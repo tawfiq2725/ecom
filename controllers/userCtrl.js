@@ -105,14 +105,14 @@ const newUserRegistration = async(req,res)=>{
                         console.log('SMTP problem'+err)
                     }
                     else{
-                        console.log('SMTP connected'+done);
+                        console.log('SMTP connected'+done)
                     }
                 })
 
                 // Email Details
                 const emailDeatils = await transporter.sendMail
                 ({
-                    from:process.env.BREVO_SERVER,
+                    from:process.env.BREVO_MAIL,
                     to:email,
                     subject:"Hossom Shirts Verify Otp",
                     html:`Your OTP is ${otp} , Dont Share for Others and It will automatically expires within 5 minutes !`            
