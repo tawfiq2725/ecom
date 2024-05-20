@@ -85,8 +85,17 @@ const newUserRegistration = async(req,res)=>{
             if(!findUser){
                 // Random Otp Generate
                 const otp = `${Math.floor(1000+Math.random()*9000)}`
-
                 console.log(otp);
+                 // Otp Details
+                 const otpdata = new Otp({
+                    // userId: ObjectId,
+                    otp: otp,
+                    createdAt: Date.now(),
+                    expiresAt: Date.now() + (5 *  60 *  1000),
+                            });
+                    // Otp to saved   
+                    await otpdata.save();
+                    res.send('your otp is saved')
                 // Nodemailer Setup
                 const transporter = nodemailer.createTransport({
                     host:process.env.BREVO_SERVER,
@@ -123,16 +132,7 @@ const newUserRegistration = async(req,res)=>{
                     req.session.userData = req.body
                     res.render("verify-otp", { email })
                     console.log("Email sented", info.messageId);
-                     // Otp Details
-                    const otpdata = new Otp({
-                    userId: _id,
-                    otp: otp,
-                    createdAt: Date.now(),
-                    expiresAt: Date.now() + (5 *  60 *  1000),
-                            });
-                    // Otp to saved   
-                    await otpdata.save();
-                    res.render('user/verifyotp')
+                    
                    
                 } else {
                     res.json("email-error")
