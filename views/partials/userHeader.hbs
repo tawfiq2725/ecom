@@ -89,18 +89,31 @@
 					</li><!-- / Search -->
 
 					<!-- Languages -->
-					<li class="dropdown cart-nav dropdown-slide">
-						<a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
-							<i class="fa-regular fa-user"></i> Profile</a>
-						<div class="dropdown-menu cart-dropdown">
-							
-							<ul class="text-center cart-buttons">
-								<li><a href="/login" class="btn btn-small">Login In</a></li>
-								<li><a href="/signup" class="btn btn-small btn-solid-border">Sign Up</a></li>
-							</ul>
-						</div>
+					<!-- userHeader.hbs -->
 
-					</li>
+<li class="dropdown cart-nav dropdown-slide">
+    {{#if user}}
+        <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+            <i class="fa-regular fa-user"></i> Profile</a>
+        <div class="dropdown-menu cart-dropdown">
+            <ul class="text-center cart-buttons">
+                <li>Welcome, {{user.firstname}}</li>
+                <li><a href="/profile" class="btn btn-small">Profile</a></li>
+                <li><a href="/logout" class="btn btn-small btn-solid-border">Logout</a></li>
+            </ul>
+        </div>
+    {{else}}
+        <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+            <i class="fa-regular fa-user"></i> Profile</a>
+        <div class="dropdown-menu cart-dropdown">
+            <ul class="text-center cart-buttons">
+                <li><a href="/login" class="btn btn-small">Login In</a></li>
+                <li><a href="/signup" class="btn btn-small btn-solid-border">Sign Up</a></li>
+            </ul>
+        </div>
+    {{/if}}
+</li>
+
 					<!-- / Languages -->
 
 				</ul><!-- / .nav .navbar-nav .navbar-right -->

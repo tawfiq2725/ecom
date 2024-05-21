@@ -1,4 +1,3 @@
-<!-- signup.hbs -->
 <section class="signin-page account">
     <div class="container">
         <div class="row">
@@ -14,7 +13,7 @@
                     {{#if error_msg}}
                         <div class="alert alert-danger">{{error_msg}}</div>
                     {{/if}}
-                    <form action="/auth/otp" method="post">
+                    <form action="/auth/register" method="post"> <!-- Changed action to /auth/register -->
                         <div class="form-group">
                             <input type="text" class="form-control" name="firstname" placeholder="First Name" value="{{firstname}}">
                         </div>

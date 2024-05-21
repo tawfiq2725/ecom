@@ -22,7 +22,6 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 app.use(morgan('dev'));
 app.use(nocache())
-app.use(express.static(path.join(__dirname,'public')));
 
 // Sessions
 app.use(session({

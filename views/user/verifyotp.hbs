@@ -1,21 +1,77 @@
-<!-- verify-otp.hbs -->
-<section class="verify-otp-page account">
+<section class="otp-page">
     <div class="container">
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
                 <div class="block text-center">
                     <h2 class="text-center">Verify Your OTP</h2>
-                    {{#if message}}
-                        <div class="alert alert-danger">{{message}}</div>
+                    {{#if success_msg}}
+                    <div class="alert alert-success">{{success_msg}}</div>
                     {{/if}}
-                    <form action="/auth/verify-otp" method="post">
+                    {{#if error_msg}}
+                    <div class="alert alert-danger">{{error_msg}}</div>
+                    {{/if}}
+                    {{#if errors}}
+                    {{#each errors}}
+                    <div class="alert alert-danger">{{this.msg}}</div>
+                    {{/each}}
+                    {{/if}}
+                    <form action="/auth/verify-otp" method="post"> <!-- Adjusted action to verify OTP -->
                         <div class="form-group">
                             <input type="text" class="form-control" name="otp" placeholder="Enter OTP">
                         </div>
                         <button type="submit" class="btn btn-primary">Verify</button>
                     </form>
+                    <div id="resend-section">
+                        <button id="resend-btn" class="btn btn-secondary" disabled>Resend OTP</button>
+                        <p id="timer"></p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let timer = 120; // 2 minutes countdown
+        const timerElement = document.getElementById('timer');
+        const resendButton = document.getElementById('resend-btn');
+
+        const updateTimer = () => {
+            if (timer <= 0) {
+                clearInterval(countdown);
+                resendButton.disabled = false;
+                timerElement.textContent = 'You can now resend the OTP.';
+            } else {
+                timer--;
+                const minutes = Math.floor(timer / 60);
+                const seconds = timer % 60;
+                timerElement.textContent = `Resend OTP in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }
+        };
+
+        const countdown = setInterval(updateTimer, 1000);
+        updateTimer(); // Initial call to set the timer text immediately
+
+        resendButton.addEventListener('click', function () {
+            fetch('/auth/resend', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: "{{email}}" })  // Ensure the email is correctly passed
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resendButton.disabled = true;
+                    timer = 120;  // Reset timer for 2 minutes
+                    clearInterval(countdown);
+                    setInterval(updateTimer, 1000);
+                } else {
+                    alert('Failed to resend OTP. Please try again.');
+                }
+            });
+        });
+    });
+</script>
