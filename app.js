@@ -4,6 +4,7 @@ const {engine} = require('express-handlebars')
 const path = require('path')
 const morgan = require('morgan')
 const nocache = require('nocache')
+const flash = require('connect-flash')
 
 // Configurations
 require('dotenv').config();
@@ -33,6 +34,16 @@ app.use(session({
         httpOnly: true
     }
 }))
+
+// Flash
+app.use(flash())
+
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    next();
+});
 
 // Express handlebars
 app.engine('hbs',engine({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials/'}))

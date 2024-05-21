@@ -10,5 +10,6 @@ router.get('/',userController.getHomePage);
 router.get('/login',userController.getLoginPage);
 router.get('/signup',userController.getSignupPage);
 router.post('/auth/otp',userController.newUserRegistration);
+router.post('/auth/verify-otp', userController.verifyOtp);
 
 module.exports = router;

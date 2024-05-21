@@ -73,90 +73,123 @@ const getSignupPage = async (req, res) => {
 }
 
 // Register New Member
-
-const newUserRegistration = async(req,res)=>{
+const newUserRegistration = async (req, res) => {
     try {
-        const {email} = req.body;
-        const findUser = await User.findOne({email})
-
-        // Check password and Confirm password
-        if(req.body.password === req.body.password2){
-            // Check Existing Member
-            if(!findUser){
-                // Random Otp Generate
-                const otp = `${Math.floor(1000+Math.random()*9000)}`
-                console.log(otp);
-                 // Otp Details
-                 const otpdata = new Otp({
-                    // userId: ObjectId,
-                    otp: otp,
-                    createdAt: Date.now(),
-                    expiresAt: Date.now() + (5 *  60 *  1000),
-                            });
-                    // Otp to saved   
-                    await otpdata.save();
-                    res.send('your otp is saved')
-                // Nodemailer Setup
-                const transporter = nodemailer.createTransport({
-                    host:process.env.BREVO_SERVER,
-                    port:process.env.BREVO_PORT,
-                    secure:false,
-                    logger:true,
-                    requireTLS:true,
-                    auth:{
-                        user:process.env.BREVO_MAIL,
-                        pass:process.env.BREVO_KEY
-                    }
-                })
-
-                transporter.verify((err,done)=>{
-                    if(err){
-                        console.log('SMTP problem'+err)
-                    }
-                    else{
-                        console.log('SMTP connected'+done)
-                    }
-                })
-
-                // Email Details
-                const emailDeatils = await transporter.sendMail
-                ({
-                    from:process.env.BREVO_MAIL,
-                    to:email,
-                    subject:"Hossom Shirts Verify Otp",
-                    html:`Your OTP is ${otp} , Dont Share for Others and It will automatically expires within 5 minutes !`            
-                })
-                // Error Handling
-                if (emailDeatils) {
-                    req.session.userOtp = otp
-                    req.session.userData = req.body
-                    res.render("verify-otp", { email })
-                    console.log("Email sented", info.messageId);
-                    
-                   
-                } else {
-                    res.json("email-error")
-                }
-           
-
-            } else{
-                console.log("User already Exist");
-                res.render("signup", { message: "User with this email already exists" })
-            }
-        }else{
-            console.log("the confirm pass is not matching");
-            res.render("signup", { message: "The confirm pass is not matching" })
-        }
-       
+        const { firstname, lastname, mobile, email, password, password2 } = req.body;
         
+        // Check if the passwords match
+        if (password !== password2) {
+            console.log("The confirm password does not match.");
+            return res.render("signup", { message: "The confirm password does not match." });
+        }
+
+        // Check if the user already exists
+        const findUser = await User.findOne({ email });
+        if (findUser) {
+            console.log("User already exists.");
+            return res.render("signup", { message: "User with this email already exists." });
+        }
+
+        // Create and save the new user
+        const newUser = new User({
+            firstname,
+            lastname,
+            mobile,
+            email,
+            password,
+            isBlocked: false,
+            isVerified: false,
+            isAdmin: false
+        });
+
+        const savedUser = await newUser.save();
+        console.log("User saved:", savedUser);
+
+        // Generate and save OTP
+        const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+        console.log("Generated OTP:", otp);
+
+        const otpData = new Otp({
+            userId: savedUser._id,  // Use the saved user's ID
+            otp,
+            createdAt: Date.now(),
+            expiresAt: Date.now() + (5 * 60 * 1000)  // 5 minutes
+        });
+
+        await otpData.save();
+        console.log("OTP saved:", otpData);
+
+        // Send OTP via email
+        const transporter = nodemailer.createTransport({
+            host: process.env.BREVO_SERVER,
+            port: process.env.BREVO_PORT,
+            secure: false,
+            auth: {
+                user: process.env.BREVO_MAIL,
+                pass: process.env.BREVO_KEY
+            }
+        });
+        transporter.verify((err,done)=>{
+            if(err){
+                console.log('SMTP problem '+err)
+            }
+            else{
+                console.log('SMTP connected '+done)
+            }
+        })
+
+        const emailDetails = await transporter.sendMail({
+            from: process.env.BREVO_MAIL,
+            to: email,
+            subject: "Verify Your OTP",
+            html: `<p>Your OTP is ${otp}. It will expire in 5 minutes.</p>`
+        });
+
+        if (emailDetails) {
+            req.session.userOtp = otp;
+            req.session.userData = savedUser;
+            return res.render("user/verifyotp", { email });
+        } else {
+            console.log("Email error.");
+            return res.json("email-error");
+        }
     } catch (error) {
         console.log(error.message);
     }
-}
+};
+// Verify the Otp
+const verifyOtp = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        const { userOtp, userData } = req.session;
+
+        if (otp !== userOtp) {
+            return res.render("user/verifyotp", { message: "Invalid OTP" });
+        }
+
+        // Find and update the user
+        const user = await User.findById(userData._id);
+        if (!user) {
+            return res.render("user/verifyotp", { message: "User not found" });
+        }
+
+        user.isVerified = true;
+        await user.save();
+        console.log("User verified:", user);
+
+        return res.render("user/login", { message: "Your account has been verified. Please log in." });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send("An error occurred while verifying the OTP.");
+    }
+};
+
+
 module.exports = {
     pageNotFound,
     getLoginPage,
     getHomePage,
     getSignupPage,
-    newUserRegistration
+    newUserRegistration,
+    verifyOtp
 }
