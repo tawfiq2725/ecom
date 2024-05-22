@@ -20,15 +20,12 @@ const pageNotFound = async (req, res) => {
 const getHomePage = async (req, res) => {
     try {
         const locals = { title: "Hosssom Online Store" };
-        if (req.session.user) {
-            res.render('index', { title: locals.title, user: req.session.user });
-        } else {
-            res.redirect('/login');
-        }
+        res.render('index', { title: locals.title, user: req.session.user });
     } catch (error) {
         console.log("Something went wrong: " + error);
     }
 }
+
 
 
 // Login Page

@@ -1,0 +1,45 @@
+    <div class="authincation h-100">
+        <div class="container-fluid h-100">
+            <div class="row justify-content-center h-100 align-items-center">
+                <div class="col-md-6">
+                    <div class="authincation-content">
+                        <div class="row no-gutters">
+                            <div class="col-xl-12">
+                                <div class="auth-form">
+                                    <h4 class="text-center mb-4">Sign in your account</h4>
+                                    {{#if success_msg}}
+                                    <div class="alert alert-success">{{success_msg}}</div>
+                                    {{/if}}
+                                    {{#if error_msg}}
+                                    <div class="alert alert-danger">{{error_msg}}</div>
+                                    {{/if}}
+                                    {{#if errors}}
+                                    {{#each errors}}
+                                    <div class="alert alert-danger">{{this.msg}}</div>
+                                    {{/each}}
+                                    {{/if}}
+                                    <form action="/admin/auth/login" method="post">
+                                        <div class="form-group">
+                                            <label><strong>Email</strong></label>
+                                            <input type="email" name="email" class="form-control" value="hello@example.com">
+                                        </div>
+                                        <div class="form-group">
+                                            <label><strong>Password</strong></label>
+                                            <input type="password" name="password" class="form-control" value="Password">
+                                        </div>
+                                       
+                                        <div class="text-center">
+                                            <button type="submit" class="btn btn-primary btn-block">Sign me in</button>
+                                        </div>
+                                    </form>
+                                    <div class="new-account mt-3">
+                                        <p>Don't have an account? <a class="text-primary" href="/admin/signup">Sign up</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

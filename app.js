@@ -13,6 +13,7 @@ const PORT = process.env.APP_PORT || 3000;
 
 // Routes Path
 const authRoutes = require('./routes/authRoutes')
+const adminRoutes = require('./routes/adminRoutes')
 
 // app
 const app = express();
@@ -44,6 +45,12 @@ app.use((req, res, next) => {
     next();
 });
 
+// Ensure user session is available in all views
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    next();
+});
+
 // Express handlebars
 app.engine('hbs',engine({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials/'}))
 app.set('views',path.join(__dirname,'views'));
@@ -52,7 +59,8 @@ app.set('view engine','hbs');
 
 // Routes
 app.use('/',authRoutes)
-app.use(authRoutes,express.static('public'))
+app.use('/admin',adminRoutes)
+app.use(express.static('public'))
 app.get('*', function (req, res) {
     res.redirect("/pageNotFound");
 });
