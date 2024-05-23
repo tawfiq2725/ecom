@@ -1,4 +1,5 @@
 const Admin = require('../models/adminSchema');
+const User = require('../models/userSchema');
 require('dotenv').config()
 const bcrypt = require('bcrypt')
 
@@ -9,7 +10,7 @@ const getHomePage = async (req, res) => {
     try {
         const locals = { title: "Hosssom Dashboard" };
         if(req.session.admin){
-            res.render('admin/dashboard', { title: locals.title , layout:'adminlayout' });
+            res.render('admin/dashboard', { title: locals.title , layout:'adminlayout',admin:req.session.admin});
         }
         else{
             res.render('admin/login', {layout:'adminlayout'});
@@ -33,7 +34,7 @@ const getLoginPage = async (req, res) => {
             res.render("admin/login",{title:locals.title,layout:'adminlayout'})
         }
         else{
-            res.render('admin/dashboard',{layout:'adminlayout'});
+            res.redirect('/admin/dashboard');
         }
      }
      catch (error) {
@@ -52,7 +53,7 @@ const getSignupPage = async (req, res) => {
             res.render("admin/signup",{title:locals.title,layout:'adminlayout'})
         }
         else{
-            res.render('admin/dashboard',{layout:'adminlayout'});
+            res.render('/dashboard');
         }
 
     }
@@ -114,7 +115,7 @@ const loginUser = async (req, res) => {
         }
         // Set user session
         req.session.admin = admin;
-        return res.render("admin/dashboard",{layout:'adminlayout'});
+        return res.redirect("/admin/dashboard");
     } catch (error) {
         console.log(error.message);
         res.status(500).send("An error occurred during login.");
@@ -129,13 +130,56 @@ const logoutUser = async (req, res) => {
                 res.render('admin/dashboard',{layout:'adminlayout'})
                 return res.status(500).send("An error occurred during logout.");
             }
-            res.render('admin/login',{layout:'adminlayout'});
+            res.redirect('/admin/login');
         });
     } catch (error) {
         console.log(error.message);
         res.status(500).send("An error occurred during logout.");
     }
 };
+
+// User Management
+const getAllUsers = async (req, res) => {
+    try {
+        if (req.session.admin) {
+            const allUsers = await User.find();
+            res.render('admin/userManagement', {
+                layout: 'adminlayout',
+                title: "User Management Page",
+                users: allUsers
+            });
+            console.log(allUsers)
+        } else {
+            res.redirect('/admin/login');
+        }
+    } catch (err) {
+        console.log('Some Error ' + err);
+        res.redirect('/admin/dashboard'); // Redirect to a safe location if there's an error
+    }
+};
+const blockUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        await User.findByIdAndUpdate(userId, { isBlocked: true });
+        res.redirect('/admin/userm');
+    } catch (error) {
+        console.error('Error blocking user:', error);
+        res.redirect('/admin/userm');
+    }
+};
+
+const unblockUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        await User.findByIdAndUpdate(userId, { isBlocked: false });
+        res.redirect('/admin/userm');
+    } catch (error) {
+        console.error('Error unblocking user:', error);
+        res.redirect('/admin/userm');
+    }
+};
+
+
 
 
 module.exports = {
@@ -144,5 +188,8 @@ module.exports = {
     getSignupPage,
     newUserRegistration,
     loginUser,
-    logoutUser
+    logoutUser,
+    getAllUsers,
+    blockUser,
+    unblockUser
 }

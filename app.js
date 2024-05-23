@@ -42,17 +42,24 @@ app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
-    next();
-});
-
-// Ensure user session is available in all views
-app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
+    res.locals.admin = req.session.admin || null;
     next();
 });
 
 // Express handlebars
-app.engine('hbs',engine({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials/'}))
+app.engine('hbs',engine(
+    {
+        extname:'hbs',
+        defaultLayout:'layout',
+        layoutsDir:__dirname+'/views/layout/',
+        partialsDir:__dirname+'/views/partials/',
+        runtimeOptions: {
+            allowProtoPropertiesByDefault: true,
+            allowProtoMethodsByDefault: true,
+        }
+    }
+))
 app.set('views',path.join(__dirname,'views'));
 app.set('view engine','hbs');
 

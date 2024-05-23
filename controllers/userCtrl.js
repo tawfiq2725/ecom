@@ -1,7 +1,6 @@
 const User = require('../models/userSchema');
 const Otp = require('../models/otpSchema')
 const { GenerateOtp,sendMail} = require('../helpers/otpverification')
-const nodemailer = require('nodemailer');
 require('dotenv').config()
 const bcrypt = require('bcrypt')
 
@@ -126,7 +125,7 @@ const resendOtp = async (req, res) => {
         // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ success: false, message: "User not found" });
+            return res.status(400).json({ success: false, error_msg: "User not found" });
         }
 
         // Generate a new OTP
@@ -150,14 +149,14 @@ const resendOtp = async (req, res) => {
         if (sendmail) {
             req.session.userOtp = otpcode;
             req.session.userData = user;
-            return res.json({ success: true, message: "OTP resent successfully", email });
+            return res.json({ success: true, success_msg: "OTP resent successfully", email });
         } else {
             console.log("Email error.");
-            return res.json({ success: false, message: "Failed to send OTP email." });
+            return res.json({ success: false, error_msg: "Failed to send OTP email." });
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ success: false, message: "An error occurred while resending the OTP." });
+        res.status(500).json({ success: false, error_msg: "An error occurred while resending the OTP." });
     }
 };
 // Go to otp page
@@ -179,20 +178,20 @@ const verifyOtp = async (req, res) => {
         const { userOtp, userData } = req.session;
 
         if (otp !== userOtp) {
-            return res.render("user/verifyotp", { message: "Invalid OTP" });
+            return res.render("user/verifyotp", { error_msg: "Invalid OTP" });
         }
 
         // Find and update the user
         const user = await User.findById(userData._id);
         if (!user) {
-            return res.render("user/verifyotp", { message: "User not found" });
+            return res.render("user/verifyotp", { error_msg: "User not found" });
         }
 
         user.isVerified = true;
         await user.save();
         console.log("User verified:", user);
 
-        return res.render("user/login", { message: "Your account has been verified. Please log in." });
+        return res.render("user/login", { success_msg: "Your account has been verified. Please log in." });
     } catch (error) {
         console.log(error.message);
         res.status(500).send("An error occurred while verifying the OTP.");
@@ -206,23 +205,23 @@ const loginUser = async (req, res) => {
         // Find user by email
         const user = await User.findOne({ email });
         if (!user) {
-            return res.render("user/login", { message: "Invalid email or password." });
+            return res.render("user/login", { error_msg: "Invalid email or password." });
         }
 
         // Check if the user is verified
         if (!user.isVerified) {
-            return res.render("user/login", { message: "Please verify your email first." });
+            return res.render("user/login", { error_msg: "Please verify your email first." });
         }
 
         // Check if the user is blocked
         if (user.isBlocked) {
-            return res.render("user/login", { message: "Your account is blocked. Please contact support." });
+            return res.render("user/login", { error_msg: "Your account is blocked. Please contact support." });
         }
 
         // Validate password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.render("user/login", { message: "Invalid email or password." });
+            return res.render("user/login", { error_msg: "Invalid email or password." });
         }
 
         // Set user session
