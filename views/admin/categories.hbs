@@ -1,0 +1,62 @@
+
+<div class="content-body">
+    <div class="container-fluid">
+<!-- Breadcrumbs -->
+        <div class="row mb-2 mt-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">User Management</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+    <h2>Category Management</h2>
+    <a href="/admin/categories/add" class="btn btn-primary mb-3">Add Category</a>
+    {{#if success_msg}}
+    <div class="alert alert-success">{{success_msg}}</div>
+    {{/if}}
+    {{#if error_msg}}
+    <div class="alert alert-danger">{{error_msg}}</div>
+    {{/if}}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each categories}}
+            <tr>
+                <td>{{this.name}}</td>
+                <td>{{this.description}}</td>
+                <td><img src="/uploads/categories/{{this.image}}" alt="{{this.name}}" style="width: 100px;"></td>
+                <td>
+                    <a href="/admin/categories/edit/{{this._id}}" class="btn btn-warning">Edit</a>
+                    <a href="/admin/categories/delete/{{this._id}}" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+</div>
+</div>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#example').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": false,
+            "pageLength": 10
+        });
+    });
