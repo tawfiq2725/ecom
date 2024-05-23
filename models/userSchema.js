@@ -1,42 +1,55 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
-       firstname: {
+    firstname: {
         type: String,
-        required: true,
-      },
-      lastname: {
+        required: [true, 'First name is required'],
+    },
+    lastname: {
         type: String,
-        required: true,
-      },
-      mobile: {
+        required: [true, 'Last name is required'],
+    },
+    mobile: {
         type: String,
-        required: true,
-        unique: true
-      },
-      email: {
-        type: String,
-        required: true,
+        required: false,  // Make it optional initially
         unique: true,
-      },
-      password: {
+    }, 
+    email: {
         type: String,
-        required: true,
-      },
-      isVerified:{
+        required: [true, 'Email is required'],
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: false,  // Make it optional initially
+    },
+    googleId: {
+        type: String,
+        required: false,
+    },
+    isVerified: {
         type: Boolean,
-        default:false,
-      },
-      isBlocked:{
-        type:Boolean,
-        default:false
-      },
-      isAdmin:{
-        type:Boolean,
-        default:false
-      }
-    }, {
-      timestamps: true,
-    });
+        default: false,
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false,
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false,
+    },
+}, {
+    timestamps: true,
+});
 
-module.exports = mongoose.model('User',userSchema);
+userSchema.pre('save', async function (next) {
+    if (this.isModified('password') && this.password) {
+        const saltRounds = 10;
+        this.password = await bcrypt.hash(this.password, saltRounds);
+    }
+    next();
+});
+
+module.exports = mongoose.model('User', userSchema);

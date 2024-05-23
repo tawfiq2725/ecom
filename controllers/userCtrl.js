@@ -249,6 +249,39 @@ const logoutUser = async (req, res) => {
     }
 };
 
+const getAdditionalInfoPage = async (req, res) => {
+    res.render('user/additionalinfo', { title: "Additional Information" });
+};
+
+const saveAdditionalInfo = async (req, res) => {
+    try {
+        const { mobile, password, password2 } = req.body;
+
+        if (password !== password2) {
+            return res.render('user/additionalinfo', { error_msg: "Passwords do not match." });
+        }
+
+        const user = await User.findById(req.session.user._id);
+        if (!user) {
+            return res.render('user/additionalinfo', { error_msg: "User not found." });
+        }
+
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user.password = hashedPassword;
+        }
+
+        user.mobile = mobile;
+        await user.save();
+
+        req.session.user = user; // Update session with updated user info
+        res.redirect('/');
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send("An error occurred while saving additional information.");
+    }
+};
+
 
 module.exports = {
     pageNotFound,
@@ -260,5 +293,7 @@ module.exports = {
     resendOtp,
     verifyOtp,
     loginUser,
-    logoutUser
+    logoutUser,
+    getAdditionalInfoPage,
+    saveAdditionalInfo
 }

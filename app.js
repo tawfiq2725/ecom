@@ -5,6 +5,7 @@ const path = require('path')
 const morgan = require('morgan')
 const nocache = require('nocache')
 const flash = require('connect-flash')
+const passport = require('./config/passport-config')
 
 // Configurations
 require('dotenv').config();
@@ -34,6 +35,10 @@ app.use(session({
         httpOnly: true
     }
 }))
+
+// Google authentication using Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Flash
 app.use(flash())
