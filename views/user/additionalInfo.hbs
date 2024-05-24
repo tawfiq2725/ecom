@@ -1,19 +1,20 @@
-<h1>{{title}}</h1>
+
+<div class="container text-center" style="width: 500px; height: 400px;">
+    <h1>{{title}}</h1>
 {{#if error_msg}}
-    <p style="color: red;">{{error_msg}}</p>
+<p style="color: red;">{{error_msg}}</p>
 {{/if}}
 <form action="/auth/google/additional-info" method="post">
-    <div>
-        <label for="mobile">Mobile Number</label>
-        <input type="text" id="mobile" name="mobile" required>
+    <div class="form-group">
+        <input type="text" class="form-control" name="mobile" placeholder="Mobile" value="{{mobile}}" required>
     </div>
-    <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
+    <div class="form-group">
+        <input type="password" class="form-control" name="password" placeholder="Password" required>
     </div>
-    <div>
-        <label for="password2">Confirm Password</label>
-        <input type="password" id="password2" name="password2" required>
+    <div class="form-group">
+        <input type="password" class="form-control" name="password2" placeholder="Confirm Password" required>
     </div>
-    <button type="submit">Submit</button>
+    <button type="submit" class="btn btn-primary">Register</button>
 </form>
+</div>
+

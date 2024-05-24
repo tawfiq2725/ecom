@@ -39,6 +39,6 @@ routes.post('/products/edit/:id', productUpload.fields([
     { name: 'subImages', maxCount: 3 }
 ]), productController.updateProduct);
 routes.get('/products/delete/:id', productController.deleteProduct);
-routes.post('/products/toggle-status/:id', productController.toggleProductStatus);
+routes.get('/products/toggle-status/:id', productController.toggleProductStatus);
 
 module.exports = routes;

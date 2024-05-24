@@ -1,0 +1,29 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-2 mt-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Products</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <h2>Product List</h2>
+        <div class="row">
+            {{#each products}}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="/uploads/products/{{this.mainImage}}" class="card-img-top" alt="{{this.name}}" style="width:200px;height: 250px;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{this.name}}</h5>
+                        <p class="card-text">{{this.description}}</p>
+                        <a href="/products/{{this._id}}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

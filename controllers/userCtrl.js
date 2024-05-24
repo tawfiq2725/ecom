@@ -197,6 +197,10 @@ const verifyOtp = async (req, res) => {
         res.status(500).send("An error occurred while verifying the OTP.");
     }
 };
+
+
+
+
 // Login user
 const loginUser = async (req, res) => {
     try {
@@ -281,6 +285,30 @@ const saveAdditionalInfo = async (req, res) => {
         res.status(500).send("An error occurred while saving additional information.");
     }
 };
+const Product = require('../models/productSchema');
+
+// Controller to fetch and display products on the user side
+const getProducts = async (req, res) => {
+    try {
+        const products = await Product.find({ status: true }).populate('category');
+        res.render('user/products', { title: "Products", products });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+};
+
+// Controller to fetch and display a single product's details
+const getProductDetails = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id).populate('category');
+        res.render('user/productDetails', { title: product.name, product });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+};
+
 
 
 module.exports = {
@@ -295,5 +323,7 @@ module.exports = {
     loginUser,
     logoutUser,
     getAdditionalInfoPage,
-    saveAdditionalInfo
+    saveAdditionalInfo,
+    getProducts,
+    getProductDetails
 }
