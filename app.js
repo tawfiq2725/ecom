@@ -6,6 +6,11 @@ const morgan = require('morgan')
 const nocache = require('nocache')
 const flash = require('connect-flash')
 const passport = require('./config/passport-config')
+const Handlebars = require('handlebars')
+
+Handlebars.registerHelper('eq', function (a, b) {
+    return a === b;
+});
 
 // Configurations
 require('dotenv').config();

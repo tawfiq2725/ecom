@@ -1,0 +1,55 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-2 mt-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Product Management</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <a href="/admin/products/add" class="btn btn-danger mb-3">Add Product</a>
+        <h2>Product List</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each products}}
+                    <tr>
+                        <td>{{@index}}</td>
+                        <td>{{this.name}}</td>
+                        <td>
+                            {{#if this.mainImage}}
+                                <img src="/uploads/products/{{this.mainImage}}" alt="{{this.name}}" style="width: 100px;">
+                            {{else}}
+                                <span>No Image</span>
+                            {{/if}}
+                        </td>
+                        <td>{{this.category.name}}</td>
+                        <td>
+                            {{#if this.status}}
+                                <a href="/admin/products/toggle-status/{{this._id}}" class="btn btn-success">Listed</a>
+                            {{else}}
+                                <a href="/admin/products/toggle-status/{{this._id}}" class="btn btn-secondary">Unlisted</a>
+                            {{/if}}
+                        </td>
+                        <td>
+                            <a href="/admin/products/edit/{{this._id}}" class="btn btn-warning">Edit</a>
+                            <a href="/admin/products/delete/{{this._id}}" class="btn btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>

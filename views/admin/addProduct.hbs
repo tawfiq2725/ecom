@@ -1,0 +1,42 @@
+<div class="content-body">
+    <div class="container-fluid">
+ <h2>Add Product</h2>
+
+    <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">Product Name</label>
+            <input type="text" name="name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="description" class="form-control" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" name="price" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="stock">Stock</label>
+            <input type="number" name="stock" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select name="category" class="form-control" required>
+                {{#each categories}}
+                    <option value="{{this._id}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="mainImage">Main Image</label>
+            <input type="file" name="mainImage" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="subImages">Additional Images</label>
+            <input type="file" name="subImages" class="form-control" multiple>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Product</button>
+    </form>
+
+</div>
+</div>

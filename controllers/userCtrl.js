@@ -219,7 +219,7 @@ const loginUser = async (req, res) => {
         }
 
         // Validate password
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.render("user/login", { error_msg: "Invalid email or password." });
         }

@@ -5,9 +5,8 @@ const getCategories = async (req, res) => {
     try {
         if(req.session.admin){
             const categories = await Category.find();
-            res.render('admin/categories', { title: "Category List", categories ,layout:'adminlayout'});
-        }
-        else{
+            res.render('admin/categories', { title: "Category List", categories, layout: 'adminlayout' });
+        } else {
             res.redirect('/admin/login');
         }
     } catch (error) {
@@ -18,7 +17,7 @@ const getCategories = async (req, res) => {
 
 // Render the add category page
 const getAddCategoryPage = (req, res) => {
-    res.render('admin/addCategory', { title: "Add Category" ,layout:'adminlayout'});
+    res.render('admin/addCategory', { title: "Add Category", layout: 'adminlayout' });
 };
 
 // Add a new category
@@ -43,7 +42,7 @@ const addCategory = async (req, res) => {
 const getEditCategoryPage = async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
-        res.render('admin/editCategory', { title: "Edit Category", category,layout:'adminlayout' });
+        res.render('admin/editCategory', { title: "Edit Category", category, layout: 'adminlayout' });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
