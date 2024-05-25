@@ -27,7 +27,7 @@ const app = express();
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(nocache())
 
 // Sessions

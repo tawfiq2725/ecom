@@ -1,6 +1,6 @@
 const Category = require('../models/categorySchema');
 
-// Fetch all categories
+// Get All categories
 const getCategories = async (req, res) => {
     try {
         if(req.session.admin){
@@ -15,7 +15,7 @@ const getCategories = async (req, res) => {
     }
 };
 
-// Render the add category page
+// Add category page
 const getAddCategoryPage = (req, res) => {
     res.render('admin/addCategory', { title: "Add Category", layout: 'adminlayout' });
 };
@@ -38,7 +38,7 @@ const addCategory = async (req, res) => {
     }
 };
 
-// Render the edit category page
+//  Edit category page
 const getEditCategoryPage = async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);

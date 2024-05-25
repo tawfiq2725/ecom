@@ -189,8 +189,6 @@ const verifyOtp = async (req, res) => {
 
         user.isVerified = true;
         await user.save();
-        console.log("User verified:", user);
-
         return res.render("user/login", { success_msg: "Your account has been verified. Please log in." });
     } catch (error) {
         console.log(error.message);
@@ -205,6 +203,11 @@ const verifyOtp = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        // Check if both email and password are provided
+        if (!email || !password) {
+            return res.render("user/login", { error_msg: "Please fill in both email and password." });
+        }
 
         // Find user by email
         const user = await User.findOne({ email });
@@ -227,7 +230,7 @@ const loginUser = async (req, res) => {
         if (!isMatch) {
             return res.render("user/login", { error_msg: "Invalid email or password." });
         }
-
+        
         // Set user session
         req.session.user = user;
         return res.redirect("/");
@@ -236,6 +239,7 @@ const loginUser = async (req, res) => {
         res.status(500).send("An error occurred during login.");
     }
 };
+
 // Logout user
 const logoutUser = async (req, res) => {
     try {
@@ -252,11 +256,12 @@ const logoutUser = async (req, res) => {
         res.status(500).send("An error occurred during logout.");
     }
 };
-
+// Go to Additional Info While Google Auth
 const getAdditionalInfoPage = async (req, res) => {
     res.render('user/additionalinfo', { title: "Additional Information" });
 };
 
+// Additional Info While Google Auth
 const saveAdditionalInfo = async (req, res) => {
     try {
         const { mobile, password, password2 } = req.body;
@@ -292,6 +297,7 @@ const getProducts = async (req, res) => {
     try {
         const products = await Product.find({ status: true }).populate('category');
         res.render('user/products', { title: "Products", products });
+        
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
@@ -303,6 +309,7 @@ const getProductDetails = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id).populate('category');
         res.render('user/productDetails', { title: product.name, product });
+        
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");

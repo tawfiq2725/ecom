@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userCtrl');
 const passport = require('../config/passport-config');
-const { isBlocked } = require('../middleware/user');
+const isBlocked = require('../middlewares/auth');
+
+router.use(isBlocked);
 
 // User Routes
 router.get("/pageNotFound", userController.pageNotFound);
-router.get('/',isBlocked,userController.getHomePage);
+router.get('/',userController.getHomePage);
 router.get('/login', userController.getLoginPage);
 router.get('/signup', userController.getSignupPage);
 router.post('/auth/otp', userController.verifyOtp);

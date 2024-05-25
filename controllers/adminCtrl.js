@@ -41,6 +41,7 @@ const getLoginPage = async (req, res) => {
         console.log(error.message);
     }
 }
+
 //Go to Signup Page
 
 const getSignupPage = async (req, res) => {
@@ -121,6 +122,7 @@ const loginUser = async (req, res) => {
         res.status(500).send("An error occurred during login.");
     }
 };
+
 // Logout user
 const logoutUser = async (req, res) => {
     try {
@@ -157,6 +159,9 @@ const getAllUsers = async (req, res) => {
         res.redirect('/admin/dashboard'); // Redirect to a safe location if there's an error
     }
 };
+
+// Block User
+
 const blockUser = async (req, res) => {
     try {
         const userId = req.params.id;
@@ -167,6 +172,8 @@ const blockUser = async (req, res) => {
         res.redirect('/admin/userm');
     }
 };
+
+// Unblock User
 
 const unblockUser = async (req, res) => {
     try {
