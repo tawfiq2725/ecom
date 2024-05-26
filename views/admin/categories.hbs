@@ -35,7 +35,7 @@
                         <td><img src="/uploads/categories/{{this.image}}" alt="{{this.name}}" style="width: 100px;"></td>
                         <td>
                             <a href="/admin/categories/edit/{{this._id}}" class="btn btn-warning">Edit</a>
-                            <a href="/admin/categories/delete/{{this._id}}" class="btn btn-danger">Delete</a>
+                            <button class="btn btn-danger toggle-status" data-id="{{this._id}}">{{#ifCond this.status '==' 'active'}}Unlist{{else}}List{{/ifCond}}</button>
                         </td>
                     </tr>
                 {{/each}}
@@ -43,3 +43,25 @@
         </table>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    document.querySelectorAll('.toggle-status').forEach(button => {
+        button.addEventListener('click', function () {
+            const categoryId = this.getAttribute('data-id');
+            const action = this.innerText.toLowerCase();
+
+            Swal.fire({
+                title: `Are you sure you want to ${action} this category?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, do it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/categories/toggle/${categoryId}`;
+                }
+            });
+        });
+    });
+</script>

@@ -3,7 +3,7 @@ const Category = require('../models/categorySchema');
 // Get All categories
 const getCategories = async (req, res) => {
     try {
-        if(req.session.admin){
+        if (req.session.admin) {
             const categories = await Category.find();
             res.render('admin/categories', { title: "Category List", categories, layout: 'adminlayout' });
         } else {
@@ -38,7 +38,7 @@ const addCategory = async (req, res) => {
     }
 };
 
-//  Edit category page
+// Edit category page
 const getEditCategoryPage = async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
@@ -66,15 +66,19 @@ const updateCategory = async (req, res) => {
     }
 };
 
-// Delete a category
-const deleteCategory = async (req, res) => {
+// Soft delete (list/unlist) a category
+const toggleCategoryStatus = async (req, res) => {
     try {
-        await Category.findByIdAndDelete(req.params.id);
-        req.flash('success_msg', 'Category deleted successfully');
+        const category = await Category.findById(req.params.id);
+        category.status = category.status === 'active' ? 'inactive' : 'active';
+        await category.save();
+
+        const message = category.status === 'active' ? 'Category listed successfully' : 'Category unlisted successfully';
+        req.flash('success_msg', message);
         res.redirect('/admin/categories');
     } catch (error) {
         console.error(error);
-        req.flash('error_msg', 'Error deleting category');
+        req.flash('error_msg', 'Error updating category status');
         res.redirect('/admin/categories');
     }
 };
@@ -85,5 +89,5 @@ module.exports = {
     addCategory,
     getEditCategoryPage,
     updateCategory,
-    deleteCategory
+    toggleCategoryStatus
 };

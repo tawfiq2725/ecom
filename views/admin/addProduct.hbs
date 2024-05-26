@@ -1,42 +1,96 @@
 <div class="content-body">
     <div class="container-fluid">
- <h2>Add Product</h2>
-
-    <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="name">Product Name</label>
-            <input type="text" name="name" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea name="description" class="form-control" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="price">Price</label>
-            <input type="number" name="price" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="stock">Stock</label>
-            <input type="number" name="stock" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="category">Category</label>
-            <select name="category" class="form-control" required>
-                {{#each categories}}
+        <h2>Add Product</h2>
+        <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Product Name</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea name="description" class="form-control" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" name="price" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="stock">Stock</label>
+                <input type="number" name="stock" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select name="category" class="form-control" required>
+                    {{#each categories}}
                     <option value="{{this._id}}">{{this.name}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="mainImage">Main Image</label>
-            <input type="file" name="mainImage" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="subImages">Additional Images</label>
-            <input type="file" name="subImages" class="form-control" multiple>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Product</button>
-    </form>
-
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mainImage">Main Image</label>
+                <input type="file" id="mainImage" name="mainImage" class="form-control" required>
+                <img id="main-cropped-image" src="#" alt="Cropped Image" style="display:none;">
+            </div>
+            <div class="form-group">
+                <label for="subImages">Additional Images</label>
+                <input type="file" id="subImages" name="subImages" class="form-control" multiple>
+                <div id="subImagePreviews"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Product</button>
+        </form>
+    </div>
 </div>
+
+<!-- Modal for main image cropping -->
+<div class="modal fade" id="cropModalProduct" tabindex="-1" role="dialog" aria-labelledby="cropModalLabelProduct" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cropModalLabelProduct">Crop Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="img-container">
+                    <img id="image-to-crop-product" src="" alt="Picture">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="cropButtonProduct">Crop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for sub image cropping -->
+<div class="modal fade" id="cropModalSubImage" tabindex="-1" role="dialog" aria-labelledby="cropModalLabelSubImage" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cropModalLabelSubImage">Crop Sub Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="subImageCarousel" class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner"></div>
+                    <a class="carousel-control-prev" href="#subImageCarousel" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#subImageCarousel" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="cropButtonSubImage">Crop</button>
+            </div>
+        </div>
+    </div>
 </div>

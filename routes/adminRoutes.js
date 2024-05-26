@@ -24,7 +24,7 @@ routes.get('/categories/add', categoryController.getAddCategoryPage);
 routes.post('/categories/add', categoryUpload.single('image'), categoryController.addCategory);
 routes.get('/categories/edit/:id', categoryController.getEditCategoryPage);
 routes.post('/categories/edit/:id', categoryUpload.single('image'), categoryController.updateCategory);
-routes.get('/categories/delete/:id', categoryController.deleteCategory);
+routes.get('/categories/toggle/:id', categoryController.toggleCategoryStatus);
 
 // Product Management Routes
 routes.get('/products', productController.getProducts);

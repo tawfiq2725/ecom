@@ -150,7 +150,6 @@ const getAllUsers = async (req, res) => {
                 title: "User Management Page",
                 users: allUsers
             });
-            console.log(allUsers)
         } else {
             res.redirect('/admin/login');
         }

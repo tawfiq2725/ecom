@@ -1,3 +1,17 @@
+    <!--*******************
+        Preloader start
+    ********************-->
+    <div id="preloader">
+        <div class="sk-three-bounce">
+            <div class="sk-child sk-bounce1"></div>
+            <div class="sk-child sk-bounce2"></div>
+            <div class="sk-child sk-bounce3"></div>
+        </div>
+    </div>
+    <!--*******************
+        Preloader end
+    ********************-->
+
 <div class="content-body">
     <div class="container-fluid">
         <div class="row mb-2 mt-4">
@@ -53,3 +67,17 @@
         </table>
     </div>
 </div>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#example').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": false,
+            "pageLength": 10
+        });
+    });
+</script>
