@@ -304,17 +304,38 @@ const getProducts = async (req, res) => {
     }
 };
 
-// Controller to fetch and display a single product's details
 const getProductDetails = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id).populate('category');
-        res.render('user/productDetails', { title: product.name, product });
-        
+        const productId = req.params.id;
+        const product = await Product.findById(productId).populate('category');
+
+        // Determine product status
+        if (!product.status) {
+            product.displayStatus = 'Unavailable';
+        } else if (product.stock === 0) {
+            product.displayStatus = 'Out of stock';
+        } else {
+            product.displayStatus = 'Available';
+        }
+
+        // Fetch related products from the same category excluding the current product
+        let relatedProducts = await Product.find({
+            category: product.category._id,
+            _id: { $ne: product._id }
+        }).limit(4);
+
+        // If no related products found, fetch other products excluding the current product
+        if (relatedProducts.length === 0) {
+            relatedProducts = await Product.find({ _id: { $ne: product._id } }).limit(4);
+        }
+
+        res.render('user/productDetails', { product, relatedProducts });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
     }
 };
+
 
 
 

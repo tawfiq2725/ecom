@@ -100,6 +100,7 @@ const toggleProductStatus = async (req, res) => {
     }
 };
 
+
 module.exports = {
     getProducts,
     getAddProductPage,

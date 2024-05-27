@@ -1,6 +1,6 @@
 <section class="single-product">
     <div class="container">
-        {{!-- Breadcrums --}}
+        <!-- Breadcrumbs -->
         <div class="row mb-2 mt-4">
             <div class="col-12">
                 <nav aria-label="breadcrumb">
@@ -12,23 +12,27 @@
                 </nav>
             </div>
         </div>
+        {{!-- Product Details --}}
         <div class="row mt-20">
             <div class="col-md-5">
                 <div class="single-product-slider">
                     <div id='carousel-custom' class='carousel slide' data-ride='carousel'>
                         <div class='carousel-outer'>
-                            <!-- me art lab slider -->
+                            <!-- main image slider -->
                             <div class='carousel-inner'>
                                 <div class='item active'>
-                                    <img id="zoom_01" src="/uploads/products/{{product.mainImage}}" data-zoom-image="/uploads/products/{{product.mainImage}}" class="img-fluid" alt="{{product.name}}">
+                                    <img id="zoom_01" src="/uploads/products/{{product.mainImage}}"
+                                        data-zoom-image="/uploads/products/{{product.mainImage}}" class="img-fluid"
+                                        alt="{{product.name}}">
                                 </div>
                                 {{#each product.subImages}}
-                                    <div class='item'>
-                                        <img src="/uploads/products/{{this}}" data-zoom-image="/uploads/products/{{this}}" class="img-thumbnail zoom-img" alt="{{../product.name}}">
-                                    </div>
+                                <div class='item'>
+                                    <img src="/uploads/products/{{this}}" data-zoom-image="/uploads/products/{{this}}"
+                                        class="img-thumbnail zoom-img" alt="{{../product.name}}">
+                                </div>
                                 {{/each}}
                             </div>
-                            <!-- sag sol -->
+                            <!-- navigation arrows -->
                             <a class='left carousel-control' href='#carousel-custom' data-slide='prev'>
                                 <i class="tf-ion-ios-arrow-left"></i>
                             </a>
@@ -36,15 +40,16 @@
                                 <i class="tf-ion-ios-arrow-right"></i>
                             </a>
                         </div>
-                        <!-- thumb -->
+                        <!-- thumbnail indicators -->
                         <ol class='carousel-indicators mCustomScrollbar meartlab'>
                             <li data-target='#carousel-custom' data-slide-to='0' class='active'>
-                                <img src="/uploads/products/{{product.mainImage}}" class="img-fluid" alt="{{product.name}}">
+                                <img src="/uploads/products/{{product.mainImage}}" class="img-fluid"
+                                    alt="{{product.name}}">
                             </li>
                             {{#each product.subImages}}
-                                <li data-target='#carousel-custom' data-slide-to='{{@index}}'>
-                                    <img src="/uploads/products/{{this}}" class="img-thumbnail" alt="{{../product.name}}">
-                                </li>
+                            <li data-target='#carousel-custom' data-slide-to='{{@index}}'>
+                                <img src="/uploads/products/{{this}}" class="img-thumbnail" alt="{{../product.name}}">
+                            </li>
                             {{/each}}
                         </ol>
                     </div>
@@ -78,9 +83,152 @@
                             <li>{{product.category.name}}</li>
                         </ul>
                     </div>
+                    <!-- Availability message -->
+                    <p class="{{#if product.displayStatus}}text-success{{else}}text-danger{{/if}}">
+                        This product is {{product.displayStatus}}.
+                    </p>
+                    {{#unless (or (eq product.displayStatus 'Unavailable') (eq product.displayStatus 'Out of stock'))}}
                     <a href="cart.html" class="btn btn-main mt-20">Add To Cart</a>
+                    {{/unless}}
                 </div>
             </div>
+        </div>
+        {{!-- Reviews --}}
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="tabCommon mt-20">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#details" aria-expanded="true">Details</a></li>
+                        <li class=""><a data-toggle="tab" href="#reviews" aria-expanded="false">Reviews (3)</a></li>
+                    </ul>
+                    <div class="tab-content patternbg">
+                        <div id="details" class="tab-pane fade active in">
+                            <h4>Product Description</h4>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
+                                dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+                                mollit anim id est laborum. Sed ut per spici</p>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis delectus quidem
+                                repudiandae veniam distinctio repellendus magni pariatur molestiae asperiores animi, eos
+                                quod iusto hic doloremque iste a, nisi iure at unde molestias enim fugit, nulla
+                                voluptatibus. Deserunt voluptate tempora aut illum harum, deleniti laborum animi neque,
+                                praesentium explicabo, debitis ipsa?</p>
+                        </div>
+                        <div id="reviews" class="tab-pane fade">
+                            <div class="post-comments">
+                                <ul class="media-list comments-list m-bot-50 clearlist">
+                                    <!-- Comment Item start-->
+                                    <li class="media">
+                                        <a class="pull-left" href="#!">
+                                            <img class="media-object comment-avatar" src="images/blog/avater-1.jpg"
+                                                alt="" width="50" height="50" />
+                                        </a>
+                                        <div class="media-body">
+                                            <div class="comment-info">
+                                                <h4 class="comment-author">
+                                                    <a href="#!">Jonathon Andrew</a>
+                                                </h4>
+                                                <time datetime="2013-04-06T13:53">July 02, 2015, at 11:34</time>
+                                                <a class="comment-button" href="#!"><i
+                                                        class="tf-ion-chatbubbles"></i>Reply</a>
+                                            </div>
+                                            <p>
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque at
+                                                magna ut ante eleifend eleifend.Lorem ipsum dolor sit amet, consectetur
+                                                adipisicing elit. Quod laborum minima, reprehenderit laboriosam officiis
+                                                praesentium? Impedit minus provident assumenda quae.
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <!-- End Comment Item -->
+                                    <!-- Comment Item start-->
+                                    <li class="media">
+                                        <a class="pull-left" href="#!">
+                                            <img class="media-object comment-avatar" src="images/blog/avater-4.jpg"
+                                                alt="" width="50" height="50" />
+                                        </a>
+                                        <div class="media-body">
+                                            <div class="comment-info">
+                                                <div class="comment-author">
+                                                    <a href="#!">Jonathon Andrew</a>
+                                                </div>
+                                                <time datetime="2013-04-06T13:53">July 02, 2015, at 11:34</time>
+                                                <a class="comment-button" href="#!"><i
+                                                        class="tf-ion-chatbubbles"></i>Reply</a>
+                                            </div>
+                                            <p>
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque at
+                                                magna ut ante eleifend eleifend. Lorem ipsum dolor sit amet, consectetur
+                                                adipisicing elit. Magni natus, nostrum iste non delectus atque ab a
+                                                accusantium optio, dolor!
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <!-- End Comment Item -->
+                                    <!-- Comment Item start-->
+                                    <li class="media">
+                                        <a class="pull-left" href="#!">
+                                            <img class="media-object comment-avatar" src="images/blog/avater-1.jpg"
+                                                alt="" width="50" height="50">
+                                        </a>
+                                        <div class="media-body">
+                                            <div class="comment-info">
+                                                <div class="comment-author">
+                                                    <a href="#!">Jonathon Andrew</a>
+                                                </div>
+                                                <time datetime="2013-04-06T13:53">July 02, 2015, at 11:34</time>
+                                                <a class="comment-button" href="#!"><i
+                                                        class="tf-ion-chatbubbles"></i>Reply</a>
+                                            </div>
+                                            <p>
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque at
+                                                magna ut ante eleifend eleifend.
+                                            </p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section>
+    <div class="container">
+        <!-- Related Products Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3>Related Products</h3>
+            </div>
+            {{#each relatedProducts}}
+            <div class="col-md-3">
+                <div class="product-item">
+                    <div class="product-thumb">
+                        <img src="/uploads/products/{{this.mainImage}}" class="img-fluid" alt="{{this.name}}">
+                        <div class="preview-meta">
+                            <ul>
+                                <li>
+                                    <a href="/products/{{this._id}}"><i class="tf-ion-ios-search-strong"></i></a>
+                                </li>
+                                <li>
+                                    <a href="#!"><i class="tf-ion-ios-heart"></i></a>
+                                </li>
+                                <li>
+                                    <a href="#!"><i class="tf-ion-android-cart"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <h4><a href="/products/{{this._id}}">{{this.name}}</a></h4>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
         </div>
     </div>
 </section>

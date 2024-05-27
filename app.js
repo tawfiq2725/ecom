@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const nocache = require('nocache');
 const flash = require('connect-flash');
 const passport = require('./config/passport-config');
-const Handlebars = require('handlebars'); // Add this line to ensure Handlebars is required
+const Handlebars = require('handlebars'); // Ensure Handlebars is required
 
 // Configurations
 require('dotenv').config();
@@ -53,26 +53,12 @@ app.use((req, res, next) => {
     next();
 });
 
-// Express handlebars
-app.engine('hbs', engine({
-    extname: 'hbs',
-    defaultLayout: 'layout',
-    layoutsDir: path.join(__dirname, 'views/layout/'),
-    partialsDir: path.join(__dirname, 'views/partials/'),
-    runtimeOptions: {
-        allowProtoPropertiesByDefault: true,
-        allowProtoMethodsByDefault: true,
-    }
-}));
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
-
 // Register Handlebars helpers
-const hbs = require('express-handlebars').create({});
-hbs.handlebars.registerHelper('eq', function (a, b) {
+Handlebars.registerHelper('eq', function (a, b) {
     return a === b;
 });
-hbs.handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+
+Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
     switch (operator) {
         case '==':
             return (v1 == v2) ? options.fn(this) : options.inverse(this);
@@ -98,6 +84,25 @@ hbs.handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
             return options.inverse(this);
     }
 });
+
+Handlebars.registerHelper('or', function (v1, v2) {
+    return v1 || v2;
+});
+
+// Express handlebars
+app.engine('hbs', engine({
+    extname: 'hbs',
+    defaultLayout: 'layout',
+    layoutsDir: path.join(__dirname, 'views/layout/'),
+    partialsDir: path.join(__dirname, 'views/partials/'),
+    handlebars: Handlebars, // Use the Handlebars instance with registered helpers
+    runtimeOptions: {
+        allowProtoPropertiesByDefault: true,
+        allowProtoMethodsByDefault: true,
+    }
+}));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
 // Routes
 app.use('/', authRoutes);
