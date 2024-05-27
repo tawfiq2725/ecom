@@ -24,9 +24,11 @@
                 </nav>
             </div>
         </div>
-        <a href="/admin/products/add" class="btn btn-danger mb-3">Add Product</a>
-        <h2>Product List</h2>
-        <table class="table">
+                    <div class="card-header">
+                        <h4 class="card-title">Product Management</h4>
+                    </div>
+        <a href="/admin/products/add" class="btn btn-danger mb-3 mt-3">Add Product</a>
+        <table class="table" id="example">
             <thead>
                 <tr>
                     <th>#</th>
@@ -52,9 +54,9 @@
                         <td>{{this.category.name}}</td>
                         <td>
                             {{#if this.status}}
-                                <a href="/admin/products/toggle-status/{{this._id}}" class="btn btn-success">Listed</a>
+                                <a href="/admin/products/toggle-status/{{this._id}}" class="btn btn-success toggle-status">Listed</a>
                             {{else}}
-                                <a href="/admin/products/toggle-status/{{this._id}}" class="btn btn-secondary">Unlisted</a>
+                                <a href="/admin/products/toggle-status/{{this._id}}" class="btn btn-secondary toggle-status">Unlisted</a>
                             {{/if}}
                         </td>
                         <td>
@@ -80,4 +82,6 @@
             "pageLength": 10
         });
     });
+
+
 </script>

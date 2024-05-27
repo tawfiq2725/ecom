@@ -1,27 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>{{title}}</title>
     <link rel="icon" type="image/png" sizes="16x16" href="/adminAssets/images/favicon.png">
+    <!-- Template styles -->
     <link rel="stylesheet" href="/adminAssets/vendor/owl-carousel/css/owl.carousel.min.css">
     <link rel="stylesheet" href="/adminAssets/vendor/owl-carousel/css/owl.theme.default.min.css">
     <link href="/adminAssets/vendor/jqvmap/css/jqvmap.min.css" rel="stylesheet">
     <link href="/adminAssets/css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
+    <!-- Bootstrap -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Cropper -->
     <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+    <!-- SweetAlert -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
-
 <body>
     <div id="main-wrapper">
         {{>adminHeader}}
         {{>adminSidebar}}
         {{{body}}}
     </div>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <!-- Cropper js -->
+    <script src="https://unpkg.com/cropperjs"></script>
+    <!-- Template Scripts -->
     <script src="/adminAssets/vendor/global/global.min.js"></script>
     <script src="/adminAssets/js/quixnav-init.js"></script>
     <script src="/adminAssets/js/custom.min.js"></script>
@@ -37,11 +48,12 @@
     <script src="/adminAssets/vendor/jqvmap/js/jquery.vmap.usa.js"></script>
     <script src="/adminAssets/vendor/jquery.counterup/jquery.counterup.min.js"></script>
     <script src="/adminAssets/js/dashboard/dashboard-1.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/cropperjs"></script>
+    <!-- DataTables -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Custom Scripts -->
     <script src="/adminAssets/js/category.js"></script>
     <script src="/adminAssets/js/product.js"></script>
 </body>
-
 </html>

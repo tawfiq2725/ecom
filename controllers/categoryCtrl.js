@@ -1,4 +1,5 @@
 const Category = require('../models/categorySchema');
+const Product = require('../models/productSchema');
 
 // Get All categories
 const getCategories = async (req, res) => {
@@ -70,10 +71,15 @@ const updateCategory = async (req, res) => {
 const toggleCategoryStatus = async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
-        category.status = category.status === 'active' ? 'inactive' : 'active';
+        const newStatus = category.status === 'active' ? 'inactive' : 'active';
+
+        category.status = newStatus;
         await category.save();
 
-        const message = category.status === 'active' ? 'Category listed successfully' : 'Category unlisted successfully';
+        // Update the status of all products under this category
+        await Product.updateMany({ category: category._id }, { status: newStatus === 'active' });
+
+        const message = newStatus === 'active' ? 'Category listed successfully' : 'Category unlisted successfully';
         req.flash('success_msg', message);
         res.redirect('/admin/categories');
     } catch (error) {

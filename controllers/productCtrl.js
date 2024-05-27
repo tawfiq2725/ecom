@@ -2,7 +2,6 @@ const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
 
 // Get All Products
-
 const getProducts = async (req, res) => {
     try {
         const products = await Product.find().populate('category');
@@ -13,7 +12,7 @@ const getProducts = async (req, res) => {
     }
 };
 
-//Go to Add New Product
+// Go to Add New Product
 const getAddProductPage = async (req, res) => {
     try {
         const categories = await Category.find();
@@ -86,7 +85,7 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-// List and UnList 
+// List and Unlist Product
 const toggleProductStatus = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
