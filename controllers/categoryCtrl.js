@@ -79,15 +79,13 @@ const toggleCategoryStatus = async (req, res) => {
         // Update the status of all products under this category
         await Product.updateMany({ category: category._id }, { status: newStatus === 'active' });
 
-        const message = newStatus === 'active' ? 'Category listed successfully' : 'Category unlisted successfully';
-        req.flash('success_msg', message);
-        res.redirect('/admin/categories');
+        res.json({ success: true, message: `Category ${newStatus === 'active' ? 'listed' : 'unlisted'} successfully` });
     } catch (error) {
         console.error(error);
-        req.flash('error_msg', 'Error updating category status');
-        res.redirect('/admin/categories');
+        res.status(500).json({ success: false, message: 'Error updating category status' });
     }
 };
+
 
 module.exports = {
     getCategories,

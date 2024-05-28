@@ -24,7 +24,7 @@ routes.get('/categories/add', categoryController.getAddCategoryPage);
 routes.post('/categories/add', categoryUpload.single('image'), categoryController.addCategory);
 routes.get('/categories/edit/:id', categoryController.getEditCategoryPage);
 routes.post('/categories/edit/:id', categoryUpload.single('image'), categoryController.updateCategory);
-routes.get('/categories/toggle/:id', categoryController.toggleCategoryStatus);
+routes.post('/categories/toggle/:id', categoryController.toggleCategoryStatus); 
 
 // Product Management Routes
 routes.get('/products', productController.getProducts);
@@ -38,7 +38,7 @@ routes.post('/products/edit/:id', productUpload.fields([
     { name: 'mainImage', maxCount: 1 },
     { name: 'subImages', maxCount: 3 }
 ]), productController.updateProduct);
-routes.get('/products/delete/:id', productController.deleteProduct);
-routes.get('/products/toggle-status/:id', productController.toggleProductStatus);
+routes.delete('/products/delete/:id', productController.deleteProduct); // Change to DELETE method
+routes.post('/products/toggle-status/:id', productController.toggleProductStatus)
 
 module.exports = routes;

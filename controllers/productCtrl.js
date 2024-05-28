@@ -76,12 +76,10 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
     try {
         await Product.findByIdAndDelete(req.params.id);
-        req.flash('success_msg', 'Product deleted successfully');
-        res.redirect('/admin/products');
+        res.json({ success: true });
     } catch (error) {
         console.error(error);
-        req.flash('error_msg', 'Error deleting product');
-        res.redirect('/admin/products');
+        res.json({ success: false, error: error.message });
     }
 };
 
@@ -91,15 +89,12 @@ const toggleProductStatus = async (req, res) => {
         const product = await Product.findById(req.params.id);
         product.status = !product.status;
         await product.save();
-        req.flash('success_msg', 'Product status updated successfully');
-        res.redirect('/admin/products');
+        res.json({ success: true });
     } catch (error) {
         console.error(error);
-        req.flash('error_msg', 'Error toggling product status');
-        res.redirect('/admin/products');
+        res.json({ success: false, error: error.message });
     }
 };
-
 
 module.exports = {
     getProducts,

@@ -1,3 +1,4 @@
+<!-- categories.hbs -->
 <div class="content-body">
     <div class="container-fluid">
         <div class="row mb-2 mt-4">
@@ -10,9 +11,9 @@
                 </nav>
             </div>
         </div>
-                    <div class="card-header">
-                        <h4 class="card-title">Category Management</h4>
-                    </div>
+        <div class="card-header">
+            <h4 class="card-title">Category Management</h4>
+        </div>
         <a href="/admin/categories/add" class="btn btn-primary mb-3 mt-3">Add Category</a>
         {{#if success_msg}}
             <div class="alert alert-success">{{success_msg}}</div>
@@ -49,7 +50,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
 <script>
-    $(document).ready(function() {
+   $(document).ready(function() {
         $('#example').DataTable({
             "paging": true,
             "searching": true,
@@ -57,7 +58,49 @@
             "lengthChange": false,
             "pageLength": 10
         });
+
+        // SweetAlert for Unlist button
+        $('.toggle-status').on('click', function() {
+            var categoryId = $(this).data('id');
+            var button = $(this);
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, change it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Add your AJAX request here to change the category status
+                    $.ajax({
+                        url: `/admin/categories/toggle/${categoryId}`,  // Corrected URL
+                        type: 'POST',  // Using POST request
+                        success: function(response) {
+                            if(response.success) {
+                                Swal.fire(
+                                    'Changed!',
+                                    'Category status has been changed.',
+                                    'success'
+                                );
+                                // Update button text based on new status
+                                if (button.text() == 'Unlist') {
+                                    button.text('List');
+                                } else {
+                                    button.text('Unlist');
+                                }
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error changing the status.',
+                                    'error'
+                                );
+                            }
+                        }
+                    });
+                }
+            });
+        });
     });
-
-
 </script>

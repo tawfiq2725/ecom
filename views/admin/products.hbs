@@ -1,16 +1,16 @@
-    <!--*******************
-        Preloader start
-    ********************-->
-    <div id="preloader">
-        <div class="sk-three-bounce">
-            <div class="sk-child sk-bounce1"></div>
-            <div class="sk-child sk-bounce2"></div>
-            <div class="sk-child sk-bounce3"></div>
-        </div>
+<!--*******************
+    Preloader start
+********************-->
+<div id="preloader">
+    <div class="sk-three-bounce">
+        <div class="sk-child sk-bounce1"></div>
+        <div class="sk-child sk-bounce2"></div>
+        <div class="sk-child sk-bounce3"></div>
     </div>
-    <!--*******************
-        Preloader end
-    ********************-->
+</div>
+<!--*******************
+    Preloader end
+********************-->
 
 <div class="content-body">
     <div class="container-fluid">
@@ -24,9 +24,9 @@
                 </nav>
             </div>
         </div>
-                    <div class="card-header">
-                        <h4 class="card-title">Product Management</h4>
-                    </div>
+        <div class="card-header">
+            <h4 class="card-title">Product Management</h4>
+        </div>
         <a href="/admin/products/add" class="btn btn-danger mb-3 mt-3">Add Product</a>
         <table class="table" id="example">
             <thead>
@@ -54,14 +54,14 @@
                         <td>{{this.category.name}}</td>
                         <td>
                             {{#if this.status}}
-                                <a href="/admin/products/toggle-status/{{this._id}}" class="btn btn-success toggle-status">Listed</a>
+                                <button class="btn btn-success toggle-status" data-id="{{this._id}}">Listed</button>
                             {{else}}
-                                <a href="/admin/products/toggle-status/{{this._id}}" class="btn btn-secondary toggle-status">Unlisted</a>
+                                <button class="btn btn-secondary toggle-status" data-id="{{this._id}}">Unlisted</button>
                             {{/if}}
                         </td>
                         <td>
                             <a href="/admin/products/edit/{{this._id}}" class="btn btn-warning">Edit</a>
-                            <a href="/admin/products/delete/{{this._id}}" class="btn btn-danger">Delete</a>
+                            <button class="btn btn-danger delete-product" data-id="{{this._id}}">Delete</button>
                         </td>
                     </tr>
                 {{/each}}
@@ -69,9 +69,11 @@
         </table>
     </div>
 </div>
+
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
         $('#example').DataTable({
@@ -81,7 +83,92 @@
             "lengthChange": false,
             "pageLength": 10
         });
+
+        // Handle List/Unlist action
+        $('.toggle-status').on('click', function() {
+            var productId = $(this).data('id');
+            var button = $(this);
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to change the status of this product!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, change it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/products/toggle-status/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            Swal.fire(
+                                'Changed!',
+                                'Product status has been changed.',
+                                'success'
+                            );
+                            // Update button text based on new status
+                            if (button.hasClass('btn-success')) {
+                                button.removeClass('btn-success').addClass('btn-secondary').text('Unlisted');
+                            } else {
+                                button.removeClass('btn-secondary').addClass('btn-success').text('Listed');
+                            }
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                'There was an error changing the status.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+
+        // Handle Delete action
+        $('.delete-product').on('click', function() {
+            var productId = $(this).data('id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/products/delete/${productId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            Swal.fire(
+                                'Deleted!',
+                                'Product has been deleted.',
+                                'success'
+                            ).then(() => {
+                                location.reload(); // Reload the page after deletion
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                'There was an error deleting the product.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
     });
-
-
 </script>

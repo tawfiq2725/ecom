@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <!-- Basic Page Needs
-  ================================================== -->
+  <!-- Basic Page Needs -->
   <meta charset="utf-8">
   <title>{{title}}</title>
-
-  <!-- Mobile Specific Metas
-  ================================================== -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="Construction Html5 Template">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -25,63 +20,42 @@
   <link rel="stylesheet" href="/plugins/themefisher-font/style.css">
   <!-- bootstrap.min css -->
   <link rel="stylesheet" href="/plugins/bootstrap/css/bootstrap.min.css">
-  
   <!-- Animate css -->
   <link rel="stylesheet" href="/plugins/animate/animate.css">
   <!-- Slick Carousel -->
   <link rel="stylesheet" href="/plugins/slick/slick.css">
   <link rel="stylesheet" href="/plugins/slick/slick-theme.css">
-  
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="/css/style.css">
-
-  {{!-- Fonts style sheet --}}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-
-  {{!-- Fontawesome --}}
+  <!-- Fontawesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-   <!-- Elevate Zoom CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/css/elevatezoom.min.css" integrity="sha512-E19U0BDA5uFnBHQhCmMe17Jk1q4VbAzRFvU+fyv51OMxtv5QH1HTvKDZsmfbke5omFJtGMvftCt44wth1idIIA==" crossorigin="anonymous" />
-
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
-{{>userHeader}}
-{{{body}}}
-{{>footer}}
+<body>
+  {{> userHeader}}
+  {{{body}}}
+  {{> footer}}
 
- <!-- 
-    Essential Scripts
-    =====================================-->
-    
-    <!-- Main jQuery -->
-    <script src="/plugins/jquery/dist/jquery.min.js"></script>
-    <!-- Bootstrap 3.1 -->
-    <script src="/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <!-- Bootstrap Touchpin -->
-    <script src="/plugins/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.js"></script>
-    <!-- Instagram Feed Js -->
-    <script src="/plugins/instafeed/instafeed.min.js"></script>
-    <!-- Video Lightbox Plugin -->
-    <script src="/plugins/ekko-lightbox/dist/ekko-lightbox.min.js"></script>
-    <!-- Count Down Js -->
-    <script src="/plugins/syo-timer/build/jquery.syotimer.min.js"></script>
-
-    <!-- slick Carousel -->
-    <script src="/plugins/slick/slick.min.js"></script>
-    <script src="/plugins/slick/slick-animation.min.js"></script>
-
-    <!-- Google Mapl -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCC72vZw-6tGqFyRhhg5CkF2fqfILn2Tsw"></script>
-    <script type="text/javascript" src="/plugins/google-map/gmap.js"></script>
-
-    <!-- Main Js File -->
-    <script src="/js/script.js"></script>
-
-    {{!-- Elevate zoom --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js" integrity="sha512-lE7GCR5KcCwClmRfpPLtQ2nUuXtZ/YgRKiWwnVf8ho63g2BBYibqob1TD4cVp3PEptOXItwmV53M0p8tG68ktA==" crossorigin="anonymous"></script>
-    <script src="/js/productzoom.js"></script>
-
-  </body>
-  </html>
+  <!-- Essential Scripts -->
+  <!-- Include jQuery library -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+  <!-- Include Elevate Zoom library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js"></script>
+  <!-- Bootstrap 3.1 -->
+  <script src="/plugins/bootstrap/js/bootstrap.min.js"></script>
+  <!-- Bootstrap Touchpin -->
+  <script src="/plugins/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.js"></script>
+  <!-- Video Lightbox Plugin -->
+  <script src="/plugins/ekko-lightbox/dist/ekko-lightbox.min.js"></script>
+  <!-- Count Down Js -->
+  <script src="/plugins/syo-timer/build/jquery.syotimer.min.js"></script>
+  <!-- slick Carousel -->
+  <script src="/plugins/slick/slick.min.js"></script>
+  <script src="/plugins/slick/slick-animation.min.js"></script>
+  <!-- Main Js File -->
+  <script src="/js/script.js"></script>
+  <!-- Elevate zoom -->
+  <script src="/js/productzoom.js"></script>
+</body>
+</html>

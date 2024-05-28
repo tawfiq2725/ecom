@@ -15,45 +15,47 @@
         {{!-- Product Details --}}
         <div class="row mt-20">
             <div class="col-md-5">
-                <div class="single-product-slider">
-                    <div id='carousel-custom' class='carousel slide' data-ride='carousel'>
-                        <div class='carousel-outer'>
-                            <!-- main image slider -->
-                            <div class='carousel-inner'>
-                                <div class='item active'>
-                                    <img id="zoom_01" src="/uploads/products/{{product.mainImage}}"
-                                        data-zoom-image="/uploads/products/{{product.mainImage}}" class="img-fluid"
-                                        alt="{{product.name}}">
-                                </div>
-                                {{#each product.subImages}}
-                                <div class='item'>
-                                    <img src="/uploads/products/{{this}}" data-zoom-image="/uploads/products/{{this}}"
-                                        class="img-thumbnail zoom-img" alt="{{../product.name}}">
-                                </div>
-                                {{/each}}
-                            </div>
-                            <!-- navigation arrows -->
-                            <a class='left carousel-control' href='#carousel-custom' data-slide='prev'>
-                                <i class="tf-ion-ios-arrow-left"></i>
-                            </a>
-                            <a class='right carousel-control' href='#carousel-custom' data-slide='next'>
-                                <i class="tf-ion-ios-arrow-right"></i>
-                            </a>
-                        </div>
-                        <!-- thumbnail indicators -->
-                        <ol class='carousel-indicators mCustomScrollbar meartlab'>
-                            <li data-target='#carousel-custom' data-slide-to='0' class='active'>
-                                <img src="/uploads/products/{{product.mainImage}}" class="img-fluid"
-                                    alt="{{product.name}}">
-                            </li>
-                            {{#each product.subImages}}
-                            <li data-target='#carousel-custom' data-slide-to='{{@index}}'>
-                                <img src="/uploads/products/{{this}}" class="img-thumbnail" alt="{{../product.name}}">
-                            </li>
-                            {{/each}}
-                        </ol>
-                    </div>
+             <div class="single-product-slider">
+    <div id='carousel-custom' class='carousel slide' data-ride='carousel'>
+        <div class='carousel-outer'>
+            <!-- Main image slider -->
+            <div class='carousel-inner'>
+                <div class='item active'>
+                    <img id="zoom_01" src="/uploads/products/{{product.mainImage}}"
+                        data-zoom-image="/uploads/products/{{product.mainImage}}" class="img-fluid zoom-img"
+                        alt="{{product.name}}">
                 </div>
+                {{#each product.subImages}}
+                <div class='item'>
+                    <img src="/uploads/products/{{this}}" data-zoom-image="/uploads/products/{{this}}"
+                        class="img-thumbnail zoom-img" alt="{{../product.name}}">
+                </div>
+                {{/each}}
+            </div>
+            <!-- Navigation arrows -->
+            <a class='left carousel-control' href='#carousel-custom' data-slide='prev'>
+                <i class="tf-ion-ios-arrow-left"></i>
+            </a>
+            <a class='right carousel-control' href='#carousel-custom' data-slide='next'>
+                <i class="tf-ion-ios-arrow-right"></i>
+            </a>
+        </div>
+        <!-- Thumbnail indicators -->
+        <ol class='carousel-indicators mCustomScrollbar meartlab'>
+            <li data-target='#carousel-custom' data-slide-to='0' class='active'>
+                <img src="/uploads/products/{{product.mainImage}}" class="img-fluid zoom-thumb"
+                    data-zoom-image="/uploads/products/{{product.mainImage}}" alt="{{product.name}}">
+            </li>
+            {{#each product.subImages}}
+            <li data-target='#carousel-custom' data-slide-to='{{@index}}'>
+                <img src="/uploads/products/{{this}}" class="img-thumbnail zoom-thumb" 
+                     data-zoom-image="/uploads/products/{{this}}" alt="{{../product.name}}">
+            </li>
+            {{/each}}
+        </ol>
+    </div>
+</div>
+
             </div>
             <div class="col-md-7">
                 <div class="single-product-details">
