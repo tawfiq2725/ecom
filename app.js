@@ -7,7 +7,7 @@ const nocache = require('nocache');
 const flash = require('connect-flash');
 const passport = require('./config/passport-config');
 const Handlebars = require('handlebars'); // Ensure Handlebars is required
-
+const checkUserStatus = require('./middlewares/auth');
 // Configurations
 require('dotenv').config();
 require('./config/dbconnection');
@@ -32,7 +32,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-        maxAge: 72 * 60 * 60 * 1000,
+        maxAge: 72 * 60 * 60 * 1000, // 72 hours
         httpOnly: true
     }
 }));
@@ -105,8 +105,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 // Routes
-app.use('/', authRoutes);
-app.use('/admin', adminRoutes);
+app.use('/',checkUserStatus,authRoutes);
+app.use('/admin', adminRoutes); 
 app.use(express.static('public'));
 app.get('*', function (req, res) {
     res.redirect("/pageNotFound");

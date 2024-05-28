@@ -14,17 +14,17 @@ const pageNotFound = async (req, res) => {
     }
 }
 
-// Home Page
 
+
+// Home Page
 const getHomePage = async (req, res) => {
     try {
         const locals = { title: "Hosssom Online Store" };
-        res.render('index', { title: locals.title, user: req.session.user });
+        res.render('index', { title: locals.title, user: req.session.user, admin: req.session.admin });
     } catch (error) {
         console.log("Something went wrong: " + error);
     }
-}
-
+};
 
 
 // Login Page
@@ -296,8 +296,7 @@ const Product = require('../models/productSchema');
 const getProducts = async (req, res) => {
     try {
         const products = await Product.find({ status: true }).populate('category');
-        res.render('user/products', { title: "Products", products });
-        
+        res.render('user/products', { title: "Products", products, admin: req.session.admin });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
@@ -329,7 +328,7 @@ const getProductDetails = async (req, res) => {
             relatedProducts = await Product.find({ _id: { $ne: product._id } }).limit(4);
         }
 
-        res.render('user/productDetails', { product, relatedProducts });
+        res.render('user/productDetails', { product, relatedProducts, admin: req.session.admin });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");

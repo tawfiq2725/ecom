@@ -10,16 +10,14 @@ const getHomePage = async (req, res) => {
     try {
         const locals = { title: "Hosssom Dashboard" };
         if(req.session.admin){
-            res.render('admin/dashboard', { title: locals.title , layout:'adminlayout',admin:req.session.admin});
-        }
-        else{
-            res.render('admin/login', {layout:'adminlayout'});
+            res.render('admin/dashboard', { title: locals.title , layout:'adminlayout', admin: req.session.admin });
+        } else {
+            res.render('admin/login', { layout: 'adminlayout' });
         }
     } catch (error) {
         console.log("Something went wrong: " + error);
     }
-}
-
+};
 
 
 // Login Page

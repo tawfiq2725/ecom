@@ -30,54 +30,63 @@
                 <!-- User Menu -->
                 <ul class="top-menu text-right list-inline">
                     {{#if user}}
-						<li class="dropdown cart-nav dropdown-slide">
-						<a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"><i
-								class="tf-ion-android-cart"></i>Cart</a>
-						</li><!-- / Cart -->
-						<!-- Search -->
-					<li class="dropdown search dropdown-slide">
-						<a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"><i
-								class="tf-ion-ios-search-strong"></i> Search</a>
-						<ul class="dropdown-menu search-dropdown">
-							<li>
-								<form action="post"><input type="search" class="form-control" placeholder="Search..."></form>
-							</li>
-						</ul>
-					</li><!-- / Search -->
-                        <li class="dropdown cart-nav dropdown-slide">
-                            <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
-                                <i class="fa-regular fa-user"></i> Profile</a>
-                            <div class="dropdown-menu cart-dropdown">
-                                <ul class="text-center cart-buttons">
-                                    <li>Welcome, {{user.firstname}} {{user.lastname}}</li>
-                                    <li><a href="/profile" class="btn btn-small">Profile</a></li>
-                                    <li><a href="/auth/logout" class="btn btn-small btn-solid-border">Logout</a></li>
-                                </ul>
-                            </div>
-                        </li>
+<li class="dropdown cart-nav dropdown-slide">
+    <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+        <i class="tf-ion-android-cart"></i>Cart</a>
+</li>
+<li class="dropdown search dropdown-slide">
+    <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+        <i class="tf-ion-ios-search-strong"></i> Search</a>
+    <ul class="dropdown-menu search-dropdown">
+        <li>
+            <form action="post"><input type="search" class="form-control" placeholder="Search..."></form>
+        </li>
+    </ul>
+</li>
+<li class="dropdown cart-nav dropdown-slide">
+    <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+        <i class="fa-regular fa-user"></i> Profile</a>
+    <div class="dropdown-menu cart-dropdown">
+        <ul class="text-center cart-buttons">
+            <li>Welcome, {{user.firstname}} {{user.lastname}}</li>
+            <li><a href="/profile" class="btn btn-small">Profile</a></li>
+            <li><a href="/auth/logout" class="btn btn-small btn-solid-border">Logout</a></li>
+        </ul>
+    </div>
+</li>
+{{else}}
+<li class="dropdown search dropdown-slide">
+    <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+        <i class="tf-ion-ios-search-strong"></i> Search</a>
+    <ul class="dropdown-menu search-dropdown">
+        <li>
+            <form action="post"><input type="search" class="form-control" placeholder="Search..."></form>
+        </li>
+    </ul>
+</li>
+<li class="dropdown cart-nav dropdown-slide">
+    <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+        <i class="fa-regular fa-user"></i> Profile</a>
+    <div class="dropdown-menu cart-dropdown">
+        <ul class="text-center cart-buttons">
+            <li><a href="/login" class="btn btn-small">Log In</a></li>
+            <li><a href="/signup" class="btn btn-small btn-solid-border">Sign Up</a></li>
+        </ul>
+    </div>
+</li>
+{{/if}}
 
-                    {{else}}
-					<!-- Search -->
-					<li class="dropdown search dropdown-slide">
-						<a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"><i
-								class="tf-ion-ios-search-strong"></i> Search</a>
-						<ul class="dropdown-menu search-dropdown">
-							<li>
-								<form action="post"><input type="search" class="form-control" placeholder="Search..."></form>
-							</li>
-						</ul>
-					</li><!-- / Search -->
-                        <li class="dropdown cart-nav dropdown-slide">
-                            <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
-                                <i class="fa-regular fa-user"></i> Profile</a>
-                            <div class="dropdown-menu cart-dropdown">
-                                <ul class="text-center cart-buttons">
-                                    <li><a href="/login" class="btn btn-small">Log In</a></li>
-                                    <li><a href="/signup" class="btn btn-small btn-solid-border">Sign Up</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                    {{/if}}
+{{#if admin}}
+<li class="dropdown cart-nav dropdown-slide">
+    <a href="#!" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+        <i class="fa-regular fa-user"></i> Admin Panel</a>
+    <ul class="dropdown-menu search-dropdown">
+        <li>
+            <a href="/admin/dashboard">Dashboard</a>
+        </li>
+    </ul>
+</li>
+{{/if}}
                 </ul>
             </div>
         </div>
