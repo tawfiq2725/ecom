@@ -53,6 +53,8 @@ app.use((req, res, next) => {
     next();
 });
 
+
+// Register Handlebars helpers
 // Register Handlebars helpers
 Handlebars.registerHelper('eq', function (a, b) {
     return a === b;
@@ -87,6 +89,31 @@ Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
 
 Handlebars.registerHelper('or', function (v1, v2) {
     return v1 || v2;
+});
+
+Handlebars.registerHelper('add', function (a, b) {
+    return a + b;
+});
+
+Handlebars.registerHelper('subtract', function (a, b) {
+    return a - b;
+});
+
+
+Handlebars.registerHelper('range', function(start, end) {
+    const range = [];
+    for (let i = start; i <= end; i++) {
+        range.push(i);
+    }
+    return range;
+});
+
+Handlebars.registerHelper('gt', function(a, b) {
+    return a > b;
+});
+
+Handlebars.registerHelper('lt', function(a, b) {
+    return a < b;
 });
 
 // Express handlebars

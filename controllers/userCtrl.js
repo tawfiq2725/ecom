@@ -295,13 +295,33 @@ const Product = require('../models/productSchema');
 // Controller to fetch and display products on the user side
 const getProducts = async (req, res) => {
     try {
-        const products = await Product.find({ status: true }).populate('category');
-        res.render('user/products', { title: "Products", products, admin: req.session.admin });
+        const page = parseInt(req.query.page) || 1;
+        const limit = 12;
+        const skip = (page - 1) * limit;
+
+        const totalProducts = await Product.countDocuments({ status: true });
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        const products = await Product.find({ status: true })
+            .populate('category')
+            .skip(skip)
+            .limit(limit);
+
+        res.render('user/products', { 
+            title: "Products", 
+            products, 
+            currentPage: page, 
+            totalPages, 
+            admin: req.session.admin 
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
     }
 };
+
+
+
 
 const getProductDetails = async (req, res) => {
     try {
