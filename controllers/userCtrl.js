@@ -1,5 +1,6 @@
 const User = require('../models/userSchema');
 const Otp = require('../models/otpSchema')
+const Product = require('../models/productSchema');
 const { GenerateOtp,sendMail} = require('../helpers/otpverification')
 require('dotenv').config()
 const bcrypt = require('bcrypt')
@@ -264,22 +265,12 @@ const getAdditionalInfoPage = async (req, res) => {
 // Additional Info While Google Auth
 const saveAdditionalInfo = async (req, res) => {
     try {
-        const { mobile, password, password2 } = req.body;
-
-        if (password !== password2) {
-            return res.render('user/additionalinfo', { error_msg: "Passwords do not match." });
-        }
+        const { mobile } = req.body;
 
         const user = await User.findById(req.session.user._id);
         if (!user) {
             return res.render('user/additionalinfo', { error_msg: "User not found." });
         }
-
-        if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            user.password = hashedPassword;
-        }
-
         user.mobile = mobile;
         await user.save();
 
@@ -290,7 +281,8 @@ const saveAdditionalInfo = async (req, res) => {
         res.status(500).send("An error occurred while saving additional information.");
     }
 };
-const Product = require('../models/productSchema');
+
+
 
 // Controller to fetch and display products on the user side
 const getProducts = async (req, res) => {
@@ -348,7 +340,7 @@ const getProductDetails = async (req, res) => {
             relatedProducts = await Product.find({ _id: { $ne: product._id } }).limit(4);
         }
 
-        res.render('user/productDetails', { product, relatedProducts, admin: req.session.admin });
+        res.render('user/productDetails', { product, relatedProducts, admin: req.session.admin , title : "Product Details"});
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");

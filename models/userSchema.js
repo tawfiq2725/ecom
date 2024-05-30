@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     },
     mobile: {
         type: String,
-        required: false,  // Make it optional initially
+        required: false, 
         unique: true,
     }, 
     email: {
@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: false,  // Make it optional initially
+        required: false,  
     },
     googleId: {
         type: String,
