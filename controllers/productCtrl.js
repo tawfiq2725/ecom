@@ -4,8 +4,12 @@ const Category = require('../models/categorySchema');
 // Get All Products
 const getProducts = async (req, res) => {
     try {
-        const products = await Product.find().populate('category');
-        res.render('admin/products', { title: "Product List", products, layout: 'adminlayout' });
+        if (req.session.admin) { // Corrected typo here
+            const products = await Product.find().populate('category');
+            res.render('admin/products', { title: "Product List", products, layout: 'adminlayout' });
+        } else {
+            res.redirect('/admin/login');
+        }
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
@@ -26,11 +30,13 @@ const getAddProductPage = async (req, res) => {
 // Add New Product
 const addProduct = async (req, res) => {
     try {
-        const { name, description, price, stock, category } = req.body;
+        const { name, description, price, stock, category, highlights } = req.body;
         const mainImage = req.files.mainImage[0].filename;
         const subImages = req.files.subImages ? req.files.subImages.map(file => file.filename) : [];
+        
+        const highlightsArray = highlights.split(',').map(item => item.trim());
 
-        const newProduct = new Product({ name, description, price, stock, category, mainImage, subImages });
+        const newProduct = new Product({ name, description, price, stock, category, mainImage, subImages, highlights: highlightsArray });
         await newProduct.save();
 
         req.flash('success_msg', 'Product added successfully');
@@ -57,11 +63,13 @@ const getEditProductPage = async (req, res) => {
 // Update Product
 const updateProduct = async (req, res) => {
     try {
-        const { name, description, price, stock, category, existingMainImage, existingSubImages } = req.body;
+        const { name, description, price, stock, category, existingMainImage, existingSubImages, highlights } = req.body;
         const mainImage = req.files.mainImage ? req.files.mainImage[0].filename : existingMainImage;
         const subImages = req.files.subImages ? req.files.subImages.map(file => file.filename) : existingSubImages.split(',');
 
-        await Product.findByIdAndUpdate(req.params.id, { name, description, price, stock, category, mainImage, subImages });
+        const highlightsArray = highlights.split(',').map(item => item.trim());
+
+        await Product.findByIdAndUpdate(req.params.id, { name, description, price, stock, category, mainImage, subImages, highlights: highlightsArray });
 
         req.flash('success_msg', 'Product updated successfully');
         res.redirect('/admin/products');

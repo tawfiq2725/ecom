@@ -13,24 +13,30 @@
                     {{#if error_msg}}
                         <div class="alert alert-danger">{{error_msg}}</div>
                     {{/if}}
-                    <form id="registrationForm" action="/auth/register" method="post"> <!-- Added id for the form -->
+                    <form id="registrationForm" action="/auth/register" method="post">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="firstname" placeholder="First Name" value="{{firstname}}" required>
+                            <input type="text" class="form-control" name="firstname" placeholder="First Name" value="{{firstname}}" >
+                            <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" name="lastname" placeholder="Last Name" value="{{lastname}}" required>
+                            <input type="text" class="form-control" name="lastname" placeholder="Last Name" value="{{lastname}}" >
+                            <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="email" class="form-control" name="email" placeholder="Email" value="{{email}}" required>
+                            <input type="email" class="form-control" name="email" placeholder="Email" value="{{email}}" >
+                            <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" name="mobile" placeholder="Mobile" value="{{mobile}}" required>
+                            <input type="text" class="form-control" name="mobile" placeholder="Mobile" value="{{mobile}}" >
+                            <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="password" class="form-control" name="password" placeholder="Password" required>
+                            <input type="password" class="form-control" name="password" placeholder="Password" >
+                            <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="password" class="form-control" name="password2" placeholder="Confirm Password" required>
+                            <input type="password" class="form-control" name="password2" placeholder="Confirm Password" >
+                            <small class="error-message text-danger"></small>
                         </div>
                         <button type="submit" class="btn btn-primary">Register</button>
                     </form>
@@ -46,52 +52,99 @@
 
 <script>
     document.getElementById('registrationForm').addEventListener('submit', function(e) {
-        // Get form fields
-        var firstname = document.querySelector('input[name="firstname"]').value.trim();
-        var lastname = document.querySelector('input[name="lastname"]').value.trim();
-        var email = document.querySelector('input[name="email"]').value.trim();
-        var mobile = document.querySelector('input[name="mobile"]').value.trim();
-        var password = document.querySelector('input[name="password"]').value.trim();
-        var password2 = document.querySelector('input[name="password2"]').value.trim();
+        // Prevent form submission
+        e.preventDefault();
 
-        // Validate fields
-        if (!firstname || !lastname || !email || !mobile || !password || !password2) {
-            alert('Please fill in all fields.');
-            e.preventDefault(); // Prevent form submission
-            return;
+        // Clear previous error messages
+        document.querySelectorAll('.error-message').forEach(function(el) {
+            el.textContent = '';
+        });
+        document.querySelectorAll('.form-control').forEach(function(el) {
+            el.style.borderColor = '';
+        });
+
+        // Get form fields
+        var firstname = document.querySelector('input[name="firstname"]');
+        var lastname = document.querySelector('input[name="lastname"]');
+        var email = document.querySelector('input[name="email"]');
+        var mobile = document.querySelector('input[name="mobile"]');
+        var password = document.querySelector('input[name="password"]');
+        var password2 = document.querySelector('input[name="password2"]');
+
+        var isValid = true;
+
+        // Name validation (letters only)
+        var namePattern = /^[a-zA-Z\s]+$/;
+        if (!namePattern.test(firstname.value.trim())) {
+            firstname.nextElementSibling.textContent = 'First name must contain letters only.';
+            firstname.style.borderColor = 'red';
+            isValid = false;
+        } else {
+            firstname.style.borderColor = 'green';
+        }
+
+        if (!namePattern.test(lastname.value.trim())) {
+            lastname.nextElementSibling.textContent = 'Last name must contain letters only.';
+            lastname.style.borderColor = 'red';
+            isValid = false;
+        } else {
+            lastname.style.borderColor = 'green';
         }
 
         // Email validation
         var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (!emailPattern.test(email)) {
-            alert('Please enter a valid email address.');
-            e.preventDefault();
-            return;
+        if (!emailPattern.test(email.value.trim())) {
+            email.nextElementSibling.textContent = 'Please enter a valid email address.';
+            email.style.borderColor = 'red';
+            isValid = false;
+        } else {
+            email.style.borderColor = 'green';
         }
 
         // Mobile number validation (assuming a simple 10-digit format for example)
         var mobilePattern = /^\d{10}$/;
-        if (!mobilePattern.test(mobile)) {
-            alert('Please enter a valid mobile number (10 digits).');
-            e.preventDefault();
-            return;
+        if (!mobilePattern.test(mobile.value.trim())) {
+            mobile.nextElementSibling.textContent = 'Please enter a valid mobile number (10 digits).';
+            mobile.style.borderColor = 'red';
+            isValid = false;
+        } else {
+            mobile.style.borderColor = 'green';
         }
 
         // Password validation (minimum 8 characters, at least one letter and one number)
         var passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        if (!passwordPattern.test(password)) {
-            alert('Password must be at least 8 characters long and include at least one letter and one number.');
-            e.preventDefault();
-            return;
+        if (!passwordPattern.test(password.value.trim())) {
+            password.nextElementSibling.textContent = 'Password must be at least 8 characters long and include at least one letter and one number.';
+            password.style.borderColor = 'red';
+            isValid = false;
+        } else {
+            password.style.borderColor = 'green';
         }
 
         // Confirm password match
-        if (password !== password2) {
-            alert('Passwords do not match.');
-            e.preventDefault();
-            return;
+        if (password2.value.trim() === '') {
+            password2.nextElementSibling.textContent = 'Confirm password is required.';
+            password2.style.borderColor = 'red';
+            isValid = false;
+        } else if (password.value.trim() !== password2.value.trim()) {
+            password2.nextElementSibling.textContent = 'Passwords do not match.';
+            password2.style.borderColor = 'red';
+            isValid = false;
+        } else {
+            password2.style.borderColor = 'green';
         }
 
-        // Optional: Additional validation for other conditions can be added here
+        if (isValid) {
+            // If the form is valid, submit it
+            this.submit();
+        }
     });
 </script>
+
+<style>
+    .error-message {
+        font-size: 0.875em;
+        color: red;
+        margin-top: 0.25em;
+    }
+</style>

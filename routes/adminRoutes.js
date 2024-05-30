@@ -15,8 +15,8 @@ routes.get('/auth/logout', adminController.logoutUser);
 
 // Management
 routes.get('/userm', adminController.getAllUsers);
-routes.get('/block/:id', adminController.blockUser);
-routes.get('/unblock/:id', adminController.unblockUser);
+routes.post('/block/:id', adminController.blockUser);
+routes.post('/unblock/:id', adminController.unblockUser);
 
 // Category Routes
 routes.get('/categories', categoryController.getCategories);

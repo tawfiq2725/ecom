@@ -199,11 +199,12 @@
                         <li><a data-toggle="tab" href="#reviews" aria-expanded="false">Reviews (3)</a></li>
                     </ul>
                     <div class="tab-content patternbg">
-                        <div id="details" class="tab-pane fade active in">
-                            <h4>Product Description</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-                        </div>
+                    <div id="details" class="tab-pane fade active in">
+                        <h4>Product Highlights</h4>
+                        {{#each product.highlights}}
+                        <p>{{this}}</p>
+                        {{/each}}
+                    </div>
                         <div id="reviews" class="tab-pane fade">
                             <div class="post-comments">
                                 <ul class="media-list comments-list m-bot-50 clearlist">

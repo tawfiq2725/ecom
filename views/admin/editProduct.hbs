@@ -1,56 +1,116 @@
 <div class="content-body">
     <div class="container-fluid">
-    <h2>Edit Product</h2>
-    <form action="/admin/products/edit/{{product._id}}" method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="name">Product Name</label>
-            <input type="text" name="name" class="form-control" value="{{product.name}}" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea name="description" class="form-control" required>{{product.description}}</textarea>
-        </div>
-        <div class="form-group">
-            <label for="price">Price</label>
-            <input type="number" name="price" class="form-control" value="{{product.price}}" required>
-        </div>
-        <div class="form-group">
-            <label for="stock">Stock</label>
-            <input type="number" name="stock" class="form-control" value="{{product.stock}}" required>
-        </div>
-        <div class="form-group">
-            <label for="category">Category</label>
-            <select name="category" class="form-control" required>
-                {{#each categories}}
-                    <option value="{{this._id}}" {{#if (eq this._id ../product.category._id)}}selected{{/if}}>{{this.name}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="existingMainImage">Existing Main Image</label>
-            <div>
-                <img src="/uploads/products/{{product.mainImage}}" alt="Main Product Image" style="width: 100px;">
+        <h2>Edit Product</h2>
+        <form action="/admin/products/edit/{{product._id}}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Product Name</label>
+                <input type="text" name="name" class="form-control" value="{{product.name}}" required>
             </div>
-            <input type="hidden" name="existingMainImage" value="{{product.mainImage}}">
-        </div>
-        <div class="form-group">
-            <label for="mainImage">Upload New Main Image</label>
-            <input type="file" name="mainImage" id="mainImage" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="existingSubImages">Existing Additional Images</label>
-            <div>
-                {{#each product.subImages}}
-                    <img src="/uploads/products/{{this}}" alt="Sub Product Image" style="width: 100px;">
-                {{/each}}
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea name="description" class="form-control" required>{{product.description}}</textarea>
             </div>
-            <input type="hidden" name="existingSubImages" value="{{product.subImages}}">
-        </div>
-        <div class="form-group">
-            <label for="subImages">Upload New Additional Images</label>
-            <input type="file" name="subImages" id="subImages" class="form-control" multiple>
-        </div>
-        <button type="submit" class="btn btn-primary">Update Product</button>
-    </form>
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" name="price" class="form-control" value="{{product.price}}" required>
+            </div>
+            <div class="form-group">
+                <label for="stock">Stock</label>
+                <input type="number" name="stock" class="form-control" value="{{product.stock}}" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select name="category" class="form-control" required>
+                    {{#each categories}}
+                        <option value="{{this._id}}" {{#if (eq this._id ../product.category._id)}}selected{{/if}}>{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+             <div class="form-group">
+                <label for="highlights">Highlights (comma-separated)</label>
+                <input type="text" name="highlights" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="existingMainImage">Existing Main Image</label>
+                <div>
+                    <img src="/uploads/products/{{product.mainImage}}" alt="Main Product Image" style="width: 100px;">
+                </div>
+                <input type="hidden" name="existingMainImage" value="{{product.mainImage}}">
+            </div>
+            <div class="form-group">
+                <label for="mainImage">Upload New Main Image</label>
+                <input type="file" name="mainImage" id="mainImage" class="form-control">
+                <img id="main-cropped-image" src="#" alt="Cropped Image" style="display:none;">
+            </div>
+            <div class="form-group">
+                <label for="existingSubImages">Existing Additional Images</label>
+                <div>
+                    {{#each product.subImages}}
+                        <img src="/uploads/products/{{this}}" alt="Sub Product Image" style="width: 100px;">
+                    {{/each}}
+                </div>
+                <input type="hidden" name="existingSubImages" value="{{product.subImages}}">
+            </div>
+            <div class="form-group">
+                <label for="subImages">Upload New Additional Images</label>
+                <input type="file" name="subImages" id="subImages" class="form-control" multiple>
+                <div id="subImagePreviews"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Product</button>
+        </form>
+    </div>
 </div>
+
+<!-- Modal for main image cropping -->
+<div class="modal fade" id="cropModalProduct" tabindex="-1" role="dialog" aria-labelledby="cropModalLabelProduct" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cropModalLabelProduct">Crop Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="img-container">
+                    <img id="image-to-crop-product" src="" alt="Picture">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="cropButtonProduct">Crop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for sub image cropping -->
+<div class="modal fade" id="cropModalSubImage" tabindex="-1" role="dialog" aria-labelledby="cropModalLabelSubImage" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cropModalLabelSubImage">Crop Sub Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="subImageCarousel" class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner"></div>
+                    <a class="carousel-control-prev" href="#subImageCarousel" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#subImageCarousel" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="cropButtonSubImage">Crop</button>
+            </div>
+        </div>
+    </div>
 </div>

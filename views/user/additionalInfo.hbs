@@ -1,14 +1,56 @@
-
 <div class="container text-center" style="width: 500px; height: 400px;">
     <h1>{{title}}</h1>
-{{#if error_msg}}
-<p style="color: red;">{{error_msg}}</p>
-{{/if}}
-<form action="/auth/google/additional-info" method="post">
-    <div class="form-group">
-        <input type="number" class="form-control" name="mobile" placeholder="Mobile" value="{{mobile}}" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
+    {{#if error_msg}}
+    <p style="color: red;">{{error_msg}}</p>
+    {{/if}}
+    <form id="additionalInfoForm" action="/auth/google/additional-info" method="post">
+        <div class="form-group mt-5 mb-5">
+            <input type="number" class="form-control" name="mobile" placeholder="Mobile" value="{{mobile}}">
+            <small class="error-message text-danger"></small>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
 </div>
 
+<script>
+    document.getElementById('additionalInfoForm').addEventListener('submit', function(e) {
+        // Prevent form submission
+        e.preventDefault();
+
+        // Clear previous error messages
+        document.querySelectorAll('.error-message').forEach(function(el) {
+            el.textContent = '';
+        });
+        document.querySelectorAll('.form-control').forEach(function(el) {
+            el.style.borderColor = '';
+        });
+
+        // Get form fields
+        var mobile = document.querySelector('input[name="mobile"]');
+
+        var isValid = true;
+
+        // Mobile number validation (assuming a simple 10-digit format for example)
+        var mobilePattern = /^\d{10}$/;
+        if (!mobilePattern.test(mobile.value.trim())) {
+            mobile.nextElementSibling.textContent = 'Please enter a valid mobile number (10 digits).';
+            mobile.style.borderColor = 'red';
+            isValid = false;
+        } else {
+            mobile.style.borderColor = 'green';
+        }
+
+        if (isValid) {
+            // If the form is valid, submit it
+            this.submit();
+        }
+    });
+</script>
+
+<style>
+    .error-message {
+        font-size: 0.875em;
+        color: red;
+        margin-top: 0.25em;
+    }
+</style>
