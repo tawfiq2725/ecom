@@ -1,0 +1,15 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <h2>Manage Stock for {{product.name}}</h2>
+        <form action="/admin/products/update-stock/{{product._id}}" method="POST">
+            {{#each product.variants}}
+                <div class="form-group">
+                    <label for="variant-size-{{@index}}">Size: {{this.size}}</label>
+                    <input type="number" name="variants[{{@index}}][stock]" class="form-control" value="{{this.stock}}" required>
+                    <input type="hidden" name="variants[{{@index}}][size]" value="{{this.size}}">
+                </div>
+            {{/each}}
+            <button type="submit" class="btn btn-primary">Update Stock</button>
+        </form>
+    </div>
+</div>

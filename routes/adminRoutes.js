@@ -40,5 +40,7 @@ routes.post('/products/edit/:id', productUpload.fields([
 ]), productController.updateProduct);
 routes.delete('/products/delete/:id', productController.deleteProduct); // Change to DELETE method
 routes.post('/products/toggle-status/:id', productController.toggleProductStatus)
+routes.get('/products/manage-stock/:id', productController.getManageStockPage);
+routes.post('/products/update-stock/:id', productController.updateStock);
 
 module.exports = routes;

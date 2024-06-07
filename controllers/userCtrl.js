@@ -5,8 +5,8 @@ const { GenerateOtp,sendMail} = require('../helpers/otpverification')
 require('dotenv').config()
 const bcrypt = require('bcrypt')
 
-// Page Not Found
 
+// Page Not Found
 const pageNotFound = async (req, res) => {
     try {
         res.render("404")
@@ -36,7 +36,6 @@ const getLoginPage = async (req, res) => {
             title:`Login Page`
         }
         if(!req.session.user){
-
             res.render("user/login",{title:locals.title})
         }
         else{
@@ -47,6 +46,7 @@ const getLoginPage = async (req, res) => {
         console.log(error.message);
     }
 }
+
 //Go to Signup Page
 
 const getSignupPage = async (req, res) => {
@@ -54,7 +54,6 @@ const getSignupPage = async (req, res) => {
         const locals={
             title:`Sign Up Page`
         }
-
             res.render("user/signup",{title:locals.title})
     }
      catch (error) {
@@ -62,10 +61,13 @@ const getSignupPage = async (req, res) => {
     }
 }
 
+
 // Register New Member
 const newUserRegistration = async (req, res) => {
+    let firstname, lastname, mobile, email, password, password2;
     try {
-        const { firstname, lastname, mobile, email, password, password2 } = req.body;
+        // Assign values inside the try block
+        ({ firstname, lastname, mobile, email, password, password2 } = req.body);
 
         // Check if the passwords match
         if (password !== password2) {
@@ -77,15 +79,17 @@ const newUserRegistration = async (req, res) => {
         if (findUser) {
             return res.render("user/signup", { error_msg: "User with this email already exists.", firstname, lastname, email, mobile });
         }
+
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds); 
+
         // Create and save the new user
         const newUser = new User({
-            firstname:firstname,
-            lastname:lastname,
-            mobile:mobile,
-            email:email,
-            password:hashedPassword,
+            firstname,
+            lastname,
+            mobile,
+            email,
+            password: hashedPassword,
             isBlocked: false,
             isVerified: false,
             isAdmin: false
@@ -118,6 +122,7 @@ const newUserRegistration = async (req, res) => {
         res.status(500).render("user/signup", { error_msg: "An error occurred during registration.", firstname, lastname, email, mobile });
     }
 };
+
 // Resend Otp Page
 const resendOtp = async (req, res) => {
     try {
@@ -160,6 +165,7 @@ const resendOtp = async (req, res) => {
         res.status(500).json({ success: false, error_msg: "An error occurred while resending the OTP." });
     }
 };
+
 // Go to otp page
 const getOtpPage = async (req, res) => {
     try {
@@ -171,6 +177,7 @@ const getOtpPage = async (req, res) => {
         console.log(error.message);
     }
 }
+
 
 // Verify the Otp
 const verifyOtp = async (req, res) => {
@@ -196,9 +203,6 @@ const verifyOtp = async (req, res) => {
         res.status(500).send("An error occurred while verifying the OTP.");
     }
 };
-
-
-
 
 // Login user
 const loginUser = async (req, res) => {
@@ -257,32 +261,6 @@ const logoutUser = async (req, res) => {
         res.status(500).send("An error occurred during logout.");
     }
 };
-// Go to Additional Info While Google Auth
-const getAdditionalInfoPage = async (req, res) => {
-    res.render('user/additionalinfo', { title: "Additional Information" });
-};
-
-// Additional Info While Google Auth
-const saveAdditionalInfo = async (req, res) => {
-    try {
-        const { mobile } = req.body;
-
-        const user = await User.findById(req.session.user._id);
-        if (!user) {
-            return res.render('user/additionalinfo', { error_msg: "User not found." });
-        }
-        user.mobile = mobile;
-        await user.save();
-
-        req.session.user = user; // Update session with updated user info
-        res.redirect('/');
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).send("An error occurred while saving additional information.");
-    }
-};
-
-
 
 // Controller to fetch and display products on the user side
 const getProducts = async (req, res) => {
@@ -311,9 +289,6 @@ const getProducts = async (req, res) => {
         res.status(500).send("Server Error");
     }
 };
-
-
-
 
 const getProductDetails = async (req, res) => {
     try {
@@ -348,6 +323,62 @@ const getProductDetails = async (req, res) => {
 };
 
 
+// User profile
+const gotoProfile = async(req, res) => {
+    if (req.session.user) {
+        const user = await User.findById(req.session.user._id);
+        res.render('user/profile-details', {
+            title: "User Profile",
+            user: {
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                mobile: user.mobile
+            }
+        });
+    } else {
+        res.redirect('/login');
+    }
+};
+
+// User Profile Update
+
+const updateProfile = async (req, res) => {
+    try {
+        const { firstname, lastname, email, mobile } = req.body;
+        const userId = req.session.user._id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        user.firstname = firstname;
+        user.lastname = lastname;
+        user.email = email;
+        user.mobile = mobile;
+
+        await user.save();
+
+        req.session.user = user; 
+        res.redirect('/profile');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+// Go to address page
+
+const gotoAddress = async(req,res)=>{
+    if(req.session.user){
+        res.render('user/address',{title:"Address Details"})
+    }
+    else{
+        res.redirect('/login');
+    }
+}
+
 
 
 module.exports = {
@@ -361,8 +392,9 @@ module.exports = {
     verifyOtp,
     loginUser,
     logoutUser,
-    getAdditionalInfoPage,
-    saveAdditionalInfo,
     getProducts,
-    getProductDetails
+    getProductDetails,
+    gotoProfile,
+    gotoAddress,
+    updateProfile,
 }

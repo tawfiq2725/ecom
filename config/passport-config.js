@@ -19,9 +19,7 @@ passport.use(new GoogleStrategy({
           googleId: profile.id,
           firstname: profile.name.givenName,
           lastname: profile.name.familyName,
-          mobile: '',
           email: profile.emails[0].value,
-          password: '', 
           isVerified: true,
           isBlocked: false,
           isAdmin: false,
@@ -48,6 +46,5 @@ passport.deserializeUser(async (id, done) => {
     done(err, null);
   }
 });
-
 
 module.exports = passport;

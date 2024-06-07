@@ -17,7 +17,8 @@ const checkUserStatus = async (req, res, next) => {
                 } else {
                     next();
                 }
-            } else if (req.session.admin) {
+            } 
+            else if (req.session.admin) {
                 const admin = await Admin.findById(req.session.admin._id);
                 if (admin && admin.isAdmin) {
                     // If admin is logged in, allow access
@@ -31,14 +32,16 @@ const checkUserStatus = async (req, res, next) => {
                         return res.redirect('/admin/login');
                     });
                 }
-            } else {
+            } 
+            else {
                 next();
             }
         } catch (error) {
             console.log(error.message);
             return res.status(500).send("An error occurred while checking user status.");
         }
-    } else {
+    } 
+    else {
         next();
     }
 };

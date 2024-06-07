@@ -36,34 +36,38 @@
                     <th>Image</th>
                     <th>Category</th>
                     <th>Status</th>
+                    <th>Stocks</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {{#each products}}
-                    <tr>
-                        <td>{{@index}}</td>
-                        <td>{{this.name}}</td>
-                        <td>
-                            {{#if this.mainImage}}
-                                <img src="/uploads/products/{{this.mainImage}}" alt="{{this.name}}" style="width: 100px;">
-                            {{else}}
-                                <span>No Image</span>
-                            {{/if}}
-                        </td>
-                        <td>{{this.category.name}}</td>
-                        <td>
-                            {{#if this.status}}
-                                <button class="btn btn-success toggle-status" data-id="{{this._id}}">Listed</button>
-                            {{else}}
-                                <button class="btn btn-secondary toggle-status" data-id="{{this._id}}">Unlisted</button>
-                            {{/if}}
-                        </td>
-                        <td>
-                            <a href="/admin/products/edit/{{this._id}}" class="btn btn-warning">Edit</a>
-                            <button class="btn btn-danger delete-product" data-id="{{this._id}}">Delete</button>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>{{@index}}</td>
+                    <td>{{this.name}}</td>
+                    <td>
+                        {{#if this.mainImage}}
+                        <img src="/uploads/products/{{this.mainImage}}" alt="{{this.name}}" style="width: 100px;">
+                        {{else}}
+                        <span>No Image</span>
+                        {{/if}}
+                    </td>
+                    <td>{{this.category.name}}</td>
+                    <td>
+                        {{#if this.status}}
+                        <button class="btn btn-success toggle-status" data-id="{{this._id}}">Listed</button>
+                        {{else}}
+                        <button class="btn btn-secondary toggle-status" data-id="{{this._id}}">Unlisted</button>
+                        {{/if}}
+                    </td>
+                    <td>
+                        <a href="/admin/products/manage-stock/{{this._id}}" class="btn btn-info">Manage Stock</a>
+                    </td>
+                    <td>
+                        <a href="/admin/products/edit/{{this._id}}" class="btn btn-warning">Edit</a>
+                        <button class="btn btn-danger delete-product" data-id="{{this._id}}">Delete</button>
+                    </td>
+                </tr>
                 {{/each}}
             </tbody>
         </table>
@@ -75,7 +79,7 @@
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('#example').DataTable({
             "paging": true,
             "searching": true,
@@ -85,7 +89,7 @@
         });
 
         // Handle List/Unlist action
-        $('.toggle-status').on('click', function() {
+        $('.toggle-status').on('click', function () {
             var productId = $(this).data('id');
             var button = $(this);
             Swal.fire({
@@ -104,34 +108,34 @@
                             'Content-Type': 'application/json'
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.success) {
-                            Swal.fire(
-                                'Changed!',
-                                'Product status has been changed.',
-                                'success'
-                            );
-                            // Update button text based on new status
-                            if (button.hasClass('btn-success')) {
-                                button.removeClass('btn-success').addClass('btn-secondary').text('Unlisted');
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Changed!',
+                                    'Product status has been changed.',
+                                    'success'
+                                );
+                                // Update button text based on new status
+                                if (button.hasClass('btn-success')) {
+                                    button.removeClass('btn-success').addClass('btn-secondary').text('Unlisted');
+                                } else {
+                                    button.removeClass('btn-secondary').addClass('btn-success').text('Listed');
+                                }
                             } else {
-                                button.removeClass('btn-secondary').addClass('btn-success').text('Listed');
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error changing the status.',
+                                    'error'
+                                );
                             }
-                        } else {
-                            Swal.fire(
-                                'Error!',
-                                'There was an error changing the status.',
-                                'error'
-                            );
-                        }
-                    });
+                        });
                 }
             });
         });
 
         // Handle Delete action
-        $('.delete-product').on('click', function() {
+        $('.delete-product').on('click', function () {
             var productId = $(this).data('id');
             Swal.fire({
                 title: 'Are you sure?',
@@ -149,24 +153,24 @@
                             'Content-Type': 'application/json'
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.success) {
-                            Swal.fire(
-                                'Deleted!',
-                                'Product has been deleted.',
-                                'success'
-                            ).then(() => {
-                                location.reload(); // Reload the page after deletion
-                            });
-                        } else {
-                            Swal.fire(
-                                'Error!',
-                                'There was an error deleting the product.',
-                                'error'
-                            );
-                        }
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Product has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); // Reload the page after deletion
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error deleting the product.',
+                                    'error'
+                                );
+                            }
+                        });
                 }
             });
         });

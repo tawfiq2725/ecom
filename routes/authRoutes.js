@@ -21,23 +21,22 @@ router.get('/auth/logout', userController.logoutUser);
 
 // Google OAuth Routes
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
 router.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
-    async (req, res) => {
-        if (!req.user.mobile || !req.user.password) {
-            req.session.user = req.user; // Save user in session
-            return res.redirect('/auth/google/additional-info');
-        }
+    (req, res) => {
         req.session.user = req.user; // Ensure user is set in session
         res.redirect('/');
     }
 );
 
-router.get('/auth/google/additional-info', userController.getAdditionalInfoPage);
-router.post('/auth/google/additional-info', userController.saveAdditionalInfo);
-
 // Product Page
 router.get('/products', userController.getProducts);
 router.get('/products/:id', userController.getProductDetails);
+
+
+// Profile routes
+router.get('/profile',userController.gotoProfile);
+router.get('/address',userController.gotoAddress);
+router.post('/profile/update',userController.updateProfile)
+
 module.exports = router;

@@ -1,7 +1,7 @@
 <div class="content-body">
     <div class="container-fluid">
         <h2>Edit Product</h2>
-        <form action="/admin/products/edit/{{product._id}}" method="POST" enctype="multipart/form-data">
+       <form action="/admin/products/edit/{{product._id}}" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="name">Product Name</label>
                 <input type="text" name="name" class="form-control" value="{{product.name}}" required>
@@ -15,10 +15,6 @@
                 <input type="number" name="price" class="form-control" value="{{product.price}}" required>
             </div>
             <div class="form-group">
-                <label for="stock">Stock</label>
-                <input type="number" name="stock" class="form-control" value="{{product.stock}}" required>
-            </div>
-            <div class="form-group">
                 <label for="category">Category</label>
                 <select name="category" class="form-control" required>
                     {{#each categories}}
@@ -26,9 +22,9 @@
                     {{/each}}
                 </select>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label for="highlights">Highlights (comma-separated)</label>
-                <input type="text" name="highlights" class="form-control">
+                <input type="text" name="highlights" class="form-control" value="{{product.highlights}}">
             </div>
             <div class="form-group">
                 <label for="existingMainImage">Existing Main Image</label>
@@ -56,6 +52,22 @@
                 <input type="file" name="subImages" id="subImages" class="form-control" multiple>
                 <div id="subImagePreviews"></div>
             </div>
+            
+            <!-- Variant Section -->
+            <div id="variant-container">
+                {{#each product.variants}}
+                <div class="form-group variant-box">
+                    <h5>Variant {{@index}}</h5>
+                    <label for="variant-size-{{@index}}">Size</label>
+                    <input type="text" name="variants[{{@index}}][size]" class="form-control" value="{{this.size}}" required>
+                    <label for="variant-stock-{{@index}}">Stock</label>
+                    <input type="number" name="variants[{{@index}}][stock]" class="form-control" value="{{this.stock}}" required>
+                </div>
+                {{/each}}
+            </div>
+            <button type="button" class="btn btn-secondary" id="add-variant">Add Variant</button>
+            <div id="variant-limit-message" class="text-danger" style="display:none;">Maximum 6 variants allowed</div>
+
             <button type="submit" class="btn btn-primary">Update Product</button>
         </form>
     </div>
@@ -114,3 +126,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let variantCount = document.querySelectorAll('.variant-box').length;
+
+        document.getElementById('add-variant').addEventListener('click', function() {
+            if (variantCount < 6) {
+                const variantContainer = document.getElementById('variant-container');
+                const newVariant = document.createElement('div');
+                newVariant.classList.add('form-group', 'variant-box');
+                newVariant.innerHTML = `
+                    <h5>Variant ${variantCount + 1}</h5>
+                    <label for="variant-size-${variantCount}">Size</label>
+                    <input type="text" name="variants[${variantCount}][size]" class="form-control" required>
+                    <label for="variant-stock-${variantCount}">Stock</label>
+                    <input type="number" name="variants[${variantCount}][stock]" class="form-control" required>
+                `;
+                variantContainer.appendChild(newVariant);
+                variantCount++;
+            } else {
+                document.getElementById('variant-limit-message').style.display = 'block';
+            }
+        });
+    });
+</script>

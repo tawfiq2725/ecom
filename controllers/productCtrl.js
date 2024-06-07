@@ -30,13 +30,29 @@ const getAddProductPage = async (req, res) => {
 // Add New Product
 const addProduct = async (req, res) => {
     try {
-        const { name, description, price, stock, category, highlights } = req.body;
-        const mainImage = req.files.mainImage[0].filename;
+        const { name, description, price, category, highlights, variants } = req.body;
+        const mainImage = req.files.mainImage ? req.files.mainImage[0].filename : '';
         const subImages = req.files.subImages ? req.files.subImages.map(file => file.filename) : [];
-        
+
         const highlightsArray = highlights.split(',').map(item => item.trim());
 
-        const newProduct = new Product({ name, description, price, stock, category, mainImage, subImages, highlights: highlightsArray });
+        // Parse the variants directly from the request body
+        const variantsArray = Object.values(variants).map(variant => ({
+            size: variant.size,
+            stock: variant.stock,
+        }));
+
+        const newProduct = new Product({ 
+            name, 
+            description, 
+            price, 
+            category, 
+            mainImage, 
+            subImages, 
+            highlights: highlightsArray, 
+            variants: variantsArray
+        });
+
         await newProduct.save();
 
         req.flash('success_msg', 'Product added successfully');
@@ -47,6 +63,7 @@ const addProduct = async (req, res) => {
         res.redirect('/admin/products');
     }
 };
+
 
 // Edit Product
 const getEditProductPage = async (req, res) => {
@@ -63,13 +80,36 @@ const getEditProductPage = async (req, res) => {
 // Update Product
 const updateProduct = async (req, res) => {
     try {
-        const { name, description, price, stock, category, existingMainImage, existingSubImages, highlights } = req.body;
+        const { name, description, price, category, existingMainImage, existingSubImages, highlights, variants } = req.body;
+
+        // console.log("Received Data:", req.body);
+        
         const mainImage = req.files.mainImage ? req.files.mainImage[0].filename : existingMainImage;
         const subImages = req.files.subImages ? req.files.subImages.map(file => file.filename) : existingSubImages.split(',');
 
         const highlightsArray = highlights.split(',').map(item => item.trim());
 
-        await Product.findByIdAndUpdate(req.params.id, { name, description, price, stock, category, mainImage, subImages, highlights: highlightsArray });
+        // Parse the variants
+        const variantsArray = Object.values(variants).map(variant => ({
+            size: variant.size,
+            stock: variant.stock,
+        }));
+
+        // Ensure to include all required fields in the update
+        const updateData = {
+            name,
+            description,
+            price,
+            category,
+            mainImage,
+            subImages,
+            highlights: highlightsArray,
+            variants: variantsArray // Make sure this is correctly formatted
+        };
+
+        // console.log("Update Data:", updateData);
+
+        await Product.findByIdAndUpdate(req.params.id, updateData);
 
         req.flash('success_msg', 'Product updated successfully');
         res.redirect('/admin/products');
@@ -79,7 +119,6 @@ const updateProduct = async (req, res) => {
         res.redirect('/admin/products');
     }
 };
-
 // Delete Product
 const deleteProduct = async (req, res) => {
     try {
@@ -104,6 +143,32 @@ const toggleProductStatus = async (req, res) => {
     }
 };
 
+const getManageStockPage = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        res.render('admin/manageStock', { title: "Manage Stock", product, layout: 'adminlayout' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+};
+
+const updateStock = async (req, res) => {
+    try {
+        const { variants } = req.body;
+        const product = await Product.findById(req.params.id);
+        product.variants = variants;
+        await product.save();
+        
+        req.flash('success_msg', 'Stock updated successfully');
+        res.redirect('/admin/products');
+    } catch (error) {
+        console.error(error);
+        req.flash('error_msg', 'Error updating stock');
+        res.redirect('/admin/products');
+    }
+};
+
 module.exports = {
     getProducts,
     getAddProductPage,
@@ -111,5 +176,7 @@ module.exports = {
     getEditProductPage,
     updateProduct,
     deleteProduct,
-    toggleProductStatus
+    toggleProductStatus,
+    getManageStockPage,
+    updateStock
 };

@@ -15,10 +15,14 @@
                     <div class="alert alert-danger">{{this.msg}}</div>
                     {{/each}}
                     {{/if}}
-                    <form action="/auth/verify-otp" method="post"> <!-- Adjusted action to verify OTP -->
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="otp" placeholder="Enter OTP">
+                    <form id="otpForm" action="/auth/verify-otp" method="post"> <!-- Adjusted action to verify OTP -->
+                        <div class="form-group otp-inputs">
+                            <input type="text" class="form-control otp-input" name="otp1" maxlength="1">
+                            <input type="text" class="form-control otp-input" name="otp2" maxlength="1">
+                            <input type="text" class="form-control otp-input" name="otp3" maxlength="1">
+                            <input type="text" class="form-control otp-input" name="otp4" maxlength="1">
                         </div>
+                        <input type="hidden" name="otp" id="otpHidden">
                         <button type="submit" class="btn btn-primary">Verify</button>
                     </form>
                     <div id="resend-section">
@@ -73,5 +77,48 @@
                 }
             });
         });
+
+        // OTP input fields logic
+        const otpInputs = document.querySelectorAll('.otp-input');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1) {
+                    if (index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    } else {
+                        otpInputs[index].blur();
+                    }
+                }
+                updateHiddenOTP();
+            });
+
+            input.addEventListener('keydown', function(event) {
+                if (event.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+
+        function updateHiddenOTP() {
+            const otpHiddenInput = document.getElementById('otpHidden');
+            otpHiddenInput.value = Array.from(otpInputs).map(input => input.value).join('');
+        }
     });
 </script>
+
+<style>
+    .otp-inputs {
+        display: flex;
+        justify-content: space-between;
+    }
+    .otp-input {
+        width: 50px;
+        text-align: center;
+        margin-right: 10px;
+    }
+    .error-message {
+        font-size: 0.875em;
+        color: red;
+        margin-top: 0.25em;
+    }
+</style>

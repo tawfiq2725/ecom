@@ -1,5 +1,16 @@
 const mongoose = require('mongoose');
 
+const variantSchema = new mongoose.Schema({
+    size: {
+        type: String,
+        required: true,
+    },
+    stock: {
+        type: Number,
+        required: true,
+    }
+});
+
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -10,10 +21,6 @@ const productSchema = new mongoose.Schema({
         required: true,
     },
     price: {
-        type: Number,
-        required: true,
-    },
-    stock: {
         type: Number,
         required: true,
     },
@@ -34,8 +41,11 @@ const productSchema = new mongoose.Schema({
         default: true,
     },
     highlights: {
-        type: [String], 
-    }
-});
+        type: [String],
+    },
+    variants: [variantSchema] 
+},
+{ timestamps: true }
+);
 
 module.exports = mongoose.model('Product', productSchema);

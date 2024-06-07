@@ -15,27 +15,27 @@
                     {{/if}}
                     <form id="registrationForm" action="/auth/register" method="post">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="firstname" placeholder="First Name" value="{{firstname}}" >
+                            <input type="text" class="form-control" name="firstname" placeholder="First Name" value="{{firstname}}">
                             <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" name="lastname" placeholder="Last Name" value="{{lastname}}" >
+                            <input type="text" class="form-control" name="lastname" placeholder="Last Name" value="{{lastname}}">
                             <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="email" class="form-control" name="email" placeholder="Email" value="{{email}}" >
+                            <input type="email" class="form-control" name="email" placeholder="Email" value="{{email}}">
                             <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" name="mobile" placeholder="Mobile" value="{{mobile}}" >
+                            <input type="text" class="form-control" name="mobile" placeholder="Mobile" value="{{mobile}}">
                             <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="password" class="form-control" name="password" placeholder="Password" >
+                            <input type="password" class="form-control" name="password" placeholder="Password">
                             <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="password" class="form-control" name="password2" placeholder="Confirm Password" >
+                            <input type="password" class="form-control" name="password2" placeholder="Confirm Password">
                             <small class="error-message text-danger"></small>
                         </div>
                         <button type="submit" class="btn btn-primary">Register</button>
@@ -75,7 +75,11 @@
 
         // Name validation (letters only)
         var namePattern = /^[a-zA-Z\s]+$/;
-        if (!namePattern.test(firstname.value.trim())) {
+        if (firstname.value.trim() === '') {
+            firstname.nextElementSibling.textContent = 'First name is required.';
+            firstname.style.borderColor = 'red';
+            isValid = false;
+        } else if (!namePattern.test(firstname.value.trim())) {
             firstname.nextElementSibling.textContent = 'First name must contain letters only.';
             firstname.style.borderColor = 'red';
             isValid = false;
@@ -83,7 +87,11 @@
             firstname.style.borderColor = 'green';
         }
 
-        if (!namePattern.test(lastname.value.trim())) {
+        if (lastname.value.trim() === '') {
+            lastname.nextElementSibling.textContent = 'Last name is required.';
+            lastname.style.borderColor = 'red';
+            isValid = false;
+        } else if (!namePattern.test(lastname.value.trim())) {
             lastname.nextElementSibling.textContent = 'Last name must contain letters only.';
             lastname.style.borderColor = 'red';
             isValid = false;
@@ -93,7 +101,11 @@
 
         // Email validation
         var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (!emailPattern.test(email.value.trim())) {
+        if (email.value.trim() === '') {
+            email.nextElementSibling.textContent = 'Email is required.';
+            email.style.borderColor = 'red';
+            isValid = false;
+        } else if (!emailPattern.test(email.value.trim())) {
             email.nextElementSibling.textContent = 'Please enter a valid email address.';
             email.style.borderColor = 'red';
             isValid = false;
@@ -103,7 +115,11 @@
 
         // Mobile number validation (assuming a simple 10-digit format for example)
         var mobilePattern = /^\d{10}$/;
-        if (!mobilePattern.test(mobile.value.trim())) {
+        if (mobile.value.trim() === '') {
+            mobile.nextElementSibling.textContent = 'Mobile number is required.';
+            mobile.style.borderColor = 'red';
+            isValid = false;
+        } else if (!mobilePattern.test(mobile.value.trim())) {
             mobile.nextElementSibling.textContent = 'Please enter a valid mobile number (10 digits).';
             mobile.style.borderColor = 'red';
             isValid = false;
@@ -113,7 +129,11 @@
 
         // Password validation (minimum 8 characters, at least one letter and one number)
         var passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        if (!passwordPattern.test(password.value.trim())) {
+        if (password.value.trim() === '') {
+            password.nextElementSibling.textContent = 'Password is required.';
+            password.style.borderColor = 'red';
+            isValid = false;
+        } else if (!passwordPattern.test(password.value.trim())) {
             password.nextElementSibling.textContent = 'Password must be at least 8 characters long and include at least one letter and one number.';
             password.style.borderColor = 'red';
             isValid = false;
@@ -138,6 +158,24 @@
             // If the form is valid, submit it
             this.submit();
         }
+    });
+
+    // Clear error message and border color on input
+    document.querySelectorAll('.form-control').forEach(function(input) {
+        input.addEventListener('input', function() {
+            this.nextElementSibling.textContent = '';
+            this.style.borderColor = '';
+        });
+    });
+
+    // Check input fields on blur
+    document.querySelectorAll('.form-control').forEach(function(input) {
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.nextElementSibling.textContent = 'This field is required.';
+                this.style.borderColor = 'red';
+            }
+        });
     });
 </script>
 

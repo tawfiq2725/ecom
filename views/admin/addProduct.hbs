@@ -15,10 +15,6 @@
                 <input type="number" name="price" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="stock">Stock</label>
-                <input type="number" name="stock" class="form-control" required>
-            </div>
-            <div class="form-group">
                 <label for="category">Category</label>
                 <select name="category" class="form-control" required>
                     {{#each categories}}
@@ -26,7 +22,7 @@
                     {{/each}}
                 </select>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label for="highlights">Highlights (comma-separated)</label>
                 <input type="text" name="highlights" class="form-control">
             </div>
@@ -38,15 +34,30 @@
             <div class="form-group">
                 <label for="subImages">Additional Images</label>
                 <input type="file" id="subImages" name="subImages" class="form-control" multiple>
-                <div id="subImagePreviews"></div>
+                <div id="subImagePreviews" class="mt-2"></div>
+                <button type="button" class="btn btn-danger" id="clearSubImages" style="display:none;">Clear Sub Images</button>
             </div>
+            <!-- Add Variant Section -->
+            <div id="variant-container">
+                <div class="form-group variant-box">
+                    <h5>Variant 1</h5>
+                    <label for="variant-size-0">Size</label>
+                    <input type="text" name="variants[0][size]" class="form-control" required>
+                    <label for="variant-stock-0">Stock</label>
+                    <input type="number" name="variants[0][stock]" class="form-control" required>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" id="add-variant">Add Variant</button>
+            <div id="variant-limit-message" class="text-danger" style="display:none;">Maximum 6 variants allowed</div>
+
             <button type="submit" class="btn btn-primary">Add Product</button>
         </form>
     </div>
 </div>
 
 <!-- Modal for main image cropping -->
-<div class="modal fade" id="cropModalProduct" tabindex="-1" role="dialog" aria-labelledby="cropModalLabelProduct" aria-hidden="true">
+<div class="modal fade" id="cropModalProduct" tabindex="-1" role="dialog" aria-labelledby="cropModalLabelProduct"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -69,7 +80,8 @@
 </div>
 
 <!-- Modal for sub image cropping -->
-<div class="modal fade" id="cropModalSubImage" tabindex="-1" role="dialog" aria-labelledby="cropModalLabelSubImage" aria-hidden="true">
+<div class="modal fade" id="cropModalSubImage" tabindex="-1" role="dialog" aria-labelledby="cropModalLabelSubImage"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -98,3 +110,59 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let variantCount = 1;
+
+    document.getElementById('add-variant').addEventListener('click', function() {
+        if (variantCount < 6) {
+            const variantContainer = document.getElementById('variant-container');
+            const newVariant = document.createElement('div');
+            newVariant.classList.add('form-group', 'variant-box');
+            newVariant.innerHTML = `
+                <h5>Variant ${variantCount + 1}</h5> <!-- Incrementing heading for each variant -->
+                <label for="variant-size-${variantCount}">Size</label>
+                <input type="text" name="variants[${variantCount}][size]" class="form-control" required>
+                <label for="variant-stock-${variantCount}">Stock</label>
+                <input type="number" name="variants[${variantCount}][stock]" class="form-control" required>
+            `;
+            variantContainer.appendChild(newVariant);
+            variantCount++;
+        } else {
+            document.getElementById('variant-limit-message').style.display = 'block';
+        }
+    });
+
+    document.getElementById('subImages').addEventListener('change', function(event) {
+        const subImagePreviews = document.getElementById('subImagePreviews');
+        const clearButton = document.getElementById('clearSubImages');
+        subImagePreviews.innerHTML = '';
+        const files = event.target.files;
+
+        if (files.length > 0) {
+            clearButton.style.display = 'inline-block';
+        }
+
+        for (const file of files) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.classList.add('img-thumbnail', 'm-2');
+                img.style.width = '150px';
+                img.style.height = '150px';
+                subImagePreviews.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+
+    document.getElementById('clearSubImages').addEventListener('click', function() {
+        document.getElementById('subImages').value = '';
+        document.getElementById('subImagePreviews').innerHTML = '';
+        document.getElementById('clearSubImages').style.display = 'none';
+    });
+});
+</script>

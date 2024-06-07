@@ -1,0 +1,70 @@
+<section class="user-dashboard page-wrapper">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <ul class="list-inline dashboard-menu text-center">
+          <li><a class="active" href="/profile">Profile Details</a></li>
+          <li><a href="/address">Address</a></li>
+          <li><a href="/wallet">Wallet</a></li>
+          <li><a href="/orders">Orders</a></li>
+        </ul>
+        <div class="dashboard-wrapper dashboard-user-profile">
+          <div class="media">
+            <div class="pull-left text-center" href="#!">
+              <img class="media-object user-img" src="images/avatar.jpeg" alt="Image">
+            </div>
+            <div class="media-body">
+              <form id="profile-form" method="POST" action="/profile/update">
+                <ul class="user-profile-list">
+                  <li>
+                    <span>First Name:</span>
+                    <span id="firstname-display">{{user.firstname}}</span>
+                    <input type="text" name="firstname" id="firstname-input" class="form-control" style="display: none;" value="{{user.firstname}}">
+                  </li>
+                  <li>
+                    <span>Last Name:</span>
+                    <span id="lastname-display">{{user.lastname}}</span>
+                    <input type="text" name="lastname" id="lastname-input" class="form-control" style="display: none;" value="{{user.lastname}}">
+                  </li>
+                  <li>
+                    <span>Email:</span>
+                    <span id="email-display">{{user.email}}</span>
+                    <input type="email" name="email" id="email-input" class="form-control" style="display: none;" value="{{user.email}}" readonly>
+                  </li>
+                  <li>
+                    <span>Phone:</span>
+                    <span id="mobile-display">{{user.mobile}}</span>
+                    <input type="text" name="mobile" id="mobile-input" class="form-control" style="display: none;" value="{{user.mobile}}">
+                  </li>
+                </ul>
+                <button type="button" id="edit-profile-button" class="btn btn-primary" style="position: relative; left: 25px;">Edit Profile</button>
+                <button type="submit" id="update-profile-button" class="btn btn-primary" style="display: none;">Update Profile</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+<script>
+document.getElementById('edit-profile-button').addEventListener('click', function() {
+    document.getElementById('firstname-display').style.display = 'none';
+    document.getElementById('firstname-input').style.display = 'block';
+    
+    document.getElementById('lastname-display').style.display = 'none';
+    document.getElementById('lastname-input').style.display = 'block';
+    
+    document.getElementById('email-display').style.display = 'none';
+    document.getElementById('email-input').style.display = 'block';
+    
+    document.getElementById('mobile-display').style.display = 'none';
+    document.getElementById('mobile-input').style.display = 'block';
+    
+    document.getElementById('edit-profile-button').style.display = 'none';
+    document.getElementById('update-profile-button').style.display = 'block';
+});
+
+</script>
