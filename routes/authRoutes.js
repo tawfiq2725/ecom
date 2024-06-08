@@ -39,4 +39,10 @@ router.get('/profile',userController.gotoProfile);
 router.get('/address',userController.gotoAddress);
 router.post('/profile/update',userController.updateProfile)
 
+// Cart routes
+router.get('/cart/data', userController.getCart);
+router.post('/add-to-cart', userController.addToCart);
+router.post('/cart/remove/:id', userController.removeFromCart);
+
+
 module.exports = router;

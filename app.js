@@ -55,7 +55,6 @@ app.use((req, res, next) => {
 
 
 // Register Handlebars helpers
-// Register Handlebars helpers
 Handlebars.registerHelper('eq', function (a, b) {
     return a === b;
 });
@@ -114,6 +113,23 @@ Handlebars.registerHelper('gt', function(a, b) {
 
 Handlebars.registerHelper('lt', function(a, b) {
     return a < b;
+});
+// Register the 'multiply' helper
+Handlebars.registerHelper('multiply', function (a, b) {
+    return a * b;
+});
+// Define the json helper
+Handlebars.registerHelper('json', function(context) {
+    return JSON.stringify(context);
+});
+Handlebars.registerHelper('getMaxStock', function (variants) {
+    let maxStock = 0;
+    variants.forEach(variant => {
+        if (variant.stock > maxStock) {
+            maxStock = variant.stock;
+        }
+    });
+    return maxStock;
 });
 
 // Express handlebars
