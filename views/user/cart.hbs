@@ -11,6 +11,7 @@
                                     <thead>
                                         <tr>
                                             <th>Item Name</th>
+                                            <th>Size</th> <!-- Ensure size column is here -->
                                             <th>Item Price</th>
                                             <th>Quantity</th>
                                             <th>Total</th>
@@ -19,23 +20,24 @@
                                     </thead>
                                     <tbody>
                                         {{#each cart.items}}
-                                        <tr data-product-id="{{this.product._id}}">
+                                        <tr data-product-id="{{this.product._id}}" data-size="{{this.size}}">
                                             <td>
                                                 <div class="product-info">
                                                     <img width="80" src="/uploads/products/{{this.product.mainImage}}" alt="{{this.product.name}}" />
                                                     <a href="/products/{{this.product._id}}">{{this.product.name}}</a>
                                                 </div>
                                             </td>
+                                            <td>{{this.size}}</td> <!-- Correctly displaying size here -->
                                             <td>₹{{this.product.price}}</td>
                                             <td>{{this.quantity}}</td>
                                             <td>₹{{multiply this.quantity this.product.price}}</td>
-                                            <td><a class="product-remove" href="/cart/remove/:id" data-product-id="{{this.product._id}}">Remove</a></td>
+                                            <td><a class="product-remove" href="/cart/remove/{{this.product._id}}" data-product-id="{{this.product._id}}" data-size="{{this.size}}">Remove</a></td>
                                         </tr>
                                         {{/each}}
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="3" class="text-right"><strong>Overall Total</strong></td>
+                                            <td colspan="4" class="text-right"><strong>Overall Total</strong></td>
                                             <td colspan="2">₹<span id="overall-total">{{cart.totalPrice}}</span></td>
                                         </tr>
                                     </tfoot>
@@ -44,6 +46,7 @@
                             </form>
                             {{else}}
                             <p>Your cart is empty.</p>
+                            <a href="/products" class="btn btn-primary">Shop Now</a>
                             {{/if}}
                         </div>
                     </div>
@@ -52,80 +55,77 @@
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const removeButtons = document.querySelectorAll('.product-remove');
+    const removeButtons = document.querySelectorAll('.product-remove');
 
-        removeButtons.forEach(function (button) {
-            button.addEventListener('click', async function (event) {
-                event.preventDefault(); // Prevent default link behavior
+    removeButtons.forEach(function (button) {
+        button.addEventListener('click', async function (event) {
+            event.preventDefault();
 
-                const productId = this.dataset.productId;
+            const productId = this.dataset.productId;
+            const productSize = this.dataset.size;
 
-                // Confirm before removal
-                const result = await Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'Do you want to remove this product from the cart?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, remove it!',
-                    cancelButtonText: 'Cancel'
-                });
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to remove this product from the cart?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'Cancel'
+            });
 
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/cart/remove/${productId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/cart/remove/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ size: productSize }) // Ensure size is passed here
+                    });
 
-                        if (response.status === 200) {
-                            const jsonResponse = await response.json();
+                    if (response.status === 200) {
+                        const jsonResponse = await response.json();
 
-                            if (jsonResponse.success) {
-                                // Remove the row from the table
-                                const productRow = document.querySelector(`tr[data-product-id="${productId}"]`);
-                                productRow.remove();
+                        if (jsonResponse.success) {
+                            const productRow = document.querySelector(`tr[data-product-id="${productId}"][data-size="${productSize}"]`);
+                            productRow.remove();
 
-                                // Update the overall total
-                                updateOverallTotal();
+                            updateOverallTotal();
 
-                                // Show success message
-                                Swal.fire('Removed!', 'The product has been removed from your cart.', 'success');
+                            Swal.fire('Removed!', 'The product has been removed from your cart.', 'success');
 
-                                // If cart is empty after removal, show empty cart message
-                                if (!document.querySelector('.product-list tbody tr')) {
-                                    document.querySelector('.product-list').innerHTML = '<p>Your cart is empty.</p>';
-                                }
-                            } else {
-                                Swal.fire('Error', jsonResponse.message || 'Failed to remove the product.', 'error');
+                            if (!document.querySelector('.product-list tbody tr')) {
+                                document.querySelector('.product-list').innerHTML = '<p>Your cart is empty.</p>';
                             }
                         } else {
-                            Swal.fire('Error', 'Failed to remove the product. Please try again.', 'error');
+                            Swal.fire('Error', jsonResponse.message || 'Failed to remove the product.', 'error');
                         }
-                    } catch (error) {
-                        console.error('Error removing product:', error);
-                        Swal.fire('Error', 'An error occurred. Please try again.', 'error');
+                    } else {
+                        Swal.fire('Error', 'Failed to remove the product. Please try again.', 'error');
                     }
+                } catch (error) {
+                    console.error('Error removing product:', error);
+                    Swal.fire('Error', 'An error occurred. Please try again.', 'error');
                 }
-            });
+            }
+        });
+    });
+
+    function updateOverallTotal() {
+        let total = 0;
+        const rows = document.querySelectorAll('.product-list tbody tr');
+        rows.forEach(function (row) {
+            const quantity = parseInt(row.querySelector('td:nth-child(4)').textContent);
+            const price = parseFloat(row.querySelector('td:nth-child(3)').textContent.replace('₹', ''));
+            total += quantity * price;
         });
 
-        // Function to update the overall total price
-        function updateOverallTotal() {
-            let total = 0;
-            const rows = document.querySelectorAll('.product-list tbody tr');
-            rows.forEach(function (row) {
-                const quantity = parseInt(row.querySelector('td:nth-child(3)').textContent);
-                const price = parseFloat(row.querySelector('td:nth-child(2)').textContent.replace('₹', ''));
-                total += quantity * price;
-            });
+        document.getElementById('overall-total').textContent = total.toFixed(2);
+    }
+});
 
-            // Update the overall total element
-            document.getElementById('overall-total').textContent = total.toFixed(2);
-        }
-    });
 </script>

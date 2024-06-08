@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+// Define the cart schema
 const cartSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
@@ -13,6 +14,9 @@ const cartSchema = new Schema({
                 type: Schema.Types.ObjectId,
                 ref: 'Product',
                 required: true
+            },
+            size: {
+                type: String, 
             },
             quantity: {
                 type: Number,
