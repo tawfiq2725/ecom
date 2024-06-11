@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userCtrl');
+const addressController = require('../controllers/addressCtrl')
+const usersideCtrl = require('../controllers/usersideCtrl')
 const passport = require('../config/passport-config');
 const isBlocked = require('../middlewares/auth');
+
 
 router.use(isBlocked);
 
@@ -29,20 +32,28 @@ router.get('/auth/google/callback',
     }
 );
 
-// Product Page
-router.get('/products', userController.getProducts);
-router.get('/products/:id', userController.getProductDetails);
-
+// Forgotpass
+router.get('/forgot-pass', userController.getForgotPasswordPage);
+router.post('/auth/forgot-pass', userController.handleForgotPassword);
+router.get('/reset', userController.handleResetPasswordPageAndRequest);
+router.post('/auth/reset', userController.handleResetPasswordPageAndRequest);
 
 // Profile routes
 router.get('/profile',userController.gotoProfile);
-router.get('/address',userController.gotoAddress);
 router.post('/profile/update',userController.updateProfile)
+router.get('/address', addressController.getAddresses);
+router.post('/address',  addressController.addAddress);
+router.delete('/address/:id', addressController.deleteAddress);
 
 // Cart routes
 router.get('/cart/data', userController.getCart);
 router.post('/add-to-cart', userController.addToCart);
 router.post('/cart/remove/:id', userController.removeFromCart);
+
+// Product Page
+router.get('/products', usersideCtrl.getProducts);
+router.get('/products/:id', usersideCtrl.getProductDetails);
+
 
 
 module.exports = router;

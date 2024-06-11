@@ -13,59 +13,80 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th>Company</th>
-                  <th>Name</th>
-                  <th>Address</th>
+                  <th>Place - Home/WorkPlace</th>
+                  <th>House Number</th>
+                  <th>Street</th>
+                  <th>City</th>
+                  <th>Zipcode</th>
                   <th>Country</th>
-                  <th class="col-md-2 col-sm-3">Phone</th>
-                  <th></th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
+                {{#each addresses}}
                 <tr>
-                  <td>Nokia</td>
-                  <td>Adam Smith</td>
-                  <td>9/4 C Babor Road, Mohammad Pur, Dhaka</td>
-                  <td>Bangladesh</td>
-                  <td>+884 5452 6452</td>
+                  <td>{{this.place}}</td>
+                  <td>{{this.houseNumber}}</td>
+                  <td>{{this.street}}</td>
+                  <td>{{this.city}}</td>
+                  <td>{{this.zipcode}}</td>
+                  <td>{{this.country}}</td>
                   <td>
                     <div class="btn-group" role="group">
                       <button type="button" class="btn btn-default"><i class="tf-pencil2" aria-hidden="true"></i></button>
-                      <button type="button" class="btn btn-default"><i class="tf-ion-close" aria-hidden="true"></i></button>
+                      <button type="button" class="btn btn-default" onclick="deleteAddress('{{this._id}}')"><i class="tf-ion-close" aria-hidden="true"></i></button>
                     </div>
                   </td>
                 </tr>
-                <tr>
-                  <td>Samsung</td>
-                  <td>Adam Smith</td>
-                  <td>9/4 C Babor Road, Mohammad Pur, Dhaka</td>
-                  <td>Bangladesh</td>
-                  <td>+884 5452 6452</td>
-                  <td>
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-default"><i class="tf-pencil2" aria-hidden="true"></i></button>
-                      <button type="button" class="btn btn-default"><i class="tf-ion-close" aria-hidden="true"></i></button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Motorola</td>
-                  <td>Adam Smith</td>
-                  <td>9/4 C Babor Road, Mohammad Pur, Dhaka</td>
-                  <td>Bangladesh</td>
-                  <td>+884 5452 6452</td>
-                  <td>
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-default"><i class="tf-pencil2" aria-hidden="true"></i></button>
-                      <button type="button" class="btn btn-default"><i class="tf-ion-close" aria-hidden="true"></i></button>
-                    </div>
-                  </td>
-                </tr>
+                {{/each}}
               </tbody>
             </table>
           </div>
+          <form action="/address" method="POST">
+            <div class="form-group">
+              <label for="place">Place</label>
+              <select name="place" class="form-control" required>
+                <option value="Home">Home</option>
+                <option value="WorkPlace">WorkPlace</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="houseNumber">House Number</label>
+              <input type="text" name="houseNumber" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="street">Street</label>
+              <input type="text" name="street" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" name="city" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="zipcode">Zipcode</label>
+              <input type="text" name="zipcode" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input type="text" name="country" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Address</button>
+          </form>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  function deleteAddress(id) {
+    fetch(`/address/${id}`, { method: 'DELETE' })
+      .then(response => {
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert('Failed to delete address');
+        }
+      });
+  }
+</script>

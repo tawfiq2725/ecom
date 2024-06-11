@@ -1,23 +1,21 @@
 const User = require('../models/userSchema');
-const Otp = require('../models/otpSchema')
+const Otp = require('../models/otpSchema');
 const Product = require('../models/productSchema');
-const Category = require('../models/categorySchema')
-const Cart = require('../models/cartSchema')
-const { GenerateOtp,sendMail} = require('../helpers/otpverification')
-require('dotenv').config()
-const bcrypt = require('bcrypt')
-
+const Category = require('../models/categorySchema');
+const Cart = require('../models/cartSchema');
+const { GenerateOtp, sendMail } = require('../helpers/otpverification');
+require('dotenv').config();
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 // Page Not Found
 const pageNotFound = async (req, res) => {
     try {
-        res.render("404")
+        res.render("404");
     } catch (error) {
         console.log(error.message);
     }
-}
-
-
+};
 
 // Home Page
 const getHomePage = async (req, res) => {
@@ -29,63 +27,51 @@ const getHomePage = async (req, res) => {
     }
 };
 
-
 // Login Page
-
 const getLoginPage = async (req, res) => {
     try {
-        const locals={
-            title:`Login Page`
+        const locals = {
+            title: "Login Page"
+        };
+        if (!req.session.user) {
+            res.render("user/login", { title: locals.title });
+        } else {
+            res.redirect('/');
         }
-        if(!req.session.user){
-            res.render("user/login",{title:locals.title})
-        }
-        else{
-            res.redirect('/')
-        }
-     }
-     catch (error) {
+    } catch (error) {
         console.log(error.message);
     }
-}
+};
 
-//Go to Signup Page
-
+// Go to Signup Page
 const getSignupPage = async (req, res) => {
     try {
-        const locals={
-            title:`Sign Up Page`
-        }
-            res.render("user/signup",{title:locals.title})
-    }
-     catch (error) {
+        const locals = {
+            title: "Sign Up Page"
+        };
+        res.render("user/signup", { title: locals.title });
+    } catch (error) {
         console.log(error.message);
     }
-}
-
+};
 
 // Register New Member
 const newUserRegistration = async (req, res) => {
     let firstname, lastname, mobile, email, password, password2;
     try {
-        // Assign values inside the try block
         ({ firstname, lastname, mobile, email, password, password2 } = req.body);
 
-        // Check if the passwords match
         if (password !== password2) {
             return res.render("user/signup", { error_msg: "The confirm password does not match.", firstname, lastname, email, mobile });
         }
 
-        // Check if the user already exists
         const findUser = await User.findOne({ email });
         if (findUser) {
             return res.render("user/signup", { error_msg: "User with this email already exists.", firstname, lastname, email, mobile });
         }
 
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds); 
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create and save the new user
         const newUser = new User({
             firstname,
             lastname,
@@ -98,19 +84,19 @@ const newUserRegistration = async (req, res) => {
         });
 
         const savedUser = await newUser.save();
+        console.log('User saved:', savedUser);
 
-        // Generate and save OTP
         const otpcode = GenerateOtp();
         const otpData = new Otp({
             userId: savedUser._id,
             otp: otpcode,
             createdAt: Date.now(),
-            expiresAt: Date.now() + (5 * 60 * 1000) // 5 minutes
+            expiresAt: Date.now() + (5 * 60 * 1000)
         });
 
         await otpData.save();
+        console.log('Generated OTP:', otpcode);
 
-        // Send OTP email
         const sendmail = await sendMail(email, otpcode);
         if (sendmail) {
             req.session.userOtp = otpcode;
@@ -121,6 +107,7 @@ const newUserRegistration = async (req, res) => {
         }
 
     } catch (error) {
+        console.error('Registration error:', error);
         res.status(500).render("user/signup", { error_msg: "An error occurred during registration.", firstname, lastname, email, mobile });
     }
 };
@@ -130,29 +117,25 @@ const resendOtp = async (req, res) => {
     try {
         const { email } = req.body;
 
-        // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ success: false, error_msg: "User not found" });
         }
 
-        // Generate a new OTP
         const otpcode = GenerateOtp();
 
-        // Update the OTP record
         const otpData = await Otp.findOneAndUpdate(
             { userId: user._id },
             {
                 otp: otpcode,
                 createdAt: Date.now(),
-                expiresAt: Date.now() + (5 * 60 * 1000) // 5 minutes
+                expiresAt: Date.now() + (5 * 60 * 1000)
             },
             { new: true, upsert: true }
         );
 
         console.log("OTP saved:", otpData);
 
-        // Send OTP email
         const sendmail = await sendMail(email, otpcode);
         if (sendmail) {
             req.session.userOtp = otpcode;
@@ -172,14 +155,13 @@ const resendOtp = async (req, res) => {
 const getOtpPage = async (req, res) => {
     try {
         const locals = {
-            title:"Otp Page"
-        }
-        res.render("verify-otp",{title:locals.title})
+            title: "Otp Page"
+        };
+        res.render("verify-otp", { title: locals.title });
     } catch (error) {
         console.log(error.message);
     }
-}
-
+};
 
 // Verify the Otp
 const verifyOtp = async (req, res) => {
@@ -191,7 +173,6 @@ const verifyOtp = async (req, res) => {
             return res.render("user/verifyotp", { error_msg: "Invalid OTP" });
         }
 
-        // Find and update the user
         const user = await User.findById(userData._id);
         if (!user) {
             return res.render("user/verifyotp", { error_msg: "User not found" });
@@ -211,38 +192,32 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Check if both email and password are provided
         if (!email || !password) {
             return res.render("user/login", { error_msg: "Please fill in both email and password." });
         }
 
-        // Find user by email
         const user = await User.findOne({ email });
         if (!user) {
             return res.render("user/login", { error_msg: "Invalid email or password." });
         }
 
-        // Check if the user is verified
         if (!user.isVerified) {
             return res.render("user/login", { error_msg: "Please verify your email first." });
         }
 
-        // Check if the user is blocked
         if (user.isBlocked) {
             return res.render("user/login", { error_msg: "Your account is blocked. Please contact support." });
         }
 
-        // Validate password
-        const isMatch = bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password); // Add await here
         if (!isMatch) {
             return res.render("user/login", { error_msg: "Invalid email or password." });
         }
-        
-        // Set user session
+
         req.session.user = user;
         return res.redirect("/");
     } catch (error) {
-        console.log(error.message);
+        console.error('Login error:', error);
         res.status(500).send("An error occurred during login.");
     }
 };
@@ -253,7 +228,7 @@ const logoutUser = async (req, res) => {
         req.session.destroy((err) => {
             if (err) {
                 console.log(err.message);
-                res.redirect('/')
+                res.redirect('/');
                 return res.status(500).send("An error occurred during logout.");
             }
             res.redirect('/login');
@@ -264,103 +239,97 @@ const logoutUser = async (req, res) => {
     }
 };
 
-// Controller to fetch and display products on the user side
-const getProducts = async (req, res) => {
+// Forgot Password Page
+const getForgotPasswordPage = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = 12;
-        const skip = (page - 1) * limit;
-        const category = req.query.category;
-        const sort = req.query.sort; // Get the sort query parameter
-        const productType = req.query.productType; // Get the product type query parameter
+        const locals = {
+            title: "Forgot Password"
+        };
+        res.render("user/forgot-password", { title: locals.title });
+    } catch (error) {
+        console.log(error.message);
+    }
+};
 
-        const filter = { status: true };
-        if (category) {
-            filter.category = category;
+// Handle Forgot Password Request
+const handleForgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.render("user/forgot-password", { error_msg: "No account with that email address exists." });
         }
 
-        // Determine the sort order
-        let sortOption = {};
-        if (sort === 'priceLow') {
-            sortOption = { price: 1 }; // Sort by price in ascending order
-        } else if (sort === 'priceHigh') {
-            sortOption = { price: -1 }; // Sort by price in descending order
-        }
+        const otp = GenerateOtp();
+        const otpExpires = Date.now() + (5 * 60 * 1000);
 
-        // Determine the product type filter
-        if (productType === 'new') {
-            const today = new Date();
-            const tenDaysAgo = new Date(today);
-            tenDaysAgo.setDate(today.getDate() - 10);
-            filter.createdAt = { $gte: tenDaysAgo }; // Products added in the last 10 days
-        } else if (productType === 'old') {
-            const today = new Date();
-            const tenDaysAgo = new Date(today);
-            tenDaysAgo.setDate(today.getDate() - 10);
-            filter.createdAt = { $lt: tenDaysAgo }; // Products added before the last 10 days
-        }
-
-        const [categories, totalProducts, products] = await Promise.all([
-            Category.find(),
-            Product.countDocuments(filter),
-            Product.find(filter)
-                .populate('category')
-                .sort(sortOption) // Apply the sort option
-                .skip(skip)
-                .limit(limit)
-        ]);
-
-        const totalPages = Math.ceil(totalProducts / limit);
-
-        res.render('user/products', { 
-            title: "Products", 
-            products, 
-            categories, // Pass categories to the view
-            currentPage: page, 
-            totalPages, 
-            admin: req.session.admin,
-            category, // Pass current category filter to the view
-            sort, // Pass current sort option to the view
-            productType // Pass current product type filter to the view
+        const newOtp = new Otp({
+            userId: user._id,
+            otp: otp,
+            expiresAt: otpExpires
         });
+
+        await newOtp.save();
+
+        const emailDetails = await sendMail(email, otp);
+        if (!emailDetails) {
+            return res.render("user/forgot-password", { error_msg: "Failed to send OTP email." });
+        }
+
+        res.render("user/reset-password", { success_msg: 'An e-mail has been sent to ' + user.email + ' with further instructions.' , title:"Reset Password"});
+
     } catch (error) {
-        console.error(error);
-        res.status(500).send("Server Error");
+        console.log(error.message);
+        res.status(500).send("An error occurred while processing your request.");
     }
 };
 
-
-
-const getProductDetails = async (req, res) => {
+// Reset Password Page & Handle Reset Password
+const handleResetPasswordPageAndRequest = async (req, res) => {
     try {
-        const productId = req.params.id;
-        const product = await Product.findById(productId).populate('category');
+        const { otp, password, password2 } = req.body;
 
-        // Determine product status for each variant
-        let availableSizes = product.variants.filter(variant => variant.stock > 0);
-        if (availableSizes.length === 0) {
-            product.displayStatus = 'Out of stock';
-        } else {
-            product.displayStatus = 'Available';
+        if (!otp || !password || !password2) {
+            return res.render("user/reset-password", { error_msg: "Please fill in all fields." });
         }
 
-        // Fetch related products from the same category excluding the current product
-        let relatedProducts = await Product.find({
-            category: product.category._id,
-            _id: { $ne: product._id }
-        }).limit(4);
-
-        // If no related products found, fetch other products excluding the current product
-        if (relatedProducts.length === 0) {
-            relatedProducts = await Product.find({ _id: { $ne: product._id } }).limit(4);
+        if (password !== password2) {
+            return res.render("user/reset-password", { error_msg: "Passwords do not match." });
         }
 
-        res.render('user/productDetails', { product, relatedProducts, admin: req.session.admin, title: "Product Details" });
+        const otpData = await Otp.findOne({ otp });
+        if (!otpData) {
+            return res.render("user/reset-password", { error_msg: "Invalid OTP." });
+        }
+
+        if (otpData.expiresAt < Date.now()) {
+            return res.render("user/reset-password", { error_msg: "OTP has expired." });
+        }
+
+        const user = await User.findById(otpData.userId);
+        if (!user) {
+            return res.render("user/reset-password", { error_msg: "User not found." });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        await Otp.deleteMany({ userId: user._id });
+
+        res.render("user/login", { success_msg: "Password has been reset. Please log in." });
+
     } catch (error) {
-        console.error(error);
-        res.status(500).send("Server Error");
+        console.log(error.message);
+        res.status(500).send("An error occurred while processing your request.");
     }
 };
+
+
+
+
+
 
 
 
@@ -381,9 +350,7 @@ const gotoProfile = async(req, res) => {
         res.redirect('/login');
     }
 };
-
 // User Profile Update
-
 const updateProfile = async (req, res) => {
     try {
         const { firstname, lastname, email, mobile } = req.body;
@@ -409,16 +376,6 @@ const updateProfile = async (req, res) => {
     }
 };
 
-// Go to address page
-
-const gotoAddress = async(req,res)=>{
-    if(req.session.user){
-        res.render('user/address',{title:"Address Details"})
-    }
-    else{
-        res.redirect('/login');
-    }
-}
 const getCart = async (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -491,9 +448,6 @@ const addToCart = async (req, res) => {
     }
 };
 
-
-
-
 const removeFromCart = async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ success: false, message: 'Please log in to remove products from your cart.' });
@@ -545,12 +499,12 @@ module.exports = {
     verifyOtp,
     loginUser,
     logoutUser,
-    getProducts,
-    getProductDetails,
     gotoProfile,
-    gotoAddress,
     updateProfile,
     addToCart,
     getCart,
-    removeFromCart
+    removeFromCart,
+    getForgotPasswordPage,
+    handleForgotPassword,
+    handleResetPasswordPageAndRequest
 }
