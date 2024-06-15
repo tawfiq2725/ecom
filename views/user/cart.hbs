@@ -23,15 +23,26 @@
                                         <tr data-product-id="{{this.product._id}}" data-size="{{this.size}}">
                                             <td>
                                                 <div class="product-info">
-                                                    <img width="80" src="/uploads/products/{{this.product.mainImage}}" alt="{{this.product.name}}" />
+                                                    <img width="80" src="/uploads/products/{{this.product.mainImage}}"
+                                                        alt="{{this.product.name}}" />
                                                     <a href="/products/{{this.product._id}}">{{this.product.name}}</a>
                                                 </div>
                                             </td>
-                                            <td>{{this.size}}</td> <!-- Correctly displaying size here -->
+                                            <td>{{this.size}}</td>
                                             <td>₹{{this.product.price}}</td>
-                                            <td>{{this.quantity}}</td>
+                                            <td>
+                                                <button class="quantity-btn" data-action="decrease"
+                                                    data-product-id="{{this.product._id}}"
+                                                    data-size="{{this.size}}">-</button>
+                                                <span class="quantity">{{this.quantity}}</span>
+                                                <button class="quantity-btn" data-action="increase"
+                                                    data-product-id="{{this.product._id}}"
+                                                    data-size="{{this.size}}">+</button>
+                                            </td>
                                             <td>₹{{multiply this.quantity this.product.price}}</td>
-                                            <td><a class="product-remove" href="/cart/remove/{{this.product._id}}" data-product-id="{{this.product._id}}" data-size="{{this.size}}">Remove</a></td>
+                                            <td><a class="product-remove" href="/cart/remove/{{this.product._id}}"
+                                                    data-product-id="{{this.product._id}}"
+                                                    data-size="{{this.size}}">Remove</a></td>
                                         </tr>
                                         {{/each}}
                                     </tbody>
@@ -59,73 +70,130 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    const removeButtons = document.querySelectorAll('.product-remove');
+        const removeButtons = document.querySelectorAll('.product-remove');
+        const quantityButtons = document.querySelectorAll('.quantity-btn');
 
-    removeButtons.forEach(function (button) {
-        button.addEventListener('click', async function (event) {
-            event.preventDefault();
+        removeButtons.forEach(function (button) {
+            button.addEventListener('click', async function (event) {
+                event.preventDefault();
 
-            const productId = this.dataset.productId;
-            const productSize = this.dataset.size;
+                const productId = this.dataset.productId;
+                const productSize = this.dataset.size;
 
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to remove this product from the cart?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, remove it!',
-                cancelButtonText: 'Cancel'
+                const result = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to remove this product from the cart?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, remove it!',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/cart/remove/${productId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ size: productSize })
+                        });
+
+                        if (response.status === 200) {
+                            const jsonResponse = await response.json();
+
+                            if (jsonResponse.success) {
+                                const productRow = document.querySelector(`tr[data-product-id="${productId}"][data-size="${productSize}"]`);
+                                productRow.remove();
+
+                                updateOverallTotal();
+
+                                Swal.fire('Removed!', 'The product has been removed from your cart.', 'success');
+
+                                if (!document.querySelector('.product-list tbody tr')) {
+                                    document.querySelector('.product-list').innerHTML = '<p>Your cart is empty.</p>';
+                                }
+                            } else {
+                                Swal.fire('Error', jsonResponse.message || 'Failed to remove the product.', 'error');
+                            }
+                        } else {
+                            Swal.fire('Error', 'Failed to remove the product. Please try again.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error removing product:', error);
+                        Swal.fire('Error', 'An error occurred. Please try again.', 'error');
+                    }
+                }
             });
+        });
 
-            if (result.isConfirmed) {
+        quantityButtons.forEach(button => {
+            button.addEventListener('click', async function (event) {
+                event.preventDefault();
+
+                const action = this.dataset.action;
+                const productId = this.dataset.productId;
+                const productSize = this.dataset.size;
+
+                const quantityElement = this.parentNode.querySelector('.quantity');
+                let currentQuantity = parseInt(quantityElement.textContent);
+
+                if (action === 'decrease' && currentQuantity > 1) {
+                    currentQuantity--;
+                } else if (action === 'increase') {
+                    // Fetch the product variant to check stock
+                    try {
+                        const response = await fetch(`/api/product/${productId}/variant/${productSize}`);
+                        if (response.ok) {
+                            const variant = await response.json();
+                            if (currentQuantity < variant.stock) {
+                                currentQuantity++;
+                            } else {
+                                Swal.fire('Stock Limit', `Only ${variant.stock} units available in this size.`, 'warning');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching product variant:', error);
+                    }
+                }
+
+                // Update the cart on the server
                 try {
-                    const response = await fetch(`/cart/remove/${productId}`, {
+                    const response = await fetch(`/cart/update/${productId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ size: productSize }) // Ensure size is passed here
+                        body: JSON.stringify({ size: productSize, quantity: currentQuantity })
                     });
 
-                    if (response.status === 200) {
-                        const jsonResponse = await response.json();
-
-                        if (jsonResponse.success) {
-                            const productRow = document.querySelector(`tr[data-product-id="${productId}"][data-size="${productSize}"]`);
-                            productRow.remove();
-
-                            updateOverallTotal();
-
-                            Swal.fire('Removed!', 'The product has been removed from your cart.', 'success');
-
-                            if (!document.querySelector('.product-list tbody tr')) {
-                                document.querySelector('.product-list').innerHTML = '<p>Your cart is empty.</p>';
-                            }
-                        } else {
-                            Swal.fire('Error', jsonResponse.message || 'Failed to remove the product.', 'error');
-                        }
+                    if (response.ok) {
+                        quantityElement.textContent = currentQuantity;
+                        const priceElement = this.closest('tr').querySelector('td:nth-child(5)');
+                        const pricePerItem = parseFloat(this.closest('tr').querySelector('td:nth-child(3)').textContent.replace('₹', ''));
+                        priceElement.textContent = `₹${(pricePerItem * currentQuantity).toFixed(2)}`;
+                        updateOverallTotal();
                     } else {
-                        Swal.fire('Error', 'Failed to remove the product. Please try again.', 'error');
+                        const result = await response.json();
+                        Swal.fire('Error', result.message || 'Failed to update quantity.', 'error');
                     }
                 } catch (error) {
-                    console.error('Error removing product:', error);
+                    console.error('Error updating cart:', error);
                     Swal.fire('Error', 'An error occurred. Please try again.', 'error');
                 }
-            }
+            });
         });
+
+        function updateOverallTotal() {
+            let total = 0;
+            const rows = document.querySelectorAll('.product-list tbody tr');
+            rows.forEach(function (row) {
+                const quantity = parseInt(row.querySelector('td:nth-child(4) .quantity').textContent);
+                const price = parseFloat(row.querySelector('td:nth-child(5)').textContent.replace('₹', ''));
+                total += price; // Corrected the calculation to add the total price per item row
+            });
+
+            document.getElementById('overall-total').textContent = total.toFixed(2);
+        }
     });
-
-    function updateOverallTotal() {
-        let total = 0;
-        const rows = document.querySelectorAll('.product-list tbody tr');
-        rows.forEach(function (row) {
-            const quantity = parseInt(row.querySelector('td:nth-child(4)').textContent);
-            const price = parseFloat(row.querySelector('td:nth-child(3)').textContent.replace('₹', ''));
-            total += quantity * price;
-        });
-
-        document.getElementById('overall-total').textContent = total.toFixed(2);
-    }
-});
-
 </script>

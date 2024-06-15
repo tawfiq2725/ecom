@@ -137,39 +137,38 @@
               </svg></label>
           </div>
 
-   <form id="add-to-cart-form" action="/cart/add" method="POST">
+<form id="add-to-cart-form" action="/cart/add" method="POST">
     <input type="hidden" name="productId" value="{{product._id}}">
     <div class="product-size">
         <span>Size:</span>
         <select class="form-control" name="variantSize" id="product-size">
             {{#each product.variants}}
                 <option value="{{this.size}}" data-stock="{{this.stock}}" {{#if (eq this.stock 0)}}disabled{{/if}}>
-                    {{this.size}} {{#if (eq this.stock 0)}}(Out of Stock){{/if}}
+                    {{this.size}} {{#if (eq this.stock 0)}}(Out of Stock){{else}}({{this.stock}} in stock){{/if}}
                 </option>
             {{/each}}
         </select>
     </div>
-    
+
     <div class="product-quantity">
         <span>Quantity:</span>
         <input type="number" name="quantity" value="1" min="1" id="product-quantity" class="form-control">
     </div>
-    
+
     <div class="product-category">
         <span>Categories:</span>
         <ul>
           <li>{{product.category.name}}</li>
         </ul>
     </div>
-    
+
     <!-- Availability message -->
     <p class="{{#if product.displayStatus}}text-success{{else}}text-danger{{/if}}">
         This product is {{product.displayStatus}}.
     </p>
-    
+
     <button type="submit" class="btn btn-main mt-20" id="add-to-cart">Add To Cart</button>
 </form>
-
     
 
         </div>
@@ -317,7 +316,11 @@
       {{/each}}
     </div>
   </div>
-</section><script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 <script>
     document.getElementById('add-to-cart-form').addEventListener('submit', async function(event) {
@@ -331,61 +334,79 @@
         const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
         const stock = parseInt(selectedOption.getAttribute('data-stock'), 10);
 
-        // Validate stock and quantity before submitting
-        if (stock === 0) {
+        // Check if user is logged in
+        const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
+
+        if (!isLoggedIn) {
             Swal.fire({
-                icon: 'error',
-                title: 'Out of Stock',
-                text: 'The selected size is currently out of stock. Please choose a different size.',
-            });
-        } else if (quantity > stock) {
-            Swal.fire({
+                title: 'Not Logged In',
+                text: 'You need to log in to add items to the cart.',
                 icon: 'warning',
-                title: 'Insufficient Stock',
-                text: `Only ${stock} units available in the selected size. Please reduce the quantity.`,
-            });
-        } else if (isNaN(quantity) || quantity <= 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Quantity',
-                text: 'Please enter a valid quantity.',
+                showCancelButton: true,
+                confirmButtonText: 'Log In',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/login';
+                }
             });
         } else {
-            try {
-                const response = await fetch('/add-to-cart', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ productId, variantSize, quantity }),
+            // Validate stock and quantity before submitting
+            if (stock === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Out of Stock',
+                    text: 'The selected size is currently out of stock. Please choose a different size.',
                 });
-
-                const result = await response.json();
-                if (result.success) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: result.message,
-                        icon: 'success',
-                        confirmButtonText: 'Continue Shopping',
-                    }).then(() => {
-                        // Optional: Code to update cart UI or redirect user
+            } else if (quantity > stock) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Insufficient Stock',
+                    text: `Only ${stock} units available in the selected size. Please reduce the quantity.`,
+                });
+            } else if (isNaN(quantity) || quantity <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Quantity',
+                    text: 'Please enter a valid quantity.',
+                });
+            } else {
+                try {
+                    const response = await fetch('/add-to-cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ productId, variantSize, quantity }),
                     });
-                } else {
+
+                    const result = await response.json();
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonText: 'Continue Shopping',
+                        }).then(() => {
+                            // Optional: Code to update cart UI or redirect user
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Oops!',
+                            text: result.message,
+                            icon: 'error',
+                            confirmButtonText: 'Try Again',
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error adding product to cart:', error);
                     Swal.fire({
-                        title: 'Oops!',
-                        text: result.message,
+                        title: 'Error!',
+                        text: 'An error occurred. Please try again later.',
                         icon: 'error',
-                        confirmButtonText: 'Try Again',
+                        confirmButtonText: 'OK',
                     });
                 }
-            } catch (error) {
-                console.error('Error adding product to cart:', error);
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'An error occurred. Please try again later.',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                });
             }
         }
     });

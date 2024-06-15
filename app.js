@@ -117,7 +117,7 @@ Handlebars.registerHelper('lt', function(a, b) {
 // Register the 'multiply' helper
 Handlebars.registerHelper('multiply', function (a, b) {
     return a * b;
-});
+}); 
 // Define the json helper
 Handlebars.registerHelper('json', function(context) {
     return JSON.stringify(context);
@@ -130,6 +130,13 @@ Handlebars.registerHelper('getMaxStock', function (variants) {
         }
     });
     return maxStock;
+});
+Handlebars.registerHelper('formatDate', function (date) {
+    return new Date(date).toLocaleDateString('en-GB', {
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric'
+    });
 });
 
 // Express handlebars

@@ -20,8 +20,12 @@
                             <input type="email" class="form-control" name="email" placeholder="Email">
                             <small class="error-message text-danger"></small>
                         </div>
+                        <!-- Password Field with Toggle Icon -->
                         <div class="form-group">
-                            <input type="password" class="form-control" name="password" placeholder="Password">
+                            <div class="input-container position-relative">
+                                <input type="password" class="form-control" name="password" placeholder="Password" id="password">
+                                <i class="fa fa-eye position-absolute" id="togglePassword" style="cursor: pointer; right: 10px; top: 50%; transform: translateY(-50%);"></i>
+                            </div>
                             <small class="error-message text-danger"></small>
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
@@ -70,7 +74,7 @@
         // Password validation (minimum 8 characters, at least one letter and one number)
         var passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
         if (!passwordPattern.test(password.value.trim())) {
-            password.nextElementSibling.textContent = 'Password must be at least 8 characters long and include at least one letter and one number.';
+            password.nextElementSibling.textContent = 'Password must 8 char';
             password.style.borderColor = 'red';
             isValid = false;
         } else {
@@ -82,6 +86,21 @@
             this.submit();
         }
     });
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        var passwordInput = document.getElementById('password');
+        var icon = this;
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
 </script>
 
 <style>
@@ -89,5 +108,20 @@
         font-size: 0.875em;
         color: red;
         margin-top: 0.25em;
+    }
+    .position-relative {
+        position: relative;
+    }
+
+    .position-absolute {
+        position: absolute;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .input-container + .error-message {
+        margin-top: 0.5rem;
     }
 </style>

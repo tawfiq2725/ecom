@@ -12,9 +12,9 @@ const userSchema = new mongoose.Schema({
     },
     mobile: {
         type: String,
-        required: false, 
+        required: false,
         unique: true,
-    }, 
+    },
     email: {
         type: String,
         required: [true, 'Email is required'],
@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: false,  
+        required: false,
     },
     googleId: {
         type: String,
@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema({
     },
 }, {
     timestamps: true,
+});
+
+// Define a virtual field for full name
+userSchema.virtual('fullName').get(function() {
+    return `${this.firstname} ${this.lastname}`;
 });
 
 module.exports = mongoose.model('User', userSchema);

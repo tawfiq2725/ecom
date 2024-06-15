@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <section class="signin-page account">
     <div class="container">
         <div class="row">
@@ -8,18 +10,20 @@
                     </a>
                     <h2 class="text-center">Create Your Account</h2>
                     {{#if success_msg}}
-                        <div class="alert alert-success">{{success_msg}}</div>
+                    <div class="alert alert-success">{{success_msg}}</div>
                     {{/if}}
                     {{#if error_msg}}
-                        <div class="alert alert-danger">{{error_msg}}</div>
+                    <div class="alert alert-danger">{{error_msg}}</div>
                     {{/if}}
                     <form id="registrationForm" action="/auth/register" method="post">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="firstname" placeholder="First Name" value="{{firstname}}">
+                            <input type="text" class="form-control" name="firstname" placeholder="First Name"
+                                value="{{firstname}}">
                             <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" name="lastname" placeholder="Last Name" value="{{lastname}}">
+                            <input type="text" class="form-control" name="lastname" placeholder="Last Name"
+                                value="{{lastname}}">
                             <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
@@ -27,17 +31,27 @@
                             <small class="error-message text-danger"></small>
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" name="mobile" placeholder="Mobile" value="{{mobile}}">
+                            <input type="text" class="form-control" name="mobile" placeholder="Mobile"
+                                value="{{mobile}}">
                             <small class="error-message text-danger"></small>
                         </div>
-                        <div class="form-group">
-                            <input type="password" class="form-control" name="password" placeholder="Password">
-                            <small class="error-message text-danger"></small>
-                        </div>
-                        <div class="form-group">
-                            <input type="password" class="form-control" name="password2" placeholder="Confirm Password">
-                            <small class="error-message text-danger"></small>
-                        </div>
+                        <!-- Password Field with Toggle Icon -->
+<div class="form-group">
+    <div class="input-container position-relative">
+        <input type="password" class="form-control" name="password" placeholder="Password" id="password">
+        <i class="fa fa-eye position-absolute" id="togglePassword" style="cursor: pointer; right: 10px; top: 50%; transform: translateY(-50%);"></i>
+    </div>
+    <small class="error-message text-danger"></small>
+</div>
+
+<!-- Confirm Password Field with Toggle Icon -->
+<div class="form-group">
+    <div class="input-container position-relative">
+        <input type="password" class="form-control" name="password2" placeholder="Confirm Password" id="confirmPassword">
+        <i class="fa fa-eye position-absolute" id="toggleConfirmPassword" style="cursor: pointer; right: 10px; top: 50%; transform: translateY(-50%);"></i>
+    </div>
+    <small class="error-message text-danger"></small>
+</div>
                         <button type="submit" class="btn btn-primary">Register</button>
                     </form>
                     <p class="mt-20">Already have an account? <a href="/login">Login</a></p>
@@ -51,132 +65,125 @@
 </section>
 
 <script>
-    document.getElementById('registrationForm').addEventListener('submit', function(e) {
-        // Prevent form submission
-        e.preventDefault();
+document.getElementById('registrationForm').addEventListener('submit', function(e) {
+    // Prevent form submission
+    e.preventDefault();
 
-        // Clear previous error messages
-        document.querySelectorAll('.error-message').forEach(function(el) {
-            el.textContent = '';
-        });
-        document.querySelectorAll('.form-control').forEach(function(el) {
-            el.style.borderColor = '';
-        });
-
-        // Get form fields
-        var firstname = document.querySelector('input[name="firstname"]');
-        var lastname = document.querySelector('input[name="lastname"]');
-        var email = document.querySelector('input[name="email"]');
-        var mobile = document.querySelector('input[name="mobile"]');
-        var password = document.querySelector('input[name="password"]');
-        var password2 = document.querySelector('input[name="password2"]');
-
-        var isValid = true;
-
-        // Name validation (letters only)
-        var namePattern = /^[a-zA-Z\s]+$/;
-        if (firstname.value.trim() === '') {
-            firstname.nextElementSibling.textContent = 'First name is required.';
-            firstname.style.borderColor = 'red';
-            isValid = false;
-        } else if (!namePattern.test(firstname.value.trim())) {
-            firstname.nextElementSibling.textContent = 'First name must contain letters only.';
-            firstname.style.borderColor = 'red';
-            isValid = false;
-        } else {
-            firstname.style.borderColor = 'green';
-        }
-
-        if (lastname.value.trim() === '') {
-            lastname.nextElementSibling.textContent = 'Last name is required.';
-            lastname.style.borderColor = 'red';
-            isValid = false;
-        } else if (!namePattern.test(lastname.value.trim())) {
-            lastname.nextElementSibling.textContent = 'Last name must contain letters only.';
-            lastname.style.borderColor = 'red';
-            isValid = false;
-        } else {
-            lastname.style.borderColor = 'green';
-        }
-
-        // Email validation
-        var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (email.value.trim() === '') {
-            email.nextElementSibling.textContent = 'Email is required.';
-            email.style.borderColor = 'red';
-            isValid = false;
-        } else if (!emailPattern.test(email.value.trim())) {
-            email.nextElementSibling.textContent = 'Please enter a valid email address.';
-            email.style.borderColor = 'red';
-            isValid = false;
-        } else {
-            email.style.borderColor = 'green';
-        }
-
-        // Mobile number validation (assuming a simple 10-digit format for example)
-        var mobilePattern = /^\d{10}$/;
-        if (mobile.value.trim() === '') {
-            mobile.nextElementSibling.textContent = 'Mobile number is required.';
-            mobile.style.borderColor = 'red';
-            isValid = false;
-        } else if (!mobilePattern.test(mobile.value.trim())) {
-            mobile.nextElementSibling.textContent = 'Please enter a valid mobile number (10 digits).';
-            mobile.style.borderColor = 'red';
-            isValid = false;
-        } else {
-            mobile.style.borderColor = 'green';
-        }
-
-        // Password validation (minimum 8 characters, at least one letter and one number)
-        var passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        if (password.value.trim() === '') {
-            password.nextElementSibling.textContent = 'Password is required.';
-            password.style.borderColor = 'red';
-            isValid = false;
-        } else if (!passwordPattern.test(password.value.trim())) {
-            password.nextElementSibling.textContent = 'Password must be at least 8 characters long and include at least one letter and one number.';
-            password.style.borderColor = 'red';
-            isValid = false;
-        } else {
-            password.style.borderColor = 'green';
-        }
-
-        // Confirm password match
-        if (password2.value.trim() === '') {
-            password2.nextElementSibling.textContent = 'Confirm password is required.';
-            password2.style.borderColor = 'red';
-            isValid = false;
-        } else if (password.value.trim() !== password2.value.trim()) {
-            password2.nextElementSibling.textContent = 'Passwords do not match.';
-            password2.style.borderColor = 'red';
-            isValid = false;
-        } else {
-            password2.style.borderColor = 'green';
-        }
-
-        if (isValid) {
-            // If the form is valid, submit it
-            this.submit();
-        }
+    // Clear previous error messages and reset input border colors
+    document.querySelectorAll('.error-message').forEach(function(el) {
+        el.textContent = '';
+    });
+    document.querySelectorAll('.form-control').forEach(function(el) {
+        el.style.borderColor = '';
     });
 
-    // Clear error message and border color on input
-    document.querySelectorAll('.form-control').forEach(function(input) {
-        input.addEventListener('input', function() {
-            this.nextElementSibling.textContent = '';
-            this.style.borderColor = '';
-        });
-    });
+    // Get form fields
+    var firstname = document.querySelector('input[name="firstname"]');
+    var lastname = document.querySelector('input[name="lastname"]');
+    var email = document.querySelector('input[name="email"]');
+    var mobile = document.querySelector('input[name="mobile"]');
+    var password = document.querySelector('input[name="password"]');
+    var password2 = document.querySelector('input[name="password2"]');
 
-    // Check input fields on blur
-    document.querySelectorAll('.form-control').forEach(function(input) {
-        input.addEventListener('blur', function() {
-            if (this.value.trim() === '') {
-                this.nextElementSibling.textContent = 'This field is required.';
-                this.style.borderColor = 'red';
-            }
-        });
+    var isValid = true;
+    var invalidFields = [];
+
+    // Validate First Name (letters only)
+    if (firstname.value.trim() === '' || !/^[a-zA-Z\s]+$/.test(firstname.value.trim())) {
+        invalidFields.push('First Name');
+        firstname.style.borderColor = 'red';
+    }
+
+    // Validate Last Name (letters only)
+    if (lastname.value.trim() === '' || !/^[a-zA-Z\s]+$/.test(lastname.value.trim())) {
+        invalidFields.push('Last Name');
+        lastname.style.borderColor = 'red';
+    }
+
+    // Validate Email
+    if (email.value.trim() === '' || !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email.value.trim())) {
+        invalidFields.push('Email');
+        email.style.borderColor = 'red';
+    }
+
+    // Validate Mobile Number (10 digits)
+    if (mobile.value.trim() === '' || !/^\d{10}$/.test(mobile.value.trim())) {
+        invalidFields.push('Mobile Number');
+        mobile.style.borderColor = 'red';
+    }
+
+    // Validate Password (minimum 8 characters, at least one letter and one number)
+    if (password.value.trim() === '' || !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password.value.trim())) {
+        invalidFields.push('Password');
+        password.style.borderColor = 'red';
+    }
+
+    // Validate Confirm Password (matches Password)
+    if (password2.value.trim() === '' || password.value.trim() !== password2.value.trim()) {
+        invalidFields.push('Confirm Password');
+        password2.style.borderColor = 'red';
+    }
+
+    // Show a general error message if there are invalid fields
+    if (invalidFields.length > 0) {
+        // If there's a previous general error message, remove it
+        let generalErrorMsg = document.querySelector('.general-error-message');
+        if (generalErrorMsg) {
+            generalErrorMsg.remove();
+        }
+
+        // Create a general error message
+        var generalError = document.createElement('div');
+        generalError.className = 'alert alert-danger general-error-message';
+        generalError.textContent = 'Please fill in the required fields correctly: ' + invalidFields.join(', ');
+        document.querySelector('.block').insertBefore(generalError, document.getElementById('registrationForm'));
+
+        isValid = false;
+    }
+
+    // If the form is valid, submit it
+    if (isValid) {
+        this.submit();
+    }
+});
+
+// Clear error message and border color on input
+document.querySelectorAll('.form-control').forEach(function(input) {
+    input.addEventListener('input', function() {
+        this.style.borderColor = '';
     });
+});
+
+// Toggle password visibility
+document.getElementById('togglePassword').addEventListener('click', function() {
+    var passwordInput = document.getElementById('password');
+    var icon = this;
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+    var passwordInput = document.getElementById('confirmPassword');
+    var icon = this;
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+
 </script>
 
 <style>
@@ -185,4 +192,22 @@
         color: red;
         margin-top: 0.25em;
     }
+    .position-relative {
+    position: relative;
+}
+
+/* Position the icon absolutely within the parent container */
+.position-absolute {
+    position: absolute;
+}
+
+/* Ensure the error message is displayed below the input field */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+/* Add some spacing between the input field and the error message */
+.input-container + .error-message {
+    margin-top: 0.5rem;
+}
 </style>

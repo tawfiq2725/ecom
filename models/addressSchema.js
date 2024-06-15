@@ -9,7 +9,7 @@ const AddressSchema = new Schema({
     },
     place: {
         type: String,
-        enum: ['Home', 'WorkPlace'],
+        enum: ['home', 'work'], 
         required: true
     },
     houseNumber: {

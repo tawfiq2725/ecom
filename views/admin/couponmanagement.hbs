@@ -1,0 +1,121 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <!-- Breadcrumbs -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Coupon Management</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Coupon Management Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Coupon Management</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="couponTable" class="display table table-bordered" style="min-width: 845px">
+                                <thead>
+                                    <tr>
+                                        <th>Index</th>
+                                        <th>Coupon Code</th>
+                                        <th>Minimum Purchase Amount</th>
+                                        <th>Discount Rate (%)</th>
+                                        <th>Maximum Discount</th>
+                                        <th>Used By</th>
+                                        <th>Status</th>
+                                        <th>Expiry Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each coupons}}
+                                    <tr>
+                                        <td>{{@index}}</td>
+                                        <td>{{this.code}}</td>
+                                        <td>{{this.minPurchaseAmount}}</td>
+                                        <td>{{this.discountRate}}</td>
+                                        <td>{{this.maxDiscount}}</td>
+                                        <td>{{this.usedBy}}</td>
+                                        <td>{{this.status}}</td>
+                                        <td>{{formatDate this.expiryDate}}</td>
+                                        <td>
+                                            {{#if (eq this.status "Active")}}
+                                                <button class="btn btn-danger btn-sm unlist-btn" data-id="{{this._id}}">Unlist</button>
+                                            {{else}}
+                                                <button class="btn btn-success btn-sm list-btn" data-id="{{this._id}}">List</button>
+                                            {{/if}}
+                                            <a href="/admin/coupon/edit/{{this._id}}" class="btn btn-primary btn-sm">Edit</a>
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include necessary scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function() {
+        $('#couponTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": false,
+            "pageLength": 10
+        });
+
+        // Handle unlist button click
+        $('.unlist-btn').on('click', function() {
+            var couponId = $(this).data('id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to unlist this coupon!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, unlist it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to unlist route
+                    window.location.href = `/admin/coupon/unlist/${couponId}`;
+                }
+            });
+        });
+
+        // Handle list button click
+        $('.list-btn').on('click', function() {
+            var couponId = $(this).data('id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to list this coupon!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, list it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to list route
+                    window.location.href = `/admin/coupon/list/${couponId}`;
+                }
+            });
+        });
+    });
+</script>

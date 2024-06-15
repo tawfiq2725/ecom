@@ -1,6 +1,6 @@
 const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
-
+const Order = require('../models/orderSchema')
 // Get All Products
 const getProducts = async (req, res) => {
     try {
@@ -169,6 +169,55 @@ const updateStock = async (req, res) => {
     }
 };
 
+const getOrderList = async (req, res) => {
+    try {
+        if (!req.session.admin) {
+            return res.redirect('/admin/login');
+        }
+        const orders = await Order.find()
+            .populate('user', 'firstname lastname')
+            .populate('address')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return res.render('admin/ordermanagement', { orders, layout: 'adminlayout', title:"Order Management" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('Server Error');
+    }
+};
+
+
+const updateOrderStatus = async (req, res) => {
+    try {
+        const { id } = req.params; // Ensure this matches the route parameter
+        const { orderStatus } = req.body;
+
+        const order = await Order.findById(id);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        console.log(`Updating order ${id} status to ${orderStatus}`);
+        
+        order.orderStatus = orderStatus;
+
+        if (order.paymentMethod === 'COD' && orderStatus === 'Delivered') {
+            order.paymentStatus = 'Completed';
+        }
+
+        await order.save();
+
+        res.json({ success: true, message: 'Order status updated' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+};
+
+
+
 module.exports = {
     getProducts,
     getAddProductPage,
@@ -178,5 +227,7 @@ module.exports = {
     deleteProduct,
     toggleProductStatus,
     getManageStockPage,
-    updateStock
+    updateStock,
+    getOrderList,
+    updateOrderStatus
 };

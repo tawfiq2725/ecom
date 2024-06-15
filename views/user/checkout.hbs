@@ -1,0 +1,267 @@
+<div class="page-wrapper">
+   <div class="checkout shopping">
+      <div class="container">
+         <div class="row">
+            <div class="col-md-8">
+               <div class="block billing-details">
+                  <h4 class="widget-title">Billing Details</h4>
+                  <form class="checkout-form" method="POST" action="/orders">
+                     <input type="hidden" id="isAddingNewAddress" name="isAddingNewAddress" value="false">
+                     <input type="hidden" name="couponCode" id="hiddenCouponCode">
+
+                     {{#each addresses}}
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="addressId" id="address{{_id}}" value="{{_id}}">
+                        <label class="form-check-label" for="address{{_id}}">
+                           {{place}}, {{houseNumber}}, {{street}}, {{city}}, {{zipcode}}, {{country}}
+                        </label>
+                     </div>
+                     {{/each}}
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="addressId" id="newAddress" value="new">
+                        <label class="form-check-label" for="newAddress">
+                           Enter new address
+                        </label>
+                     </div>
+                     <div id="newAddressForm" style="display: none;">
+                        <div class="form-group">
+                           <select class="form-control" id="place" name="place">
+                              <option value="home">Home</option>
+                              <option value="work">Work</option>
+                           </select>
+                        </div>
+                        <div class="form-group">
+                           <label for="houseNumber">House Number</label>
+                           <input type="text" class="form-control" id="houseNumber" name="houseNumber" placeholder="House Number">
+                        </div>
+                        <div class="form-group">
+                           <label for="street">Street</label>
+                           <input type="text" class="form-control" id="street" name="street" placeholder="Street">
+                        </div>
+                        <div class="form-group">
+                           <label for="city">City</label>
+                           <input type="text" class="form-control" id="city" name="city" placeholder="City">
+                        </div>
+                        <div class="form-group">
+                           <label for="zipcode">Zip Code</label>
+                           <input type="text" class="form-control" id="zipcode" name="zipcode" placeholder="Zip Code">
+                        </div>
+                        <div class="form-group">
+                           <label for="country">Country</label>
+                           <input type="text" class="form-control" id="country" name="country" placeholder="Country">
+                        </div>
+                     </div>
+                     <h4 class="widget-title">Payment Method</h4>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" value="CreditCard">
+                        <label class="form-check-label" for="creditCard">
+                           Credit Card
+                        </label>
+                     </div>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD">
+                        <label class="form-check-label" for="cod">
+                           Cash on Delivery
+                        </label>
+                     </div>
+                     <div id="creditCardForm" style="display: none;">
+                        <div class="form-group">
+                           <label for="card-number">Card Number <span class="required">*</span></label>
+                           <input id="card-number" class="form-control" type="tel" placeholder="•••• •••• •••• ••••">
+                        </div>
+                        <div class="form-group half-width padding-right">
+                           <label for="card-expiry">Expiry (MM/YY) <span class="required">*</span></label>
+                           <input id="card-expiry" class="form-control" type="tel" placeholder="MM / YY">
+                        </div>
+                        <div class="form-group half-width padding-left">
+                           <label for="card-cvc">Card Code <span class="required">*</span></label>
+                           <input id="card-cvc" class="form-control" type="tel" maxlength="4" placeholder="CVC">
+                        </div>
+                     </div>
+                  
+                     <button type="submit" class="btn btn-main mt-20">Place Order</button>
+                  </form>
+               </div>
+            </div>
+            <div class="col-md-4">
+               <div class="product-checkout-details">
+                  <div class="block">
+                     <h4 class="widget-title">Order Summary</h4>
+                     {{#each cart.items}}
+                     <div class="media product-card">
+                        <a class="pull-left" href="product-single.html">
+                           <img class="media-object" src="/uploads/products/{{this.product.mainImage}}" alt="Image">
+                        </a>
+                        <div class="media-body">
+                           <h4 class="media-heading"><a href="product-single.html">{{this.product.name}}</a></h4>
+                           <p class="price">{{this.quantity}} x ${{this.product.price}}</p>
+                        </div>
+                     </div>
+                     {{/each}}
+                     <ul class="summary-prices">
+                        <li>
+                           <span>Subtotal:</span>
+                           <span class="price">${{cart.totalPrice}}</span>
+                        </li>
+                        <li>
+                           <span>Shipping:</span>
+                           <span>Free</span>
+                        </li>
+                        <li>
+                           <span>Coupon Code:</span>
+                           <span><a href="#" id="openCouponModal">Enter Coupon Code</span>
+                        </li>
+                     </ul>
+                     <div class="summary-total">
+                        <span>Total</span>
+                        <span>${{cart.totalPrice}}</span>
+                     </div>
+                     <div class="verified-icon">
+                        <img src="/images/shop/verified.png" alt="Verified">
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="coupon-modal" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-body">
+            <form id="couponForm">
+               <div class="form-group">
+                  <input id="modalCouponCode" class="form-control" type="text" placeholder="Enter Coupon Code">
+               </div>
+               <button type="button" id="applyModalCoupon" class="btn btn-main">Apply Coupon</button>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('input[name="addressId"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      const newAddressForm = document.getElementById('newAddressForm');
+      if (this.value === 'new') {
+        newAddressForm.style.display = 'block';
+      } else {
+        newAddressForm.style.display = 'none';
+      }
+    });
+  });
+
+  document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      const creditCardForm = document.getElementById('creditCardForm');
+      if (this.value === 'CreditCard') {
+        creditCardForm.style.display = 'block';
+      } else {
+        creditCardForm.style.display = 'none';
+      }
+    });
+  });
+
+  // Open coupon modal
+  document.getElementById('openCouponModal').addEventListener('click', function(event) {
+    event.preventDefault();
+    $('#coupon-modal').modal('show');
+  });
+
+  // Apply coupon from modal
+ document.getElementById('applyModalCoupon').addEventListener('click', function() {
+    const couponCode = document.getElementById('modalCouponCode').value;
+    // Call server to validate coupon and get discount
+    fetch('/api/apply-coupon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ couponCode })
+    })
+    .then(response => {
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        return response.json().then(err => { throw new Error(err.message); });
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Response data:', data);
+      if (data.success) {
+        document.getElementById('hiddenCouponCode').value = couponCode;
+        const newTotalPrice = document.querySelector('.summary-total .price');
+        newTotalPrice.textContent = `$${data.newTotal}`;
+        $('#coupon-modal').modal('hide');
+        Swal.fire({
+          title: 'Coupon Applied',
+          text: `Discount applied: $${data.discountAmount}`,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        Swal.fire({
+          title: 'Invalid Coupon',
+          text: data.message,
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error applying coupon:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'An error occurred while applying the coupon. Please try again later.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    });
+});
+
+
+  // Handle form submission
+  document.querySelector('form.checkout-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from submitting immediately
+
+    const isAddingNewAddress = document.querySelector('input[name="addressId"]:checked').value === 'new';
+    document.getElementById('isAddingNewAddress').value = isAddingNewAddress;
+
+    if (isAddingNewAddress) {
+      // Validate new address form fields before showing SweetAlert
+      const place = document.getElementById('place').value;
+      const houseNumber = document.getElementById('houseNumber').value;
+      const street = document.getElementById('street').value;
+      const city = document.getElementById('city').value;
+      const zipcode = document.getElementById('zipcode').value;
+      const country = document.getElementById('country').value;
+
+      if (!place || !houseNumber || !street || !city || !zipcode || !country) {
+        alert('Please fill out all fields for the new address.');
+        return;
+      }
+    }
+
+    // Show SweetAlert confirmation
+    Swal.fire({
+      title: 'Confirm Order',
+      text: "Are you sure you want to place this order?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, place order!',
+      cancelButtonText: 'No, cancel!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // If confirmed, submit the form
+        document.querySelector('form.checkout-form').submit();
+      }
+    });
+  });
+});
+</script>

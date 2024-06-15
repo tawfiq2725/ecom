@@ -1,0 +1,118 @@
+<section class="order-details page-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="list-inline dashboard-menu text-center">
+                    <li><a href="/profile">Profile Details</a></li>
+                    <li><a href="/address">Address</a></li>
+                    <li><a href="/wallet">Wallet</a></li>
+                    <li><a href="/orders" class="active">Orders</a></li>
+                </ul>
+                <div class="dashboard-wrapper user-dashboard">
+                    <div class="order-details-content">
+                        <h3>Order Details</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Total Items</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#{{order._id}}</td>
+                                    <td>{{order.createdAt}}</td>
+                                    <td>{{order.items.length}}</td>
+                                    <td>${{order.totalAmount}}</td>
+                                    <td><span class="label label-{{order.orderStatus}} btn btn-primary">{{order.orderStatus}}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        {{#if order.coupon.code}}
+                        <h4>Coupon Applied</h4>
+                        <p>Code: {{order.coupon.code}}</p>
+                        <p>Discount: ${{order.coupon.discountAmount}}</p>
+                        {{/if}}
+                        <h4>Items in this Order</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Size</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each order.items}}
+                                <tr>
+                                    <td>{{this.product.name}}</td>
+                                    <td>{{this.quantity}}</td>
+                                    <td>{{this.size}}</td>
+                                    <td>${{this.price}}</td>
+                                    <td>${{multiply this.quantity this.price}}</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        <h4>Shipping Address</h4>
+                        <p>{{order.address.place}}, {{order.address.houseNumber}}, {{order.address.street}}, {{order.address.city}}, {{order.address.zipcode}}, {{order.address.country}}</p>
+                        <h4>Payment Method</h4>
+                        <p>{{order.paymentMethod}}</p>
+                        <h4>Payment Status</h4>
+                        <p>{{order.paymentStatus}}</p>
+                        {{#ifCond order.orderStatus '===' 'Pending'}}
+                        <a href="/orders/cancel/{{order._id}}" class="btn btn-main btn-small">Cancel Order</a>
+                        {{/ifCond}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.getElementById('cancelOrderBtn').addEventListener('click', function () {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel this order?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/orders/{{order._id}}/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ _csrf: '{{csrfToken}}' })  // Include CSRF token if using CSRF protection
+            }).then(response => {
+                if (response.ok) {
+                    Swal.fire(
+                        'Cancelled!',
+                        'Your order has been cancelled.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        'There was a problem cancelling your order.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+});
+</script>

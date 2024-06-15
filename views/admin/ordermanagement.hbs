@@ -1,0 +1,129 @@
+<div class="content-body">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Order Management</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Order Management</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="orderTable" class="display table table-bordered" style="min-width: 845px">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>User</th>
+                                            <th>Address</th>
+                                            <th>Date</th>
+                                            <th>Payment Method</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+    {{#each orders}}
+    <tr>
+        <td>{{this._id}}</td>
+        <td>{{this.user.firstname}} {{this.user.lastname}}</td> <!-- Combine first and last names -->
+        <td>{{this.address.street}}, {{this.address.city}}, {{this.address.zip}}, {{this.address.country}}</td>
+        <td>{{formatDate this.createdAt}}</td>
+        <td>{{this.paymentMethod}}</td>
+        <td>₹{{this.totalAmount}}</td>
+        <td>{{this.orderStatus}}</td>
+        <td>
+            <select class="form-control change-status" data-id="{{this._id}}">
+                <option value="Pending" {{#if (eq this.orderStatus "Pending")}}selected{{/if}}>Pending</option>
+                <option value="Processing" {{#if (eq this.orderStatus "Processing")}}selected{{/if}}>Processing</option>
+                <option value="Shipped" {{#if (eq this.orderStatus "Shipped")}}selected{{/if}}>Shipped</option>
+                <option value="Delivered" {{#if (eq this.orderStatus "Delivered")}}selected{{/if}}>Delivered</option>
+                <option value="Cancelled" {{#if (eq this.orderStatus "Cancelled")}}selected{{/if}}>Cancelled</option>
+            </select>
+        </td>
+    </tr>
+    {{/each}}
+</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            $('#orderTable').DataTable({
+                "paging": true,
+                "searching": true,
+                "info": true,
+                "lengthChange": false,
+                "pageLength": 10
+            });
+
+            $('.change-status').on('change', function() {
+                var orderId = $(this).data('id');
+                var newStatus = $(this).val();
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You want to change the status to "${newStatus}"!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, change it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/order/status/${orderId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ orderStatus: newStatus })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Changed!',
+                                    'Order status has been changed.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'There was an error changing the order status.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(err => {
+                            Swal.fire(
+                                'Error!',
+                                err.message || 'There was an error processing your request.',
+                                'error'
+                            );
+                        });
+                    }
+                });
+            });
+        });
+    </script>

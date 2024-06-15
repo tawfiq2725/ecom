@@ -4,6 +4,7 @@ const { productUpload, categoryUpload } = require('../helpers/multer');
 const adminController = require('../controllers/adminCtrl');
 const categoryController = require('../controllers/categoryCtrl');
 const productController = require('../controllers/productCtrl');
+const couponController = require('../controllers/couponCtrl.js')
 
 // Admin routes
 routes.get(['/', '/login'], adminController.getLoginPage);
@@ -42,5 +43,19 @@ routes.delete('/products/delete/:id', productController.deleteProduct); // Chang
 routes.post('/products/toggle-status/:id', productController.toggleProductStatus)
 routes.get('/products/manage-stock/:id', productController.getManageStockPage);
 routes.post('/products/update-stock/:id', productController.updateStock);
+
+// Orders Management
+routes.get('/orders', productController.getOrderList);
+routes.put('/order/status/:id', productController.updateOrderStatus);
+
+// List coupons
+routes.get('/coupons', couponController.listCoupons);
+routes.get('/coupon/add', couponController.showAddCouponForm);
+routes.post('/coupon/add', couponController.addCoupon);
+routes.get('/coupon/edit/:id', couponController.showEditCouponForm);
+routes.post('/coupon/edit/:id', couponController.editCoupon);
+routes.get('/coupon/list/:id', couponController.listCoupon);
+routes.get('/coupon/unlist/:id', couponController.unlistCoupon);
+
 
 module.exports = routes;

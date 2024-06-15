@@ -1,0 +1,44 @@
+<section class="user-dashboard page-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="list-inline dashboard-menu text-center">
+                    <li><a  href="/profile">Profile Details</a></li>
+                    <li><a href="/address">Address</a></li>
+                    <li><a href="/wallet">Wallet</a></li>
+                    <li><a class="active" href="/orders">Orders</a></li>
+                </ul>
+                <div class="dashboard-wrapper user-dashboard">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                    <th>View</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each orders}}
+                                <tr>
+                                    <td>#{{this._id}}</td>
+                                    <td>{{this.createdAt}}</td>
+                                    <td>{{this.items.length}}</td>
+                                    <td>${{this.totalAmount}}</td>
+                                    <td><span
+                                            class="label label-{{this.orderStatus}} btn btn-primary">{{this.orderStatus}}</span>
+                                    </td>
+                                    <td><a href="/orders/{{this._id}}" class="btn btn-default">View</a></td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

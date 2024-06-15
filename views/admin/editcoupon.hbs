@@ -1,0 +1,57 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="/admin/coupons">Coupon Management</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit Coupon</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Edit Coupon</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/coupon/edit/{{coupon._id}}" method="POST">
+                            <div class="form-group">
+                                <label>Coupon Code</label>
+                                <input type="text" name="code" class="form-control" value="{{coupon.code}}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Minimum Purchase Amount</label>
+                                <input type="number" name="minPurchaseAmount" class="form-control" value="{{coupon.minPurchaseAmount}}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Discount Rate (%)</label>
+                                <input type="number" name="discountRate" class="form-control" value="{{coupon.discountRate}}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Maximum Discount</label>
+                                <input type="number" name="maxDiscount" class="form-control" value="{{coupon.maxDiscount}}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Expiry Date</label>
+                                <input type="date" name="expiryDate" class="form-control" value="{{formatDate coupon.expiryDate}}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select name="status" class="form-control">
+                                    <option value="Active" {{#if (eq coupon.status "Active")}}selected{{/if}}>Active</option>
+                                    <option value="Inactive" {{#if (eq coupon.status "Inactive")}}selected{{/if}}>Inactive</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Coupon</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

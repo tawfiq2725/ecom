@@ -1,12 +1,11 @@
 const User = require('../models/userSchema');
 const Otp = require('../models/otpSchema');
 const Product = require('../models/productSchema');
-const Category = require('../models/categorySchema');
 const Cart = require('../models/cartSchema');
+const Address = require('../models/addressSchema')
 const { GenerateOtp, sendMail } = require('../helpers/otpverification');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 
 // Page Not Found
 const pageNotFound = async (req, res) => {
@@ -487,6 +486,111 @@ const removeFromCart = async (req, res) => {
     }
 };
 
+const updateCartQuantity = async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, message: 'Please log in to update your cart.' });
+    }
+
+    try {
+        const { productId } = req.params;
+        const { size, quantity } = req.body;
+        const userId = req.session.user._id;
+
+        const parsedQuantity = parseInt(quantity, 10);
+        if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid quantity" });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        const variant = product.variants.find(v => v.size === size);
+        if (!variant) {
+            return res.status(400).json({ success: false, message: "Variant not found" });
+        }
+
+        if (variant.stock < parsedQuantity) {
+            return res.status(400).json({ success: false, message: `Only ${variant.stock} units available in the selected size.` });
+        }
+
+        let cart = await Cart.findOne({ user: userId });
+        if (!cart) {
+            return res.status(404).json({ success: false, message: "Cart not found" });
+        }
+
+        const existingCartItemIndex = cart.items.findIndex(
+            item => item.product.toString() === productId && item.size === size
+        );
+
+        if (existingCartItemIndex !== -1) {
+            const cartItem = cart.items[existingCartItemIndex];
+            cart.totalPrice -= cartItem.quantity * product.price; // Remove the old amount
+            cartItem.quantity = parsedQuantity;
+            cart.totalPrice += cartItem.quantity * product.price; // Add the new amount
+        } else {
+            return res.status(404).json({ success: false, message: 'Product not found in cart' });
+        }
+
+        await cart.save();
+
+        res.json({ success: true, message: "Cart updated" });
+
+    } catch (error) {
+        console.error('Error updating cart:', error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+const getProductVariant = async (req, res) => {
+    try {
+        const { productId, size } = req.params;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        const variant = product.variants.find(v => v.size === size);
+        if (!variant) {
+            return res.status(404).json({ success: false, message: "Variant not found" });
+        }
+
+        res.json({ success: true, stock: variant.stock });
+    } catch (error) {
+        console.error('Error fetching product variant:', error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+const checkout = async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+
+    try {
+        const userId = req.session.user._id;
+        const cart = await Cart.findOne({ user: userId }).populate('items.product');
+        const addresses = await Address.find({ userId: userId });
+
+        if (!cart) {
+            return res.redirect('/cart'); // Redirect to cart if it's empty
+        }
+
+        res.render('user/checkout', {
+            title: "Checkout",
+            cart: cart,
+            addresses: addresses,
+            user: req.session.user
+        });
+    } catch (error) {
+        console.error('Error rendering checkout page:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
 
 module.exports = {
     pageNotFound,
@@ -504,7 +608,10 @@ module.exports = {
     addToCart,
     getCart,
     removeFromCart,
+    updateCartQuantity,
+    getProductVariant,
     getForgotPasswordPage,
     handleForgotPassword,
-    handleResetPasswordPageAndRequest
+    handleResetPasswordPageAndRequest,
+    checkout
 }

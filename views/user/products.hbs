@@ -146,6 +146,9 @@
             });
         });
 
+        // Check if the user is logged in
+        const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
+
         // Event listener for the "Add to Cart" buttons
         const addToCartButtons = document.querySelectorAll('.add-to-cart');
         addToCartButtons.forEach(function (button) {
@@ -156,6 +159,22 @@
                 const sizeSelect = productItem.querySelector('.variant-size');
                 const variantSize = sizeSelect ? sizeSelect.value : null;
                 const stock = sizeSelect ? parseInt(sizeSelect.selectedOptions[0].getAttribute('data-stock'), 10) : null;
+
+                if (!isLoggedIn) {
+                    Swal.fire({
+                        title: 'Not Logged In',
+                        text: 'You need to log in to add items to the cart.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Log In',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/login';
+                        }
+                    });
+                    return;
+                }
 
                 // Check if stock is available before proceeding
                 if (stock === 0) {
@@ -191,8 +210,6 @@
                                 window.location.href = '/cart/data';
                             }
                         });
-                    } else if (response.status === 401 || response.status === 302) {
-                        window.location.href = '/login';
                     } else {
                         Swal.fire({
                             title: 'Error',

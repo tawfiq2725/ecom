@@ -1,12 +1,6 @@
-const User = require('../models/userSchema');
-const Otp = require('../models/otpSchema');
 const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
-const Cart = require('../models/cartSchema');
-const { GenerateOtp, sendMail } = require('../helpers/otpverification');
 require('dotenv').config();
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 
 
 

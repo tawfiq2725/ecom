@@ -3,6 +3,8 @@ const router = express.Router();
 const userController = require('../controllers/userCtrl');
 const addressController = require('../controllers/addressCtrl')
 const usersideCtrl = require('../controllers/usersideCtrl')
+const orderCtrl = require('../controllers/orderCtrl')
+const Coupon = require('../models/couponSchema')
 const passport = require('../config/passport-config');
 const isBlocked = require('../middlewares/auth');
 
@@ -44,16 +46,27 @@ router.post('/profile/update',userController.updateProfile)
 router.get('/address', addressController.getAddresses);
 router.post('/address',  addressController.addAddress);
 router.delete('/address/:id', addressController.deleteAddress);
+router.get('/address/edit/:id', addressController.getEditAddress); // Fetch address to edit
+router.post('/address/edit/:id', addressController.updateAddress); // Update address
 
 // Cart routes
 router.get('/cart/data', userController.getCart);
 router.post('/add-to-cart', userController.addToCart);
 router.post('/cart/remove/:id', userController.removeFromCart);
-
+router.post('/cart/update/:productId', userController.updateCartQuantity);
+router.get('/api/product/:productId/variant/:size', userController.getProductVariant);
+router.get('/checkout', userController.checkout);
 // Product Page
 router.get('/products', usersideCtrl.getProducts);
 router.get('/products/:id', usersideCtrl.getProductDetails);
 
+// Order Management
+router.post('/orders', orderCtrl.createOrder);
+router.post('/api/apply-coupon', orderCtrl.applyCoupon);
+router.get('/confirm', orderCtrl.orderConfirm);
+router.get('/orders', orderCtrl.getUserOrders);
+router.get('/orders/:id', orderCtrl.getOrderDetails);
+router.post('/orders/:id/cancel', orderCtrl.cancelOrder);
 
 
 module.exports = router;

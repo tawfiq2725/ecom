@@ -1,0 +1,46 @@
+<section class="user-dashboard page-wrapper">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <ul class="list-inline dashboard-menu text-center">
+          <li><a href="/profile">Profile Details</a></li>
+          <li><a class="active" href="/address">Address</a></li>
+          <li><a href="/wallet">Wallet</a></li>
+          <li><a href="/orders">Orders</a></li>
+        </ul>
+        <div class="dashboard-wrapper user-dashboard">
+          <form action="/address/edit/{{address._id}}" method="POST">
+            <div class="form-group">
+              <label for="place">Place</label>
+              <select name="place" class="form-control" required>
+                <option value="Home" {{#if (eq address.place 'Home')}}selected{{/if}}>Home</option>
+                <option value="WorkPlace" {{#if (eq address.place 'WorkPlace')}}selected{{/if}}>WorkPlace</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="houseNumber">House Number</label>
+              <input type="text" name="houseNumber" class="form-control" value="{{address.houseNumber}}" required>
+            </div>
+            <div class="form-group">
+              <label for="street">Street</label>
+              <input type="text" name="street" class="form-control" value="{{address.street}}" required>
+            </div>
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" name="city" class="form-control" value="{{address.city}}" required>
+            </div>
+            <div class="form-group">
+              <label for="zipcode">Zipcode</label>
+              <input type="text" name="zipcode" class="form-control" value="{{address.zipcode}}" required>
+            </div>
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input type="text" name="country" class="form-control" value="{{address.country}}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Address</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
