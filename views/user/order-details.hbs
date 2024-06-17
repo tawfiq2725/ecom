@@ -17,6 +17,16 @@
                                     <th>Order ID</th>
                                     <th>Date</th>
                                     <th>Total Items</th>
+                                    <th>
+                                        {{#if order.coupon.code}}
+                                        Coupon  
+                                        {{/if}}
+                                    </th>
+                                    <th>
+                                        {{#if order.coupon.code}}
+                                          Discount Amount
+                                        {{/if}}
+                                    </th>
                                     <th>Total Price</th>
                                     <th>Status</th>
                                 </tr>
@@ -24,18 +34,20 @@
                             <tbody>
                                 <tr>
                                     <td>#{{order._id}}</td>
-                                    <td>{{order.createdAt}}</td>
+                                    <td>{{formatDate order.createdAt}}</td>
                                     <td>{{order.items.length}}</td>
+                                    <td>{{#if order.coupon.code}}
+                                        <p> {{order.coupon.code}}</p>
+                                        {{/if}}
+                                    </td>
+                                    <td><p>{{order.coupon.discountAmount}}</p></td>
                                     <td>${{order.totalAmount}}</td>
-                                    <td><span class="label label-{{order.orderStatus}} btn btn-primary">{{order.orderStatus}}</span></td>
+                                    <td><span
+                                            class="label label-{{order.orderStatus}} btn btn-primary">{{order.orderStatus}}</span>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
-                        {{#if order.coupon.code}}
-                        <h4>Coupon Applied</h4>
-                        <p>Code: {{order.coupon.code}}</p>
-                        <p>Discount: ${{order.coupon.discountAmount}}</p>
-                        {{/if}}
                         <h4>Items in this Order</h4>
                         <table class="table">
                             <thead>
@@ -60,7 +72,8 @@
                             </tbody>
                         </table>
                         <h4>Shipping Address</h4>
-                        <p>{{order.address.place}}, {{order.address.houseNumber}}, {{order.address.street}}, {{order.address.city}}, {{order.address.zipcode}}, {{order.address.country}}</p>
+                        <p>{{order.address.place}}, {{order.address.houseNumber}}, {{order.address.street}},
+                            {{order.address.city}}, {{order.address.zipcode}}, {{order.address.country}}</p>
                         <h4>Payment Method</h4>
                         <p>{{order.paymentMethod}}</p>
                         <h4>Payment Status</h4>
@@ -78,41 +91,41 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-document.getElementById('cancelOrderBtn').addEventListener('click', function () {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to cancel this order?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, cancel it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('/orders/{{order._id}}/cancel', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ _csrf: '{{csrfToken}}' })  // Include CSRF token if using CSRF protection
-            }).then(response => {
-                if (response.ok) {
-                    Swal.fire(
-                        'Cancelled!',
-                        'Your order has been cancelled.',
-                        'success'
-                    ).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire(
-                        'Error!',
-                        'There was a problem cancelling your order.',
-                        'error'
-                    );
-                }
-            });
-        }
+    document.getElementById('cancelOrderBtn').addEventListener('click', function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel this order?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/orders/{{order._id}}/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ _csrf: '{{csrfToken}}' })  // Include CSRF token if using CSRF protection
+                }).then(response => {
+                    if (response.ok) {
+                        Swal.fire(
+                            'Cancelled!',
+                            'Your order has been cancelled.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'There was a problem cancelling your order.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
     });
-});
 </script>

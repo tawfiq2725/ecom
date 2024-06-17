@@ -4,7 +4,6 @@ const userController = require('../controllers/userCtrl');
 const addressController = require('../controllers/addressCtrl')
 const usersideCtrl = require('../controllers/usersideCtrl')
 const orderCtrl = require('../controllers/orderCtrl')
-const Coupon = require('../models/couponSchema')
 const passport = require('../config/passport-config');
 const isBlocked = require('../middlewares/auth');
 

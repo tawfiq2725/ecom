@@ -13,6 +13,8 @@ const createOrder = async (req, res) => {
 
     try {
         const userId = req.session.user._id;
+        console.log('User ID:', userId);  // Log userId to verify it's being set
+
         const { addressId, paymentMethod, place, houseNumber, street, city, zipcode, country, couponCode } = req.body;
 
         const cart = await Cart.findOne({ user: userId }).populate('items.product');
@@ -23,7 +25,7 @@ const createOrder = async (req, res) => {
         let address;
         if (addressId === 'new') {
             address = new Address({
-                user: userId,
+                userId: userId,  // Ensure this matches the field name in the schema
                 place,
                 houseNumber,
                 street,
@@ -95,6 +97,9 @@ const createOrder = async (req, res) => {
     }
 };
 
+
+
+
 const orderConfirm = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -145,8 +150,10 @@ const getUserOrders = async (req, res) => {
 
         const orders = await Order.find({ user: userId })
             .populate('items.product')
-            .populate('address');
-        res.render('user/order', {
+            .populate('address')
+            .sort({ createdAt: -1 });
+
+            res.render('user/order', {
             title: "My Orders",
             orders
         });
