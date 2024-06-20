@@ -5,6 +5,7 @@ const addressController = require('../controllers/addressCtrl')
 const usersideCtrl = require('../controllers/usersideCtrl')
 const orderCtrl = require('../controllers/orderCtrl')
 const paymentCtrl = require('../controllers/paymentCtrl')
+const whislistCtrl = require('../controllers/whislistCtrl')
 const passport = require('../config/passport-config');
 const isBlocked = require('../middlewares/auth');
 
@@ -49,6 +50,13 @@ router.delete('/address/:id', addressController.deleteAddress);
 router.get('/address/edit/:id', addressController.getEditAddress); // Fetch address to edit
 router.post('/address/edit/:id', addressController.updateAddress); // Update address
 
+
+router.get('/wishlist', whislistCtrl.getWishlistPage);
+router.post('/wishlist/add',  whislistCtrl.addToWishlist);
+router.post('/wishlist/remove' , whislistCtrl.removeFromWishlist);
+
+
+
 // Cart routes
 router.get('/cart/data', userController.getCart);
 router.post('/add-to-cart', userController.addToCart);
@@ -63,10 +71,15 @@ router.get('/products/:id', usersideCtrl.getProductDetails);
 // Order Management
 router.post('/orders', orderCtrl.createOrder);
 router.post('/api/apply-coupon', orderCtrl.applyCoupon);
+router.post('/api/remove-coupon', orderCtrl.removeCoupon);
 router.get('/confirm', orderCtrl.orderConfirm);
 router.get('/orders', orderCtrl.getUserOrders);
 router.get('/orders/:id', orderCtrl.getOrderDetails);
 router.post('/orders/:id/cancel', orderCtrl.cancelOrder);
+
+// New Routes for Razorpay integration
+router.post('/api/create-order', orderCtrl.createRazorpayOrder);
+router.post('/api/verify-payment', orderCtrl.verifyRazorpayPayment);
 
 
 // Payment Routes

@@ -135,7 +135,63 @@
                 window.location.href = currentUrl.toString();
             });
         });
+const addToWishlistButtons = document.querySelectorAll('.tf-ion-ios-heart');
+    addToWishlistButtons.forEach(function (button) {
+        button.addEventListener('click', async function (event) {
+            event.preventDefault(); // Prevent the default link click behavior
+            const productItem = this.closest('.product-item');
+            const productId = productItem.dataset.productId;
 
+            if (!isLoggedIn) {
+                Swal.fire({
+                    title: 'Not Logged In',
+                    text: 'You need to log in to add items to the wishlist.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Log In',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/login';
+                    }
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(`/wishlist/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productId })
+                });
+
+                const result = await response.json();
+
+                if (response.status === 200 && result.success) {
+                    Swal.fire({
+                        title: 'Added to wishlist',
+                        text: 'Product added to your wishlist.',
+                        icon: 'success'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: result.message || 'Something went wrong',
+                        icon: 'error'
+                    });
+                }
+            } catch (error) {
+                console.error('Error adding to wishlist:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error'
+                });
+            }
+        });
+    });
         const productTypeRadioButtons = document.querySelectorAll('input[type="radio"][name="productType"]');
         productTypeRadioButtons.forEach(function (radioButton) {
             radioButton.addEventListener('click', function () {
@@ -227,5 +283,9 @@
                 }
             });
         });
+            
     });
+
+
+
 </script>

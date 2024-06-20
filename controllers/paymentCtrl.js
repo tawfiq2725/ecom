@@ -22,7 +22,7 @@ const getWallet = async (req, res) => {
 
         res.render('user/wallet', {
             title: "Wallet",
-            wallet: wallet || { balance: 0 }, // Default to zero balance if no wallet found
+            wallet: wallet || { balance: 0 },
             transactions
         });
     } catch (error) {
@@ -80,7 +80,7 @@ const initiatePayment = async (req, res) => {
 const verifyPayment = async (req, res) => {
     try {
         if (!req.session.user) {
-            return res.redirect('/login'); // Redirect to login if session not found
+            return res.redirect('/login');
         }
 
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount, note } = req.body;
@@ -93,9 +93,9 @@ const verifyPayment = async (req, res) => {
         if (generated_signature === razorpay_signature) {
             try {
                 const userId = req.session.user._id;
-                let wallet = await Wallet.findOne({ userId });
+                const wallet = await Wallet.findOne({ userId });
                 if (!wallet) {
-                    wallet = new Wallet({ userId, balance: 0, transactions: [] });
+                    return res.status(400).json({ success: false, message: 'Wallet not found' });
                 }
 
                 // Update wallet balance and add transaction
@@ -126,6 +126,7 @@ const verifyPayment = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
 
 module.exports = {
     getWallet,

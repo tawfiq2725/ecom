@@ -55,32 +55,26 @@
                      </div>
                      <h4 class="widget-title">Payment Method</h4>
                      <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard"
-                           value="CreditCard">
-                        <label class="form-check-label" for="creditCard">
-                           Credit Card
-                        </label>
-                     </div>
-                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD">
                         <label class="form-check-label" for="cod">
                            Cash on Delivery
                         </label>
                      </div>
-                     <div id="creditCardForm" style="display: none;">
-                        <div class="form-group">
-                           <label for="card-number">Card Number <span class="required">*</span></label>
-                           <input id="card-number" class="form-control" type="tel" placeholder="•••• •••• •••• ••••">
-                        </div>
-                        <div class="form-group half-width padding-right">
-                           <label for="card-expiry">Expiry (MM/YY) <span class="required">*</span></label>
-                           <input id="card-expiry" class="form-control" type="tel" placeholder="MM / YY">
-                        </div>
-                        <div class="form-group half-width padding-left">
-                           <label for="card-cvc">Card Code <span class="required">*</span></label>
-                           <input id="card-cvc" class="form-control" type="tel" maxlength="4" placeholder="CVC">
-                        </div>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="wallet" value="Wallet">
+                        <label class="form-check-label" for="wallet">
+                           Wallet
+                        </label>
                      </div>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay"
+                           value="Razorpay">
+                        <label class="form-check-label" for="razorpay">
+                           Razorpay
+                        </label>
+                     </div>
+
+
 
                      <button type="submit" class="btn btn-main mt-20">Place Order</button>
                   </form>
@@ -102,19 +96,22 @@
                      </div>
                      {{/each}}
                      <ul class="summary-prices">
-  <li>
-    <span>Shipping:</span>
-    <span>Free</span>
-  </li>
-  <li>
-    <span>Coupon Code:</span>
-    <span><a href="#" id="openCouponModal">Enter Coupon Code</a></span>
-  </li>
-</ul>
-<div class="summary-total">
-  <span>Total</span>
-  <span class="price">${{cart.totalPrice}}</span>
-</div>
+                        <li>
+                           <span>Shipping:</span>
+                           <span>Free</span>
+                        </li>
+                        <li id="couponInfo">
+                           <span>Coupon Code:</span>
+                           <span>
+                              <a href="#" id="openCouponModal">Enter Coupon Code</a>
+                              <a href="#" id="removeCoupon" style="display:none;">Remove Coupon</a>
+                           </span>
+                        </li>
+                     </ul>
+                     <div class="summary-total">
+                        <span>Total</span>
+                        <span class="price">${{cart.totalPrice}}</span>
+                     </div>
 
                      <div class="verified-icon">
                         <img src="/images/shop/verified.png" alt="Verified">
@@ -144,6 +141,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
    document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('input[name="addressId"]').forEach(radio => {
@@ -157,97 +155,121 @@
          });
       });
 
-      document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
-         radio.addEventListener('change', function () {
-            const creditCardForm = document.getElementById('creditCardForm');
-            if (this.value === 'CreditCard') {
-               creditCardForm.style.display = 'block';
-            } else {
-               creditCardForm.style.display = 'none';
-            }
-         });
-      });
-
-      // Open coupon modal
       document.getElementById('openCouponModal').addEventListener('click', function (event) {
          event.preventDefault();
          $('#coupon-modal').modal('show');
       });
 
-      // Apply coupon from modal
-  document.getElementById('applyModalCoupon').addEventListener('click', function() {
-    const couponCode = document.getElementById('modalCouponCode').value;
-    // Call server to validate coupon and get discount
-    fetch('/api/apply-coupon', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ couponCode })
-    })
-    .then(response => {
-      if (!response.ok) {
-        return response.json().then(err => { throw new Error(err.message); });
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        // Set the hidden input value
-        document.getElementById('hiddenCouponCode').value = couponCode;
+       document.getElementById('applyModalCoupon').addEventListener('click', function () {
+        const couponCode = document.getElementById('modalCouponCode').value;
+        fetch('/api/apply-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ couponCode })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.message); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                document.getElementById('hiddenCouponCode').value = couponCode;
+                document.getElementById('removeCoupon').style.display = 'inline';
 
-        // Update the total price and discount
-        const newTotalPriceElement = document.querySelector('.summary-total .price');
-        const discountAmountElement = document.querySelector('.summary-prices li span:last-child');
-        const summaryPrices = document.querySelector('.summary-prices');
+                const newTotalPriceElement = document.querySelector('.summary-total .price');
+                const couponInfo = document.getElementById('couponInfo');
 
-        if (newTotalPriceElement && discountAmountElement && summaryPrices) {
-          newTotalPriceElement.textContent = `$${data.newTotal}`;
-          discountAmountElement.innerHTML = `Coupon Applied: -$${data.discountAmount}`;
-          // Update the subtotal if necessary
-          const subtotalElement = summaryPrices.querySelector('.price');
-          if (subtotalElement) {
-            subtotalElement.textContent = `$${(parseFloat(data.newTotal) + parseFloat(data.discountAmount)).toFixed(2)}`;
-          }
-        }
-
-        $('#coupon-modal').modal('hide');
-        Swal.fire({
-          title: 'Coupon Applied',
-          text: `Discount applied: $${data.discountAmount}`,
-          icon: 'success',
-          confirmButtonText: 'OK'
+                if (newTotalPriceElement && couponInfo) {
+                    newTotalPriceElement.textContent = `$${data.newTotal}`;
+                    couponInfo.innerHTML = `Coupon Applied: -$${data.discountAmount} <a href="#" id="removeCoupon">Remove Coupon</a>`;
+                    $('#coupon-modal').modal('hide');
+                    Swal.fire({
+                        title: 'Coupon Applied',
+                        text: `Discount applied: $${data.discountAmount}`,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } else {
+                Swal.fire({
+                    title: 'Invalid Coupon',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error applying coupon:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred while applying the coupon. Please try again later.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         });
-      } else {
-        Swal.fire({
-          title: 'Invalid Coupon',
-          text: data.message,
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-      }
-    })
-    .catch(error => {
-      console.error('Error applying coupon:', error);
-      Swal.fire({
-        title: 'Error',
-        text: 'An error occurred while applying the coupon. Please try again later.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
     });
-  });
 
+    document.addEventListener('click', function(event) {
+        if (event.target && event.target.id === 'removeCoupon') {
+            event.preventDefault();
+            fetch('/api/remove-coupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('hiddenCouponCode').value = '';
+                    document.getElementById('removeCoupon').style.display = 'none';
 
+                    const newTotalPriceElement = document.querySelector('.summary-total .price');
+                    const couponInfo = document.getElementById('couponInfo');
 
+                    if (newTotalPriceElement && couponInfo) {
+                        newTotalPriceElement.textContent = `$${data.totalAmount}`;
+                        couponInfo.innerHTML = `<span>Coupon Code:</span> <span><a href="#" id="openCouponModal">Enter Coupon Code</a></span>`;
+                        Swal.fire({
+                            title: 'Coupon Removed',
+                            text: 'Coupon has been removed.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while removing the coupon. Please try again later.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error removing coupon:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred while removing the coupon. Please try again later.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+    });
 
-document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent the form from submitting immediately
+      document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
+         event.preventDefault();
 
-        const isAddingNewAddress = document.querySelector('input[name="addressId"]:checked').value === 'new';
-        document.getElementById('isAddingNewAddress').value = isAddingNewAddress;
+         const isAddingNewAddress = document.querySelector('input[name="addressId"]:checked').value === 'new';
+         document.getElementById('isAddingNewAddress').value = isAddingNewAddress;
 
-        if (isAddingNewAddress) {
+         if (isAddingNewAddress) {
             const place = document.getElementById('place').value;
             const houseNumber = document.getElementById('houseNumber').value;
             const street = document.getElementById('street').value;
@@ -256,23 +278,127 @@ document.querySelector('form.checkout-form').addEventListener('submit', function
             const country = document.getElementById('country').value;
 
             if (!place || !houseNumber || !street || !city || !zipcode || !country) {
-                alert('Please fill out all fields for the new address.');
-                return;
+               alert('Please fill out all fields for the new address.');
+               return;
             }
-        }
+         }
 
-        Swal.fire({
-            title: 'Confirm Order',
-            text: "Are you sure you want to place this order?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, place order!',
-            cancelButtonText: 'No, cancel!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                event.target.submit();
-            }
-        });
-    });
+         const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+         if (selectedPaymentMethod === 'Razorpay') {
+            // Fetch order details from the server
+            fetch('/api/create-order', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json'
+               },
+               body: JSON.stringify({
+                  addressId: document.querySelector('input[name="addressId"]:checked').value,
+                  paymentMethod: selectedPaymentMethod,
+                  place: place,
+                  houseNumber: houseNumber,
+                  street: street,
+                  city: city,
+                  zipcode: zipcode,
+                  country: country,
+                  couponCode: document.getElementById('hiddenCouponCode').value
+               })
+            })
+               .then(response => response.json())
+               .then(data => {
+                  if (data.success && data.razorpayOrderId) {
+                     const options = {
+                        key: data.razorpayKeyId,
+                        amount: data.totalAmount * 100, // in paise
+                        currency: 'INR',
+                        name: 'Hossom Shirts',
+                        description: 'Order Payment',
+                        order_id: data.razorpayOrderId,
+                        handler: function (response) {
+                           // Verify payment on the server
+                           fetch('/api/verify-payment', {
+                              method: 'POST',
+                              headers: {
+                                 'Content-Type': 'application/json'
+                              },
+                              body: JSON.stringify(response)
+                           })
+                              .then(response => response.json())
+                              .then(data => {
+                                 if (data.success) {
+                                    Swal.fire({
+                                       title: 'Payment Successful',
+                                       text: 'Your order has been placed successfully.',
+                                       icon: 'success',
+                                       confirmButtonText: 'OK'
+                                    }).then(() => {
+                                       window.location.href = '/confirm';
+                                    });
+                                 } else {
+                                    Swal.fire({
+                                       title: 'Payment Failed',
+                                       text: 'There was an issue with your payment. Please try again.',
+                                       icon: 'error',
+                                       confirmButtonText: 'OK'
+                                    });
+                                 }
+                              })
+                              .catch(error => {
+                                 console.error('Payment verification failed:', error);
+                                 Swal.fire({
+                                    title: 'Payment Verification Failed',
+                                    text: 'There was an error verifying your payment. Please contact support.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                 });
+                              });
+                        },
+                        prefill: {
+                           name: data.user.name,
+                           email: data.user.email,
+                           contact: data.user.phone
+                        },
+                        notes: {
+                           address: data.address
+                        },
+                        theme: {
+                           color: '#3399cc'
+                        }
+                     };
+                     const rzp = new Razorpay(options);
+                     rzp.open();
+                  } else {
+                     Swal.fire({
+                        title: 'Order Creation Failed',
+                        text: data.message || 'There was an error creating your order. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                     });
+                  }
+               })
+               .catch(error => {
+                  console.error('Order creation failed:', error);
+                  Swal.fire({
+                     title: 'Order Creation Failed',
+                     text: 'There was an error creating your order. Please try again.',
+                     icon: 'error',
+                     confirmButtonText: 'OK'
+                  });
+               });
+         } else {
+            Swal.fire({
+               title: 'Confirm Order',
+               text: "Are you sure you want to place this order?",
+               icon: 'warning',
+               showCancelButton: true,
+               confirmButtonText: 'Yes, place order!',
+               cancelButtonText: 'No, cancel!'
+            }).then((result) => {
+               if (result.isConfirmed) {
+                  event.target.submit();
+               }
+            });
+         }
+      });
    });
 </script>

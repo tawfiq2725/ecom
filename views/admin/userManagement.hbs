@@ -90,11 +90,13 @@
                 confirmButtonText: confirmButtonText
             }).then((result) => {
                 if (result.isConfirmed) {
+                    window.location.href = `/admin/userm`
                     fetch(`/admin/${action}/${userId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         }
+                        
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -108,9 +110,11 @@
                             if (action === 'block') {
                                 button.removeClass('btn-danger').addClass('btn-success').text('Unblock').data('status', 'unblock');
                                 button.closest('tr').find('td:nth-child(4)').text('Blocked');
+                                 
                             } else {
                                 button.removeClass('btn-success').addClass('btn-danger').text('Block').data('status', 'block');
                                 button.closest('tr').find('td:nth-child(4)').text('Active');
+                                
                             }
                         } else {
                             Swal.fire(
