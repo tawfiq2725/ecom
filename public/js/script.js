@@ -1,10 +1,3 @@
-/**
- * WEBSITE: https://themefisher.com
- * TWITTER: https://twitter.com/themefisher
- * FACEBOOK: https://www.facebook.com/themefisher
- * GITHUB: https://github.com/themefisher/
- */
-
 (function ($) {
   'use strict';
 
@@ -15,24 +8,23 @@
     });
   });
 
-  
-  // Instagram Feed
-  if (($('#instafeed').length) !== 0) {
-    var accessToken = $('#instafeed').attr('data-accessToken');
-    var userFeed = new Instafeed({
-      get: 'user',
-      resolution: 'low_resolution',
-      accessToken: accessToken,
-      template: '<a href="{{link}}"><img src="{{image}}" alt="instagram-image"></a>'
-    });
-    userFeed.run();
-  }
 
+
+  // Initialize Slick Carousel for hero-slider
+  $('.hero-slider').slick({
+    autoplay: true,
+    autoplaySpeed: 2000,
+    dots: true,
+    arrows: true,
+    fade: true,
+    cssEase: 'linear'
+  });
+
+  // Initialize Slick Carousel for instagram-slider after the user feed is populated
   setTimeout(function () {
     $('.instagram-slider').slick({
       dots: false,
       speed: 300,
-      // autoplay: true,
       arrows: false,
       slidesToShow: 6,
       slidesToScroll: 1,
@@ -58,17 +50,14 @@
     });
   }, 1500);
 
-
   // e-commerce touchspin
-  $('input[name=\'product-quantity\']').TouchSpin();
-
+  $('input[name="product-quantity"]').TouchSpin();
 
   // Video Lightbox
   $(document).on('click', '[data-toggle="lightbox"]', function (event) {
     event.preventDefault();
     $(this).ekkoLightbox();
   });
-
 
   // Count Down JS
   $('#simple-timer').syotimer({
@@ -78,7 +67,5 @@
     hour: 20,
     minute: 30
   });
-
-
 
 })(jQuery);

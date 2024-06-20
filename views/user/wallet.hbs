@@ -1,0 +1,44 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <section class="user-dashboard page-wrapper">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="list-inline dashboard-menu text-center">
+                        <li><a href="/profile">Profile Details</a></li>
+                        <li><a href="/address">Address</a></li>
+                        <li><a class="active" href="/wallet">Wallet</a></li>
+                        <li><a href="/orders">Orders</a></li>
+                    </ul>
+                    <div class="dashboard-wrapper user-dashboard">
+                        <div class="wallet-summary">
+                            <h2>Wallet Balance: ₹{{wallet.balance}}</h2>
+                            <a href="/wallet/add-money" class="btn btn-primary">Add Money</a>
+                        </div>
+                        <div class="table-responsive">
+                            <h3>Transaction History</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Note</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each transactions}}
+                                    <tr>
+                                        <td>{{formatDate this.createdAt}}</td>
+                                        <td>₹{{this.amount}}</td>
+                                        <td>{{this.description}}</td>
+                                        <td>{{this.type}}</td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>

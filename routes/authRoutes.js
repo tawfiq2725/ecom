@@ -4,6 +4,7 @@ const userController = require('../controllers/userCtrl');
 const addressController = require('../controllers/addressCtrl')
 const usersideCtrl = require('../controllers/usersideCtrl')
 const orderCtrl = require('../controllers/orderCtrl')
+const paymentCtrl = require('../controllers/paymentCtrl')
 const passport = require('../config/passport-config');
 const isBlocked = require('../middlewares/auth');
 
@@ -67,5 +68,11 @@ router.get('/orders', orderCtrl.getUserOrders);
 router.get('/orders/:id', orderCtrl.getOrderDetails);
 router.post('/orders/:id/cancel', orderCtrl.cancelOrder);
 
+
+// Payment Routes
+router.get('/wallet', paymentCtrl.getWallet);
+router.get('/wallet/add-money', paymentCtrl.addMoneyForm);
+router.post('/add-money', paymentCtrl.initiatePayment);
+router.post('/verify-payment', paymentCtrl.verifyPayment);
 
 module.exports = router;

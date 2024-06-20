@@ -1,5 +1,4 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <section class="user-dashboard page-wrapper">
   <div class="container">
     <div class="row">
@@ -44,33 +43,39 @@
               </tbody>
             </table>
           </div>
-          <form action="/address" method="POST">
+          <form id="addressForm" action="/address" method="POST">
             <div class="form-group">
               <label for="place">Place</label>
               <select name="place" class="form-control" required>
                 <option value="home">Home</option>
                 <option value="work">WorkPlace</option>
               </select>
+              <small class="error-message text-danger"></small>
             </div>
             <div class="form-group">
               <label for="houseNumber">House Number</label>
-              <input type="text" name="houseNumber" class="form-control" required>
+              <input type="text" name="houseNumber" class="form-control" >
+              <small class="error-message text-danger"></small>
             </div>
             <div class="form-group">
               <label for="street">Street</label>
-              <input type="text" name="street" class="form-control" required>
+              <input type="text" name="street" class="form-control" >
+              <small class="error-message text-danger"></small>
             </div>
             <div class="form-group">
               <label for="city">City</label>
-              <input type="text" name="city" class="form-control" required>
+              <input type="text" name="city" class="form-control" >
+              <small class="error-message text-danger"></small>
             </div>
             <div class="form-group">
               <label for="zipcode">Zipcode</label>
-              <input type="text" name="zipcode" class="form-control" required>
+              <input type="text" name="zipcode" class="form-control" >
+              <small class="error-message text-danger"></small>
             </div>
             <div class="form-group">
               <label for="country">Country</label>
-              <input type="text" name="country" class="form-control" required>
+              <input type="text" name="country" class="form-control" >
+              <small class="error-message text-danger"></small>
             </div>
             <button type="submit" class="btn btn-primary">Add Address</button>
           </form>
@@ -81,62 +86,143 @@
 </section>
 
 <script>
-  function deleteAddress(id) {
-    // Display a confirmation dialog
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // If confirmed, send the delete request
-        fetch(`/address/${id}`, { method: 'DELETE' })
-          .then(response => {
-            if (response.ok) {
-              // On successful deletion, show the success message
-              Swal.fire({
-                title: 'Deleted!',
-                text: 'Your address has been deleted.',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-              }).then(() => {
-                // Remove the deleted address row from the table
-                const row = document.querySelector(`tr[data-id="${id}"]`);
-                if (row) {
-                  row.remove();
-                }
-              });
-            } else {
-              // If deletion failed, show an error message
-              response.json().then(data => {
-                Swal.fire({
-                  title: 'Failed!',
-                  text: data.message || 'Failed to delete address.',
-                  icon: 'error'
-                });
-              });
-            }
-          })
-          .catch(error => {
-            // Handle any errors during the fetch operation
-            Swal.fire({
-              title: 'Error!',
-              text: 'An error occurred while deleting the address.',
-              icon: 'error'
-            });
-            console.error('Error deleting address:', error);
-          });
-      }
-    });
-  }
+document.getElementById('addressForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
-  function editAddress(id) {
-    // Redirect to the edit address page
+    // Clear previous error messages and reset input border colors
+    document.querySelectorAll('.error-message').forEach(function(el) {
+        el.textContent = '';
+    });
+    document.querySelectorAll('.form-control').forEach(function(el) {
+        el.style.borderColor = '';
+    });
+
+    var place = document.querySelector('select[name="place"]');
+    var houseNumber = document.querySelector('input[name="houseNumber"]');
+    var street = document.querySelector('input[name="street"]');
+    var city = document.querySelector('input[name="city"]');
+    var zipcode = document.querySelector('input[name="zipcode"]');
+    var country = document.querySelector('input[name="country"]');
+
+    var isValid = true;
+    var invalidFields = [];
+
+    if (place.value.trim() === '') {
+        invalidFields.push('Place');
+        place.style.borderColor = 'red';
+    }
+
+    if (houseNumber.value.trim() === '' || !/^[a-zA-Z0-9\s]+$/.test(houseNumber.value.trim())) {
+        invalidFields.push('House Number');
+        houseNumber.style.borderColor = 'red';
+    }
+
+    if (street.value.trim() === '' || !/^[a-zA-Z0-9\s]+$/.test(street.value.trim())) {
+        invalidFields.push('Street');
+        street.style.borderColor = 'red';
+    }
+
+    if (city.value.trim() === '' || !/^[a-zA-Z\s]+$/.test(city.value.trim())) {
+        invalidFields.push('City');
+        city.style.borderColor = 'red';
+    }
+
+    if (zipcode.value.trim() === '' || !/^\d{6}$/.test(zipcode.value.trim())) {
+        invalidFields.push('Zipcode');
+        zipcode.style.borderColor = 'red';
+    }
+
+    if (country.value.trim() === '' || !/^[a-zA-Z\s]+$/.test(country.value.trim())) {
+        invalidFields.push('Country');
+        country.style.borderColor = 'red';
+    }
+
+    if (invalidFields.length > 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please fill in the required fields correctly: ' + invalidFields.join(', ')
+        });
+
+        isValid = false;
+    }
+
+    if (isValid) {
+        this.submit();
+    }
+});
+
+document.querySelectorAll('.form-control').forEach(function(input) {
+    input.addEventListener('input', function() {
+        this.style.borderColor = '';
+    });
+});
+
+function deleteAddress(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/address/${id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'Your address has been deleted.',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            const row = document.querySelector(`tr[data-id="${id}"]`);
+                            if (row) {
+                                row.remove();
+                            }
+                        });
+                    } else {
+                        response.json().then(data => {
+                            Swal.fire({
+                                title: 'Failed!',
+                                text: data.message || 'Failed to delete address.',
+                                icon: 'error'
+                            });
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while deleting the address.',
+                        icon: 'error'
+                    });
+                    console.error('Error deleting address:', error);
+                });
+        }
+    });
+}
+
+function editAddress(id) {
     window.location.href = `/address/edit/${id}`;
-  }
+}
 </script>
+
+<style>
+.error-message {
+    font-size: 0.875em;
+    color: red;
+    margin-top: 0.25em;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.input-container + .error-message {
+    margin-top: 0.5rem;
+}
+</style>
