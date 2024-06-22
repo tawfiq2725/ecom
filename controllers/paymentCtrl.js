@@ -76,11 +76,12 @@ const initiatePayment = async (req, res) => {
     }
 };
 
+
 // Verify the Razorpay payment signature and update the wallet
 const verifyPayment = async (req, res) => {
     try {
         if (!req.session.user) {
-            return res.redirect('/login');
+            return res.redirect('/login'); // Redirect to login if session not found
         }
 
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount, note } = req.body;
@@ -93,9 +94,9 @@ const verifyPayment = async (req, res) => {
         if (generated_signature === razorpay_signature) {
             try {
                 const userId = req.session.user._id;
-                const wallet = await Wallet.findOne({ userId });
+                let wallet = await Wallet.findOne({ userId });
                 if (!wallet) {
-                    return res.status(400).json({ success: false, message: 'Wallet not found' });
+                    wallet = new Wallet({ userId, balance: 0, transactions: [] });
                 }
 
                 // Update wallet balance and add transaction
@@ -123,9 +124,9 @@ const verifyPayment = async (req, res) => {
         }
     } catch (error) {
         console.error('Error verifying payment:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-};
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
 
 
 module.exports = {

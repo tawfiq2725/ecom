@@ -79,7 +79,7 @@
                         <h4>Payment Status</h4>
                         <p>{{order.paymentStatus}}</p>
                         {{#ifCond order.orderStatus '===' 'Pending'}}
-                        <a href="/orders/cancel/{{order._id}}" class="btn btn-main btn-small">Cancel Order</a>
+                        <a href="#" class="btn btn-main btn-small" id="cancelOrderBtn">Cancel Order</a>
                         {{/ifCond}}
                     </div>
                 </div>
@@ -89,7 +89,6 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
     document.getElementById('cancelOrderBtn').addEventListener('click', function () {
         Swal.fire({
@@ -106,24 +105,20 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ _csrf: '{{csrfToken}}' })  // Include CSRF token if using CSRF protection
-                }).then(response => {
-                    if (response.ok) {
-                        Swal.fire(
-                            'Cancelled!',
-                            'Your order has been cancelled.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire(
-                            'Error!',
-                            'There was a problem cancelling your order.',
-                            'error'
-                        );
                     }
+                }).then(response => {
+                    return response.json().then(data => {
+                        if (response.ok) {
+                            Swal.fire('Cancelled!', 'Your order has been cancelled.', 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', data.message || 'There was a problem cancelling your order.', 'error');
+                        }
+                    });
+                }).catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error!', 'An unexpected error occurred.', 'error');
                 });
             }
         });

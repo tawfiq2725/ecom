@@ -32,6 +32,7 @@
                                         <th>Used By</th>
                                         <th>Status</th>
                                         <th>Expiry Date</th>
+                                        <th>Edit</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -46,13 +47,14 @@
                                         <td>{{this.usedBy}}</td>
                                         <td>{{this.status}}</td>
                                         <td>{{formatDate this.expiryDate}}</td>
+                                        <td><a href="/admin/coupon/edit/{{this._id}}" class="btn btn-primary btn-sm">Edit</a></td>
                                         <td>
                                             {{#if (eq this.status "Active")}}
                                                 <button class="btn btn-danger btn-sm unlist-btn" data-id="{{this._id}}">Unlist</button>
                                             {{else}}
                                                 <button class="btn btn-success btn-sm list-btn" data-id="{{this._id}}">List</button>
                                             {{/if}}
-                                            <a href="/admin/coupon/edit/{{this._id}}" class="btn btn-primary btn-sm">Edit</a>
+                                            
                                         </td>
                                     </tr>
                                     {{/each}}

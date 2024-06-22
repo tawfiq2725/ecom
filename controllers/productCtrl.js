@@ -180,13 +180,12 @@ const getOrderList = async (req, res) => {
             .sort({ createdAt: -1 })
             .lean();
 
-        return res.render('admin/ordermanagement', { orders, layout: 'adminlayout', title:"Order Management" });
+        return res.render('admin/ordermanagement', { orders, layout: 'adminlayout', title: "Order Management" });
     } catch (error) {
         console.error(error);
         return res.status(500).send('Server Error');
     }
 };
-
 
 const updateOrderStatus = async (req, res) => {
     try {
@@ -215,6 +214,7 @@ const updateOrderStatus = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 };
+
 
 
 

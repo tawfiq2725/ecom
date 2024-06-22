@@ -18,41 +18,8 @@
                         </label>
                      </div>
                      {{/each}}
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="addressId" id="newAddress" value="new">
-                        <label class="form-check-label" for="newAddress">
-                           Enter new address
-                        </label>
-                     </div>
-                     <div id="newAddressForm" style="display: none;">
-                        <div class="form-group">
-                           <select class="form-control" id="place" name="place">
-                              <option value="home">Home</option>
-                              <option value="work">Work</option>
-                           </select>
-                        </div>
-                        <div class="form-group">
-                           <label for="houseNumber">House Number</label>
-                           <input type="text" class="form-control" id="houseNumber" name="houseNumber"
-                              placeholder="House Number">
-                        </div>
-                        <div class="form-group">
-                           <label for="street">Street</label>
-                           <input type="text" class="form-control" id="street" name="street" placeholder="Street">
-                        </div>
-                        <div class="form-group">
-                           <label for="city">City</label>
-                           <input type="text" class="form-control" id="city" name="city" placeholder="City">
-                        </div>
-                        <div class="form-group">
-                           <label for="zipcode">Zip Code</label>
-                           <input type="text" class="form-control" id="zipcode" name="zipcode" placeholder="Zip Code">
-                        </div>
-                        <div class="form-group">
-                           <label for="country">Country</label>
-                           <input type="text" class="form-control" id="country" name="country" placeholder="Country">
-                        </div>
-                     </div>
+                   
+                     
                      <h4 class="widget-title">Payment Method</h4>
                      <div class="form-check">
                         <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD">
@@ -264,141 +231,130 @@
     });
 
       document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
-         event.preventDefault();
+        event.preventDefault();
 
-         const isAddingNewAddress = document.querySelector('input[name="addressId"]:checked').value === 'new';
-         document.getElementById('isAddingNewAddress').value = isAddingNewAddress;
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        const selectedAddressRadio = document.querySelector('input[name="addressId"]:checked');
+        const selectedAddressLabel = selectedAddressRadio.nextElementSibling.textContent.split(',');
 
-         if (isAddingNewAddress) {
-            const place = document.getElementById('place').value;
-            const houseNumber = document.getElementById('houseNumber').value;
-            const street = document.getElementById('street').value;
-            const city = document.getElementById('city').value;
-            const zipcode = document.getElementById('zipcode').value;
-            const country = document.getElementById('country').value;
+        const addressDetails = {
+            place: selectedAddressLabel[0].trim(),
+            houseNumber: selectedAddressLabel[1].trim(),
+            street: selectedAddressLabel[2].trim(),
+            city: selectedAddressLabel[3].trim(),
+            zipcode: selectedAddressLabel[4].trim(),
+            country: selectedAddressLabel[5].trim()
+        };
 
-            if (!place || !houseNumber || !street || !city || !zipcode || !country) {
-               alert('Please fill out all fields for the new address.');
-               return;
-            }
-         }
-
-         const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
-         if (selectedPaymentMethod === 'Razorpay') {
-            // Fetch order details from the server
-            fetch('/api/create-order', {
-               method: 'POST',
-               headers: {
-                  'Content-Type': 'application/json'
-               },
-               body: JSON.stringify({
-                  addressId: document.querySelector('input[name="addressId"]:checked').value,
-                  paymentMethod: selectedPaymentMethod,
-                  place: place,
-                  houseNumber: houseNumber,
-                  street: street,
-                  city: city,
-                  zipcode: zipcode,
-                  country: country,
-                  couponCode: document.getElementById('hiddenCouponCode').value
-               })
-            })
-               .then(response => response.json())
-               .then(data => {
-                  if (data.success && data.razorpayOrderId) {
-                     const options = {
-                        key: data.razorpayKeyId,
-                        amount: data.totalAmount * 100, // in paise
-                        currency: 'INR',
-                        name: 'Hossom Shirts',
-                        description: 'Order Payment',
-                        order_id: data.razorpayOrderId,
-                        handler: function (response) {
-                           // Verify payment on the server
-                           fetch('/api/verify-payment', {
-                              method: 'POST',
-                              headers: {
-                                 'Content-Type': 'application/json'
-                              },
-                              body: JSON.stringify(response)
-                           })
-                              .then(response => response.json())
-                              .then(data => {
-                                 if (data.success) {
-                                    Swal.fire({
-                                       title: 'Payment Successful',
-                                       text: 'Your order has been placed successfully.',
-                                       icon: 'success',
-                                       confirmButtonText: 'OK'
-                                    }).then(() => {
-                                       window.location.href = '/confirm';
+        Swal.fire({
+            title: 'Confirm Order',
+            text: "Are you sure you want to place this order?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, place order!',
+            cancelButtonText: 'No, cancel!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (selectedPaymentMethod === 'Razorpay') {
+                    // Fetch order details from the server
+                    fetch('/api/create-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            addressId: selectedAddressRadio.value,
+                            paymentMethod: selectedPaymentMethod,
+                            ...addressDetails,
+                            couponCode: document.getElementById('hiddenCouponCode').value
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.razorpayOrderId) {
+                            const options = {
+                                key: data.razorpayKeyId,
+                                amount: data.totalAmount * 100, // in paise
+                                currency: 'INR',
+                                name: 'Hossom Shirts',
+                                description: 'Order Payment',
+                                order_id: data.razorpayOrderId,
+                                handler: function (response) {
+                                    // Verify payment on the server
+                                    fetch('/api/verify-payment', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(response)
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            Swal.fire({
+                                                title: 'Payment Successful',
+                                                text: 'Your order has been placed successfully.',
+                                                icon: 'success',
+                                                confirmButtonText: 'OK'
+                                            }).then(() => {
+                                                window.location.href = '/confirm';
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                                title: 'Payment Failed',
+                                                text: 'There was an issue with your payment. Please try again.',
+                                                icon: 'error',
+                                                confirmButtonText: 'OK'
+                                            });
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Payment verification failed:', error);
+                                        Swal.fire({
+                                            title: 'Payment Verification Failed',
+                                            text: 'There was an error verifying your payment. Please contact support.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK'
+                                        });
                                     });
-                                 } else {
-                                    Swal.fire({
-                                       title: 'Payment Failed',
-                                       text: 'There was an issue with your payment. Please try again.',
-                                       icon: 'error',
-                                       confirmButtonText: 'OK'
-                                    });
-                                 }
-                              })
-                              .catch(error => {
-                                 console.error('Payment verification failed:', error);
-                                 Swal.fire({
-                                    title: 'Payment Verification Failed',
-                                    text: 'There was an error verifying your payment. Please contact support.',
-                                    icon: 'error',
-                                    confirmButtonText: 'OK'
-                                 });
-                              });
-                        },
-                        prefill: {
-                           name: data.user.name,
-                           email: data.user.email,
-                           contact: data.user.phone
-                        },
-                        notes: {
-                           address: data.address
-                        },
-                        theme: {
-                           color: '#3399cc'
+                                },
+                                prefill: {
+                                    name: data.user.name,
+                                    email: data.user.email,
+                                    contact: data.user.phone
+                                },
+                                notes: {
+                                    address: data.address
+                                },
+                                theme: {
+                                    color: '#3399cc'
+                                }
+                            };
+                            const rzp = new Razorpay(options);
+                            rzp.open();
+                        } else {
+                            Swal.fire({
+                                title: 'Order Creation Failed',
+                                text: data.message || 'There was an error creating your order. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
                         }
-                     };
-                     const rzp = new Razorpay(options);
-                     rzp.open();
-                  } else {
-                     Swal.fire({
-                        title: 'Order Creation Failed',
-                        text: data.message || 'There was an error creating your order. Please try again.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                     });
-                  }
-               })
-               .catch(error => {
-                  console.error('Order creation failed:', error);
-                  Swal.fire({
-                     title: 'Order Creation Failed',
-                     text: 'There was an error creating your order. Please try again.',
-                     icon: 'error',
-                     confirmButtonText: 'OK'
-                  });
-               });
-         } else {
-            Swal.fire({
-               title: 'Confirm Order',
-               text: "Are you sure you want to place this order?",
-               icon: 'warning',
-               showCancelButton: true,
-               confirmButtonText: 'Yes, place order!',
-               cancelButtonText: 'No, cancel!'
-            }).then((result) => {
-               if (result.isConfirmed) {
-                  event.target.submit();
-               }
-            });
-         }
-      });
-   });
+                    })
+                    .catch(error => {
+                        console.error('Order creation failed:', error);
+                        Swal.fire({
+                            title: 'Order Creation Failed',
+                            text: 'There was an error creating your order. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                } else {
+                    event.target.submit();
+                }
+            }
+        });
+    });
+});
 </script>
