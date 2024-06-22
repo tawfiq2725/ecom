@@ -1,5 +1,6 @@
 const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
+const Return = require('../models/returnSchema')
 const Order = require('../models/orderSchema')
 // Get All Products
 const getProducts = async (req, res) => {
@@ -215,6 +216,47 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
+const getReturnList = async (req, res) => {
+    try {
+        if (!req.session.admin) {
+            return res.redirect('/admin/login');
+        }
+        const returns = await Return.find()
+            .populate('user', 'firstname lastname')
+            .populate('order', 'totalAmount')
+            .populate('items.product', 'name')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return res.render('admin/returnmanagement', { returns, layout: 'adminlayout', title: "Return Management" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('Server Error');
+    }
+};
+
+const updateReturnStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const returnRequest = await Return.findById(id);
+
+        if (!returnRequest) {
+            return res.status(404).json({ success: false, message: 'Return request not found' });
+        }
+
+        console.log(`Updating return request ${id} status to ${status}`);
+
+        returnRequest.status = status;
+        await returnRequest.save();
+
+        res.json({ success: true, message: 'Return request status updated' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+};
 
 
 
@@ -229,5 +271,7 @@ module.exports = {
     getManageStockPage,
     updateStock,
     getOrderList,
-    updateOrderStatus
+    updateOrderStatus,
+    getReturnList,
+    updateReturnStatus
 };

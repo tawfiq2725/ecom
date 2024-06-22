@@ -8,7 +8,7 @@
                   <form class="checkout-form" method="POST" action="/orders">
                      <input type="hidden" id="isAddingNewAddress" name="isAddingNewAddress" value="false">
                      <input type="hidden" name="couponCode" id="hiddenCouponCode">
-
+                     {{#if addresses}}
                      {{#each addresses}}
                      <div class="form-check">
                         <input class="form-check-input" type="radio" name="addressId" id="address{{_id}}"
@@ -17,7 +17,15 @@
                            {{place}}, {{houseNumber}}, {{street}}, {{city}}, {{zipcode}}, {{country}}
                         </label>
                      </div>
+                     <div class="form-check">
+                         <a href="/address" role="button" class="btn btn-success">Add Address</a>
+                     </div>
                      {{/each}}
+                     {{else}}
+                     <div class="form-check">
+                        <a href="/address" role="button" class="btn btn-success">Add Address</a>
+                     </div>
+                     {{/if}}
                    
                      
                      <h4 class="widget-title">Payment Method</h4>

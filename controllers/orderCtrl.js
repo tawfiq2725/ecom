@@ -5,6 +5,7 @@
     const Product = require('../models/productSchema');
     const Coupon = require('../models/couponSchema')
     const Wallet = require('../models/walletSchema')
+    const Return = require('../models/returnSchema');
     const Transaction = require('../models/transactionSchema')
     const Razorpay = require('razorpay')
     // Create a new order
@@ -467,6 +468,66 @@ const cancelOrder = async (req, res) => {
             res.status(500).json({ success: false, message: 'Server error' });
         }
     };
+    const createReturnRequest = async (req, res) => {
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
+    
+        try {
+            const userId = req.session.user._id;
+            const { orderId, items, reason } = req.body;
+    
+            const order = await Order.findOne({ _id: orderId, user: userId });
+            if (!order) {
+                return res.status(404).json({ success: false, message: 'Order not found' });
+            }
+    
+            if (order.orderStatus !== 'Delivered') {
+                return res.status(400).json({ success: false, message: 'Return request can only be made for delivered orders' });
+            }
+    
+            const returnItems = items.map(item => ({
+                product: item.product,
+                size: item.size,
+                quantity: item.quantity,
+                price: item.price
+            }));
+    
+            const returnRequest = new Return({
+                user: userId,
+                order: orderId,
+                items: returnItems,
+                reason
+            });
+    
+            await returnRequest.save();
+    
+            res.status(201).json({ success: true, message: 'Return request created successfully' });
+        } catch (error) {
+            console.error('Error creating return request:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    };
+    
+    // Get all return requests for a user
+    const getUserReturnRequests = async (req, res) => {
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
+    
+        try {
+            const userId = req.session.user._id;
+            const returnRequests = await Return.find({ user: userId }).populate('order items.product');
+    
+            res.render('user/returns', {
+                title: "Return Requests",
+                returnRequests
+            });
+        } catch (error) {
+            console.error('Error fetching return requests:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    };
     module.exports = {
         createOrder,
         createRazorpayOrder,
@@ -476,5 +537,7 @@ const cancelOrder = async (req, res) => {
         getUserOrders,
         cancelOrder,
         applyCoupon,
-        removeCoupon
+        removeCoupon,
+        createReturnRequest,
+        getUserReturnRequests
     };

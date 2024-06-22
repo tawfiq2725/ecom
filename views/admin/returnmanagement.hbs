@@ -1,0 +1,134 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Return Management</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Return Management</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="returnTable" class="display table table-bordered" style="min-width: 845px">
+                                <thead>
+                                    <tr>
+                                        <th>Return ID</th>
+                                        <th>User</th>
+                                        <th>Order ID</th>
+                                        <th>Items</th>
+                                        <th>Reason</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each returns}}
+                                    <tr>
+                                        <td>{{this._id}}</td>
+                                        <td>{{this.user.firstname}} {{this.user.lastname}}</td>
+                                        <td>{{this.order._id}}</td>
+                                        <td>
+                                            {{#each this.items}}
+                                            <p>{{this.product.name}} - {{this.quantity}} x {{this.size}} - ₹{{this.price}}</p>
+                                            {{/each}}
+                                        </td>
+                                        <td>{{this.reason}}</td>
+                                        <td>{{formatDate this.createdAt}}</td>
+                                        <td>{{this.status}}</td>
+                                        <td>
+                                            <select class="form-control change-status" data-id="{{this._id}}" data-current-status="{{this.status}}">
+                                                <option value="Pending" {{#if (eq this.status "Pending")}}selected{{else}}disabled{{/if}}>Pending</option>
+                                                <option value="Approved" {{#if (eq this.status "Approved")}}selected{{else if (eq this.status "Pending")}}{{else}}disabled{{/if}}>Approved</option>
+                                                <option value="Rejected" {{#if (eq this.status "Rejected")}}selected{{else}}disabled{{/if}}>Rejected</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function() {
+        $('#returnTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": false,
+            "pageLength": 10
+        });
+
+        $('.change-status').on('change', function() {
+            var returnId = $(this).data('id');
+            var newStatus = $(this).val();
+            var currentStatus = $(this).data('current-status');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You want to change the status from "${currentStatus}" to "${newStatus}"!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, change it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/return/status/${returnId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(
+                                'Changed!',
+                                'Return request status has been changed.',
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                data.message || 'There was an error changing the return request status.',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire(
+                            'Error!',
+                            err.message || 'There was an error processing your request.',
+                            'error'
+                        );
+                    });
+                } else {
+                    $(this).val(currentStatus); // Revert to the previous status
+                }
+            });
+        });
+    });
+</script>

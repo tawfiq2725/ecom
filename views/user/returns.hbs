@@ -1,0 +1,58 @@
+<!-- views/user/returns.hbs -->
+<section class="return-requests page-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="list-inline dashboard-menu text-center">
+                    <li><a href="/profile">Profile Details</a></li>
+                    <li><a href="/address">Address</a></li>
+                    <li><a href="/wallet">Wallet</a></li>
+                     <li><a href="/wishlist">Whislist</a></li>
+                    <li><a href="/orders">Orders</a></li>
+                    <li><a href="/returns" class="active">Returns</a></li>
+                </ul>
+                <div class="dashboard-wrapper user-dashboard">
+                    <div class="return-requests-content">
+                        <h3>Return Requests</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Return ID</th>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each returnRequests}}
+                                <tr>
+                                    <td>#{{this._id}}</td>
+                                    <td>#{{this.order._id}}</td>
+                                    <td>{{formatDate this.createdAt}}</td>
+                                    <td>
+                                        <ul>
+                                            {{#each this.items}}
+                                            <li>{{this.product.name}} ({{this.size}}) x{{this.quantity}}</li>
+                                            {{/each}}
+                                        </ul>
+                                    </td>
+                                    <td>{{this.reason}}</td>
+                                    <td><span
+                                            class="label label-{{this.status}} btn btn-primary">{{this.status}}</span>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        {{#if returnRequests.length}}
+                        {{else}}
+                        <p>No return requests found.</p>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

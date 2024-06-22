@@ -1,0 +1,137 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Sales Report</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Sales Report</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="reportForm">
+                            <div class="form-group">
+                                <label for="type">Select Report Type</label>
+                                <select class="form-control" id="type" name="type" required>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fromDate">From Date</label>
+                                <input type="date" class="form-control" id="fromDate" name="fromDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="toDate">To Date</label>
+                                <input type="date" class="form-control" id="toDate" name="toDate">
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="fetchReport()">Generate Report</button>
+                        </form>
+
+                        <div id="reportResults" class="mt-4" style="display: none;">
+                            <h5>Report Details</h5>
+                            <p>Total Orders: <span id="totalOrders"></span></p>
+                            <p>Total Amount: <span id="totalAmount"></span></p>
+                            <p>Total Discount: <span id="totalDiscount"></span></p>
+
+                            <div class="table-responsive">
+                                <table id="reportTable" class="display table table-bordered" style="min-width: 845px">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>User</th>
+                                            <th>Order Date</th>
+                                            <th>Items</th>
+                                            <th>Total Amount</th>
+                                            <th>Coupon</th>
+                                            <th>Coupon Discount</th>
+                                            <th>Category Discount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <button class="btn btn-success" onclick="downloadReport('pdf')">Download PDF</button>
+                            <button class="btn btn-success" onclick="downloadReport('excel')">Download Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#reportTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": false,
+            "pageLength": 10
+        });
+    });
+
+    function fetchReport() {
+        const type = $('#type').val();
+        const fromDate = $('#fromDate').val();
+        const toDate = $('#toDate').val();
+
+        $.ajax({
+            url: '/admin/salesreport/generate',
+            method: 'GET',
+            data: { type, fromDate, toDate },
+            success: function(response) {
+                $('#reportResults').show();
+                $('#totalOrders').text(response.reportDetails.totalOrders);
+                $('#totalAmount').text(`₹${response.reportDetails.totalAmount}`);
+                $('#totalDiscount').text(`₹${response.reportDetails.totalDiscount}`);
+
+                const table = $('#reportTable').DataTable();
+                table.clear();
+                response.orders.forEach(order => {
+                    table.row.add([
+                        order._id,
+                        `${order.user.firstname} ${order.user.lastname}`,
+                        new Date(order.createdAt).toLocaleString(),
+                        order.items.map(item => `${item.product.name} - ${item.quantity} x ${item.size} - ₹${item.price}`).join('<br>'),
+                        `₹${order.totalAmount}`,
+                        order.coupon ? order.coupon.code : '',
+                        `₹${order.coupon ? order.coupon.discountAmount : 0}`,
+                        `₹${order.discountAmount}`
+                    ]).draw();
+                });
+            },
+            error: function(error) {
+                console.error(error);
+                alert('Failed to fetch the report');
+            }
+        });
+    }
+
+    function downloadReport(format) {
+        const type = $('#type').val();
+        const fromDate = $('#fromDate').val();
+        const toDate = $('#toDate').val();
+
+        const form = $('<form></form>').attr('action', '/admin/salesreport/download').attr('method', 'post');
+        form.append($('<input>').attr('type', 'hidden').attr('name', 'type').attr('value', type));
+        form.append($('<input>').attr('type', 'hidden').attr('name', 'fromDate').attr('value', fromDate));
+        form.append($('<input>').attr('type', 'hidden').attr('name', 'toDate').attr('value', toDate));
+        form.append($('<input>').attr('type', 'hidden').attr('name', 'format').attr('value', format));
+        form.appendTo('body').submit().remove();
+    }
+</script>

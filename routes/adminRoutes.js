@@ -5,6 +5,7 @@ const adminController = require('../controllers/adminCtrl');
 const categoryController = require('../controllers/categoryCtrl');
 const productController = require('../controllers/productCtrl');
 const couponController = require('../controllers/couponCtrl.js')
+const salesCtrl = require('../controllers/salesCtrl.js')
 
 // Admin routes
 routes.get(['/', '/login'], adminController.getLoginPage);
@@ -47,6 +48,14 @@ routes.post('/products/update-stock/:id', productController.updateStock);
 // Orders Management
 routes.get('/orders', productController.getOrderList);
 routes.put('/order/status/:id', productController.updateOrderStatus);
+
+// Return Management
+routes.get('/returns',productController.getReturnList);
+routes.put('/return/status/:id', productController.updateReturnStatus);
+
+routes.get('/salesreport', salesCtrl.getSalesReportPage);
+routes.get('/salesreport/generate', salesCtrl.generateSalesReport);
+routes.post('/salesreport/download', salesCtrl.downloadSalesReport);
 
 // List coupons
 routes.get('/coupons', couponController.listCoupons);

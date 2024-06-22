@@ -81,6 +81,9 @@ router.post('/orders/:id/cancel', orderCtrl.cancelOrder);
 router.post('/api/create-order', orderCtrl.createRazorpayOrder);
 router.post('/api/verify-payment', orderCtrl.verifyRazorpayPayment);
 
+// Return Management
+router.post('/returns', orderCtrl.createReturnRequest);
+router.get('/returns', orderCtrl.getUserReturnRequests);
 
 // Payment Routes
 router.get('/wallet', paymentCtrl.getWallet);

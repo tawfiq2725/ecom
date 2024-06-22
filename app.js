@@ -8,6 +8,7 @@ const flash = require('connect-flash');
 const passport = require('./config/passport-config');
 const Handlebars = require('handlebars'); // Ensure Handlebars is required
 const checkUserStatus = require('./middlewares/auth');
+
 // Configurations
 require('dotenv').config();
 require('./config/dbconnection');
@@ -53,7 +54,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
 // Register Handlebars helpers
 Handlebars.registerHelper('eq', function (a, b) {
     return a === b;
@@ -98,7 +98,6 @@ Handlebars.registerHelper('subtract', function (a, b) {
     return a - b;
 });
 
-
 Handlebars.registerHelper('range', function(start, end) {
     const range = [];
     for (let i = start; i <= end; i++) {
@@ -114,14 +113,17 @@ Handlebars.registerHelper('gt', function(a, b) {
 Handlebars.registerHelper('lt', function(a, b) {
     return a < b;
 });
+
 // Register the 'multiply' helper
 Handlebars.registerHelper('multiply', function (a, b) {
     return a * b;
-}); 
-// Define the json helper
-Handlebars.registerHelper('json', function(context) {
+});
+
+// Define the 'toJson' helper to stringify JSON
+Handlebars.registerHelper('toJson', function (context) {
     return JSON.stringify(context);
 });
+
 Handlebars.registerHelper('getMaxStock', function (variants) {
     let maxStock = 0;
     variants.forEach(variant => {
@@ -131,6 +133,7 @@ Handlebars.registerHelper('getMaxStock', function (variants) {
     });
     return maxStock;
 });
+
 Handlebars.registerHelper('formatDate', function (date) {
     return new Date(date).toLocaleDateString('en-GB', {
         day: 'numeric', 
@@ -155,9 +158,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 // Routes
-app.use('/',checkUserStatus,authRoutes);
-app.use('/admin', adminRoutes); 
+app.use('/', checkUserStatus, authRoutes);
+app.use('/admin', adminRoutes);
 app.use(express.static('public'));
+
+// Catch-all route for 404 Not Found
 app.get('*', function (req, res) {
     res.redirect("/pageNotFound");
 });
