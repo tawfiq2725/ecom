@@ -1,0 +1,97 @@
+<!--*******************
+    Preloader start
+********************-->
+<div id="preloader">
+    <div class="sk-three-bounce">
+        <div class="sk-child sk-bounce1"></div>
+        <div class="sk-child sk-bounce2"></div>
+        <div class="sk-child sk-bounce3"></div>
+    </div>
+</div>
+<!--*******************
+    Preloader end
+********************-->
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-2 mt-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="/admin/offers">Offer Management</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit Offer</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <div class="card-header">
+            <h4 class="card-title">Edit Offer</h4>
+        </div>
+        <form action="/admin/offers/edit/{{offer._id}}" method="POST">
+            <div class="form-group">
+                <label for="name">Offer Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{offer.name}}" required>
+            </div>
+            <div class="form-group">
+                <label for="discount">Discount (%)</label>
+                <input type="number" class="form-control" id="discount" name="discount" value="{{offer.discount}}" required>
+            </div>
+            <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" value="{{offer.startDate}}" required>
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" value="{{offer.endDate}}" required>
+            </div>
+            <div class="form-group">
+                <label for="type">Offer Type</label>
+                <select class="form-control" id="type" name="type" required>
+                    <option value="product" {{#if (eq offer.type 'product')}}selected{{/if}}>Product</option>
+                    <option value="category" {{#if (eq offer.type 'category')}}selected{{/if}}>Category</option>
+                </select>
+            </div>
+            <div class="form-group" id="productField" style="{{#unless (eq offer.type 'product')}}display:none;{{/unless}}">
+                <label for="product">Product</label>
+                <select class="form-control" id="product" name="product">
+                    <option value="">Select a Product</option>
+                    {{#each products}}
+                    <option value="{{this._id}}" {{#if (eq this._id offer.product)}}selected{{/if}}>{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-group" id="categoryField" style="{{#unless (eq offer.type 'category')}}display:none;{{/unless}}">
+                <label for="category">Category</label>
+                <select class="form-control" id="category" name="category">
+                    <option value="">Select a Category</option>
+                    {{#each categories}}
+                    <option value="{{this._id}}" {{#if (eq this._id offer.category)}}selected{{/if}}>{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Offer</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function toggleFields() {
+            var type = $('#type').val();
+            if (type === 'product') {
+                $('#productField').show();
+                $('#categoryField').hide();
+                $('#category').val('');
+            } else if (type === 'category') {
+                $('#categoryField').show();
+                $('#productField').hide();
+                $('#product').val('');
+            }
+        }
+
+        toggleFields(); // Initial call to set the correct visibility
+        $('#type').change(toggleFields); // Bind the function to the change event
+    });
+</script>
