@@ -5,6 +5,7 @@ const adminController = require('../controllers/adminCtrl');
 const categoryController = require('../controllers/categoryCtrl');
 const productController = require('../controllers/productCtrl');
 const couponController = require('../controllers/couponCtrl.js')
+const offerController = require('../controllers/offerCtrl.js');
 const salesCtrl = require('../controllers/salesCtrl.js')
 
 // Admin routes
@@ -66,5 +67,13 @@ routes.post('/coupon/edit/:id', couponController.editCoupon);
 routes.get('/coupon/list/:id', couponController.listCoupon);
 routes.get('/coupon/unlist/:id', couponController.unlistCoupon);
 
+
+
+routes.get('/offers', offerController.getOffers);
+routes.get('/offers/add', offerController.getAddOfferPage);
+routes.post('/offers/add', offerController.addOffer);
+routes.get('/offers/edit/:id', offerController.getEditOfferPage);
+routes.post('/offers/edit/:id', offerController.updateOffer);
+routes.delete('/offers/delete/:id', offerController.deleteOffer);
 
 module.exports = routes;

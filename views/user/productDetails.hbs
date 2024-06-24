@@ -97,7 +97,15 @@
       <div class="col-md-7">
         <div class="single-product-details">
           <h2>{{product.name}}</h2>
-          <p class="product-price">₹{{product.price}}</p>
+         {{#if product.discountedPrice}}
+                            <del>₹{{product.price}}</del> ₹{{product.discountedPrice}}
+                        {{else}}
+                            ₹{{product.price}}
+                        {{/if}}
+                    
+                    {{#if product.offerLabel}}
+                        <p class="offer-label">{{product.offerLabel}}</p>
+                    {{/if}}
           <p>{{product.description}}</p>
           <div class="rating">
             <input type="radio" id="star5" name="rate" value="5" />

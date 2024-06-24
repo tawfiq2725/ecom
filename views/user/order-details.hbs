@@ -19,7 +19,7 @@
                                     <th>Total Items</th>
                                     <th>
                                         {{#if order.coupon.code}}
-                                        Coupon  
+                                        Coupon
                                         {{/if}}
                                     </th>
                                     <th>
@@ -79,8 +79,11 @@
                         <h4>Payment Status</h4>
                         <p>{{order.paymentStatus}}</p>
                         {{#ifCond order.orderStatus '===' 'Pending'}}
-                        <a href="#" class="btn btn-main btn-small" id="cancelOrderBtn">Cancel Order</a>
+                        <a  class="btn btn-main btn-small" id="cancelOrderBtn">Cancel Order</a>
                         {{/ifCond}}
+                      {{#ifCond order.orderStatus '===' 'Delivered'}}
+<a class="btn btn-main btn-small" href="/orders/{{order._id}}/return">Return Order</a>
+{{/ifCond}}
                     </div>
                 </div>
             </div>
@@ -90,6 +93,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    
+    // Cancel Order
     document.getElementById('cancelOrderBtn').addEventListener('click', function () {
         Swal.fire({
             title: 'Are you sure?',
@@ -123,4 +128,5 @@
             }
         });
     });
+
 </script>

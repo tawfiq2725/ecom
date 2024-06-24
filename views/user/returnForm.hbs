@@ -1,0 +1,79 @@
+<section class="return-form page-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-wrapper">
+                    <h3>Return Order</h3>
+                    <form id="returnForm" method="POST" action="/returns">
+                        <input type="hidden" name="orderId" value="{{order._id}}">
+                        {{#each order.items}}
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="items[{{@index}}][selected]" value="true">
+                                {{this.product.name}} - Size: {{this.size}}
+                            </label>
+                            <input type="hidden" name="items[{{@index}}][product]" value="{{this.product._id}}">
+                            <input type="hidden" name="items[{{@index}}][size]" value="{{this.size}}">
+                            <input type="hidden" name="items[{{@index}}][quantity]" value="{{this.quantity}}">
+                            <input type="hidden" name="items[{{@index}}][price]" value="{{this.price}}">
+                        </div>
+                        {{/each}}
+                        <div class="form-group">
+                            <label for="reason">Reason for Return:</label>
+                            <select name="reason" id="reason" class="form-control" required>
+                                <option value="">Select a reason</option>
+                                <option value="product_damage">Product Damage</option>
+                                <option value="parcel_damage">Parcel Damage</option>
+                                <option value="not_fitted">Product Not Fitted</option>
+                                <option value="wrong_item">Wrong Item Delivered</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="note">Additional Note:</label>
+                            <textarea name="note" id="note" class="form-control" placeholder="Elaborate on the issue (optional)"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-main">Submit Return Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+    <script>
+      document.getElementById('returnForm').addEventListener('submit', function (event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const form = this;
+    const formData = new FormData(form);
+
+    // Log the form data for debugging
+    console.log('Form Data:', Object.fromEntries(formData.entries()));
+
+    fetch('/returns', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Accept': 'application/json'
+        }
+    }).then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                Swal.fire('Return Request Created!', 'Your return request has been successfully created.', 'success').then(() => {
+                    window.location.href = '/returns'; // Redirect to returns page or another appropriate page
+                });
+            } else {
+                Swal.fire('Error!', data.message || 'There was a problem creating your return request.', 'error');
+            }
+        });
+    }).catch(error => {
+        console.error('Error:', error);
+        Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+    });
+});
+
+    </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

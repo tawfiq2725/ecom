@@ -54,10 +54,11 @@
                                             <th>User</th>
                                             <th>Order Date</th>
                                             <th>Items</th>
+                                            <th>Address</th>
                                             <th>Total Amount</th>
                                             <th>Coupon</th>
                                             <th>Coupon Discount</th>
-                                            <th>Category Discount</th>
+                                            <th>Payment Method</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -108,10 +109,11 @@
                         `${order.user.firstname} ${order.user.lastname}`,
                         new Date(order.createdAt).toLocaleString(),
                         order.items.map(item => `${item.product.name} - ${item.quantity} x ${item.size} - ₹${item.price}`).join('<br>'),
+                        `${order.address.houseNumber}, ${order.address.street}, ${order.address.city}, ${order.address.zipcode}, ${order.address.country}`,
                         `₹${order.totalAmount}`,
                         order.coupon ? order.coupon.code : '',
                         `₹${order.coupon ? order.coupon.discountAmount : 0}`,
-                        `₹${order.discountAmount}`
+                        `${order.paymentMethod}`
                     ]).draw();
                 });
             },

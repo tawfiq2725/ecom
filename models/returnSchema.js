@@ -33,12 +33,17 @@ const returnSchema = new mongoose.Schema({
     }],
     reason: { 
         type: String, 
-        required: true 
+        required: true,
+        enum: ['product_damage', 'parcel_damage', 'not_fitted', 'wrong_item'] // Add other reasons as necessary
     },
     status: { 
         type: String, 
         enum: ['Pending', 'Approved', 'Rejected'], 
         default: 'Pending' 
+    },
+    note: { 
+        type: String, 
+        default: '' // Optional field for additional notes
     },
     createdAt: { 
         type: Date, 

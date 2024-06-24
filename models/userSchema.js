@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
     firstname: {
@@ -43,7 +42,11 @@ const userSchema = new mongoose.Schema({
     wishlist: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }]
+    }],
+    wallet: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Wallet' // Reference to the Wallet document
+    }
 }, {
     timestamps: true,
 });

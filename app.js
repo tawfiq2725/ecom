@@ -120,7 +120,7 @@ Handlebars.registerHelper('multiply', function (a, b) {
 });
 
 // Define the 'toJson' helper to stringify JSON
-Handlebars.registerHelper('toJson', function (context) {
+Handlebars.registerHelper('json', function (context) {
     return JSON.stringify(context);
 });
 

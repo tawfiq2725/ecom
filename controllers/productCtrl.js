@@ -2,6 +2,7 @@ const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
 const Return = require('../models/returnSchema')
 const Order = require('../models/orderSchema')
+const Wallet = require('../models/walletSchema')
 // Get All Products
 const getProducts = async (req, res) => {
     try {
@@ -176,10 +177,10 @@ const getOrderList = async (req, res) => {
             return res.redirect('/admin/login');
         }
         const orders = await Order.find()
-            .populate('user', 'firstname lastname')
-            .populate('address')
-            .sort({ createdAt: -1 })
-            .lean();
+        .populate('user', 'firstname lastname')
+        .populate('address')
+        .lean()
+        .sort({ createdAt: -1 });
 
         return res.render('admin/ordermanagement', { orders, layout: 'adminlayout', title: "Order Management" });
     } catch (error) {
@@ -190,8 +191,10 @@ const getOrderList = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
     try {
-        const { id } = req.params; // Ensure this matches the route parameter
+        const { id } = req.params;
         const { orderStatus } = req.body;
+
+        console.log(`Request to update order ${id} to status ${orderStatus}`);
 
         const order = await Order.findById(id);
 
@@ -199,12 +202,12 @@ const updateOrderStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        console.log(`Updating order ${id} status to ${orderStatus}`);
-        
+        console.log(`Found order ${id} with current status ${order.orderStatus}`);
+
         order.orderStatus = orderStatus;
 
         if (order.paymentMethod === 'COD' && orderStatus === 'Delivered') {
-            order.paymentStatus = 'Completed';
+            order.paymentStatus = 'Paid';
         }
 
         await order.save();
@@ -215,6 +218,7 @@ const updateOrderStatus = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 };
+
 
 const getReturnList = async (req, res) => {
     try {
@@ -240,14 +244,45 @@ const updateReturnStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        const returnRequest = await Return.findById(id);
+        const returnRequest = await Return.findById(id)
+            .populate('user')
+            .populate('order');
 
         if (!returnRequest) {
             return res.status(404).json({ success: false, message: 'Return request not found' });
         }
 
-        console.log(`Updating return request ${id} status to ${status}`);
+        if (status === 'Approved' && returnRequest.status !== 'Approved') {
+            const user = returnRequest.user;
+            const returnAmount = returnRequest.order.totalAmount;
 
+            console.log(`Attempting to add return amount: ${returnAmount} to user: ${user.fullName}`);
+
+            // Check if the user already has a wallet
+            let wallet = await Wallet.findOne({ userId: user._id });
+
+            if (!wallet) {
+                // Create a wallet for the user if it doesn't exist
+                wallet = new Wallet({
+                    userId: user._id,
+                    balance: 0,
+                    transactions: [] // Initialize the transactions array
+                });
+            }
+
+            // Update the wallet balance and log the transaction
+            wallet.balance += returnAmount;
+            wallet.transactions.push({
+                type: 'Credit',
+                amount: returnAmount,
+                description: `Return approved for order ${returnRequest.order._id}`
+            });
+            await wallet.save();
+
+            console.log(`Updated wallet balance: ${wallet.balance}`);
+        }
+
+        // Update the return request status
         returnRequest.status = status;
         await returnRequest.save();
 

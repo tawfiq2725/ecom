@@ -1,0 +1,98 @@
+<!-- views/admin/offers.hbs -->
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-2 mt-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Offer Management</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <div class="card-header">
+            <h4 class="card-title">Offer Management</h4>
+        </div>
+        <a href="/admin/offers/add" class="btn btn-danger mb-3 mt-3">Add Offer</a>
+        <table class="table" id="example">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Discount</th>
+                    <th>Type</th>
+                    <th>Product/Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each offers}}
+                <tr>
+                    <td>{{@index}}</td>
+                    <td>{{this.name}}</td>
+                    <td>{{this.discount}}%</td>
+                    <td>{{this.type}}</td>
+                    <td>
+                        {{#if this.product}}
+                        {{this.product.name}}
+                        {{else if this.category}}
+                        {{this.category.name}}
+                        {{/if}}
+                    </td>
+                    <td>
+                        <a href="/admin/offers/edit/{{this._id}}" class="btn btn-warning">Edit</a>
+                        <button class="btn btn-danger delete-offer" data-id="{{this._id}}">Delete</button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function () {
+        $('.delete-offer').on('click', function () {
+            var offerId = $(this).data('id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/offers/delete/${offerId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Offer has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); // Reload the page after deletion
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error deleting the offer.',
+                                    'error'
+                                );
+                            }
+                        });
+                }
+            });
+        });
+    });
+</script>

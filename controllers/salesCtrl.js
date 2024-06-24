@@ -15,8 +15,9 @@ const generateSalesReport = async (req, res) => {
     try {
         const { type, fromDate, toDate } = req.query;
 
-        let filter = {};
+        let filter = { orderStatus: 'Delivered' }; // Only include delivered orders
         const today = moment();
+
         if (type && type !== 'custom') {
             if (type === 'daily') {
                 filter.createdAt = { $gte: today.startOf('day').toDate(), $lte: today.endOf('day').toDate() };
@@ -32,6 +33,10 @@ const generateSalesReport = async (req, res) => {
         }
 
         const orders = await Order.find(filter)
+            .populate({
+                path: 'items.product',
+                select: 'name' 
+            })
             .populate('user', 'firstname lastname')
             .populate('address')
             .lean();
@@ -45,6 +50,8 @@ const generateSalesReport = async (req, res) => {
     }
 };
 
+
+
 const calculateReportDetails = (orders) => {
     const totalOrders = orders.length;
     const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -55,10 +62,30 @@ const calculateReportDetails = (orders) => {
 
 const downloadSalesReport = async (req, res) => {
     const { type, fromDate, toDate, format } = req.body;
-    const filter = { ...req.query }; // Same filter logic as generateSalesReport
+
+    let filter = { orderStatus: 'Delivered' }; // Only include delivered orders
+
+    if (type && type !== 'custom') {
+        const today = moment();
+        if (type === 'daily') {
+            filter.createdAt = { $gte: today.startOf('day').toDate(), $lte: today.endOf('day').toDate() };
+        } else if (type === 'weekly') {
+            filter.createdAt = { $gte: today.startOf('week').toDate(), $lte: today.endOf('week').toDate() };
+        } else if (type === 'monthly') {
+            filter.createdAt = { $gte: today.startOf('month').toDate(), $lte: today.endOf('month').toDate() };
+        } else if (type === 'yearly') {
+            filter.createdAt = { $gte: today.startOf('year').toDate(), $lte: today.endOf('year').toDate() };
+        }
+    } else if (fromDate && toDate) {
+        filter.createdAt = { $gte: new Date(fromDate), $lte: new Date(toDate) };
+    }
 
     const orders = await Order.find(filter)
         .populate('user', 'firstname lastname')
+        .populate({
+            path: 'items.product',
+            select: 'name' 
+        })
         .populate('address')
         .lean();
 
@@ -132,6 +159,7 @@ const downloadSalesReport = async (req, res) => {
         res.status(400).send('Invalid format');
     }
 };
+
 
 module.exports = {
     getSalesReportPage,
