@@ -564,33 +564,6 @@ const getProductVariant = async (req, res) => {
     }
 };
 
-const checkout = async (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/login');
-    }
-
-    try {
-        const userId = req.session.user._id;
-        const cart = await Cart.findOne({ user: userId }).populate('items.product');
-        const addresses = await Address.find({ userId: userId });
-
-        if (!cart) {
-            return res.redirect('/cart'); // Redirect to cart if it's empty
-        }
-        const razorKeyId = process.env.RAZORPAY_KEY_ID
-        res.render('user/checkout', {
-            title: "Checkout",
-            cart: cart,
-            addresses: addresses,
-            totalPriceInPaise: cart.totalPrice * 100 ,
-            razorKeyId,
-            user: req.session.user
-        });
-    } catch (error) {
-        console.error('Error rendering checkout page:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-};
 
 
 
@@ -615,5 +588,4 @@ module.exports = {
     getForgotPasswordPage,
     handleForgotPassword,
     handleResetPasswordPageAndRequest,
-    checkout
 }

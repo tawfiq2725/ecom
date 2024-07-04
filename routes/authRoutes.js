@@ -58,13 +58,13 @@ router.post('/add-to-cart', userController.addToCart);
 router.post('/cart/remove/:id', userController.removeFromCart);
 router.post('/cart/update/:productId', userController.updateCartQuantity);
 router.get('/api/product/:productId/variant/:size', userController.getProductVariant);
-router.get('/checkout', userController.checkout);
 
 // Product Page
 router.get('/products', usersideCtrl.getProducts);
 router.get('/products/:id', usersideCtrl.getProductDetails);
 
 // Order Management
+router.get('/checkout', orderCtrl.checkout);
 router.post('/orders', orderCtrl.createOrder);
 router.post('/api/apply-coupon', orderCtrl.applyCoupon);
 router.post('/api/remove-coupon', orderCtrl.removeCoupon);
@@ -75,6 +75,7 @@ router.post('/orders/:id/cancel', orderCtrl.cancelOrder);
 
 // New Routes for Razorpay Integration
 router.post('/api/create-order', orderCtrl.createRazorpayOrder);
+router.post('/confirm-razorpay-payment', orderCtrl.confirmRazorpayPayment);
 router.post('/api/verify-payment', orderCtrl.verifyRazorpayPayment);
 
 // Return Management (Use only returnController)

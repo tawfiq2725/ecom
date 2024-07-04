@@ -1,146 +1,143 @@
 <div class="page-wrapper">
-   <div class="checkout shopping">
-      <div class="container">
-         <div class="row">
-            <div class="col-md-8">
-               <div class="block billing-details">
-                  <h4 class="widget-title">Billing Details</h4>
-                  <form class="checkout-form" method="POST" action="/orders">
-                     <input type="hidden" id="isAddingNewAddress" name="isAddingNewAddress" value="false">
-                     <input type="hidden" name="couponCode" id="hiddenCouponCode">
-                     {{#if addresses}}
-                     {{#each addresses}}
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="addressId" id="address{{_id}}"
-                           value="{{_id}}">
-                        <label class="form-check-label" for="address{{_id}}">
-                           {{place}}, {{houseNumber}}, {{street}}, {{city}}, {{zipcode}}, {{country}}
-                           <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-default" onclick="editAddress('{{this._id}}')"><i class="tf-pencil2" aria-hidden="true"></i></button>
-                      <button type="button" class="btn btn-default" onclick="deleteAddress('{{this._id}}')"><i class="tf-ion-close" aria-hidden="true"></i></button>
+    <div class="checkout shopping">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="block billing-details">
+                        <h4 class="widget-title">Billing Details</h4>
+                        <form class="checkout-form" method="POST" action="/orders">
+                            <input type="hidden" id="isAddingNewAddress" name="isAddingNewAddress" value="false">
+                            <input type="hidden" name="couponCode" id="hiddenCouponCode">
+                            {{#if addresses}}
+                            {{#each addresses}}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="addressId" id="address{{_id}}"
+                                    value="{{_id}}">
+                                <label class="form-check-label" for="address{{_id}}">
+                                    {{place}}, {{houseNumber}}, {{street}}, {{city}}, {{zipcode}}, {{country}}
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-default"
+                                            onclick="editAddress('{{this._id}}')"><i class="tf-pencil2"
+                                                aria-hidden="true"></i></button>
+                                        <button type="button" class="btn btn-default"
+                                            onclick="deleteAddress('{{this._id}}')"><i class="tf-ion-close"
+                                                aria-hidden="true"></i></button>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <a href="/address" role="button" class="btn btn-success">Add Address</a>
+                            </div>
+                            {{/each}}
+                            {{else}}
+                            <div class="form-check">
+                                <a href="/address" role="button" class="btn btn-success">Add Address</a>
+                            </div>
+                            {{/if}}
+
+
+                            <h4 class="widget-title">Payment Method</h4>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD">
+                                <label class="form-check-label" for="cod">
+                                    Cash on Delivery
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="wallet"
+                                    value="Wallet">
+                                <label class="form-check-label" for="wallet">
+                                    Wallet
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay"
+                                    value="Razorpay">
+                                <label class="form-check-label" for="razorpay">
+                                    Razorpay
+                                </label>
+                            </div>
+
+
+
+                            <button type="submit" class="btn btn-main mt-20">Place Order</button>
+                        </form>
                     </div>
-                        </label>
-                     </div>
-                     <div class="form-check">
-                         <a href="/address" role="button" class="btn btn-success">Add Address</a>
-                     </div>
-                     {{/each}}
-                     {{else}}
-                     <div class="form-check">
-                        <a href="/address" role="button" class="btn btn-success">Add Address</a>
-                     </div>
-                     {{/if}}
-                   
-                     
-                     <h4 class="widget-title">Payment Method</h4>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD">
-                        <label class="form-check-label" for="cod">
-                           Cash on Delivery
-                        </label>
-                     </div>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="wallet" value="Wallet">
-                        <label class="form-check-label" for="wallet">
-                           Wallet
-                        </label>
-                     </div>
-                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay"
-                           value="Razorpay">
-                        <label class="form-check-label" for="razorpay">
-                           Razorpay
-                        </label>
-                     </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="product-checkout-details">
+                        <div class="block">
+                            <h4 class="widget-title">Order Summary</h4>
+                            {{#each cart.items}}
+                            <div class="media product-card">
+                                <a class="pull-left" href="product-single.html">
+                                    <img class="media-object" src="/uploads/products/{{this.product.mainImage}}"
+                                        alt="Image">
+                                </a>
+                                <div class="media-body">
+                                    <h4 class="media-heading"><a href="product-single.html">{{this.product.name}}</a>
+                                    </h4>
+                                    <p class="price">{{this.quantity}} x {{this.product.price}}</p>
+                                </div>
+                            </div>
+                            {{/each}}
+                            <ul class="summary-prices">
+                                <li>
+                                    <span>Shipping:</span>
+                                    <span>Free</span>
+                                </li>
+                                <li id="coupon">
+                                    {{#if couponDetails}}
+                                    <div id="couponInfo">
+                                        <span>Coupon Applied: -$${{couponDetails.discountAmount}}</span>
+                                        <a href="#" id="removeCoupon" class="btn btn-danger">Remove</a>
+                                    </div>
+                                    {{else}}
+                                    <div id="couponInfo">
+                                        <span>Coupon Code:</span>
+                                        <span><a href="#" id="openCouponModal">Enter Coupon Code</a></span>
+                                    </div>
+                                    {{/if}}
+                                </li>
+                            </ul>
+                            <div class="summary-total">
+                                <span>Total</span>
+                                <span class="price">${{cart.totalPrice}}</span>
+                            </div>
 
-
-
-                     <button type="submit" class="btn btn-main mt-20">Place Order</button>
-                  </form>
-               </div>
-            </div>
-            <div class="col-md-4">
-               <div class="product-checkout-details">
-                  <div class="block">
-                     <h4 class="widget-title">Order Summary</h4>
-                     {{#each cart.items}}
-                     <div class="media product-card">
-                        <a class="pull-left" href="product-single.html">
-                           <img class="media-object" src="/uploads/products/{{this.product.mainImage}}" alt="Image">
-                        </a>
-                        <div class="media-body">
-                           <h4 class="media-heading"><a href="product-single.html">{{this.product.name}}</a></h4>
-                           <p class="price">{{this.quantity}} x {{this.product.price}}</p>
+                            <div class="verified-icon">
+                                <img src="/images/shop/verified.png" alt="Verified">
+                            </div>
                         </div>
-                     </div>
-                     {{/each}}
-                     <ul class="summary-prices">
-                        <li>
-                           <span>Shipping:</span>
-                           <span>Free</span>
-                        </li>
-                        <li id="couponInfo">
-                           <span>Coupon Code:</span>
-                           <span>
-                              <a href="#" id="openCouponModal">Enter Coupon Code</a>
-                              <a href="#" id="removeCoupon" style="display:none;">Remove Coupon</a>
-                           </span>
-                        </li>
-                     </ul>
-                     <div class="summary-total">
-                        <span>Total</span>
-                        <span class="price">${{cart.totalPrice}}</span>
-                     </div>
-
-                     <div class="verified-icon">
-                        <img src="/images/shop/verified.png" alt="Verified">
-                     </div>
-                  </div>
-               </div>
+                    </div>
+                </div>
             </div>
-         </div>
-      </div>
-   </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="coupon-modal" tabindex="-1" role="dialog">
-   <div class="modal-dialog" role="document">
-      <div class="modal-content">
-         <div class="modal-body">
-            <form id="couponForm">
-               <div class="form-group">
-                  <input id="modalCouponCode" class="form-control" type="text" placeholder="Enter Coupon Code">
-               </div>
-               <button type="button" id="applyModalCoupon" class="btn btn-main">Apply Coupon</button>
-            </form>
-         </div>
-      </div>
-   </div>
-</div>
+{{!-- <div class="modal fade" id="coupon-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form id="couponForm">
+                    <div class="form-group">
+                        <input id="modalCouponCode" class="form-control" type="text" placeholder="Enter Coupon Code">
+                    </div>
+                    <button type="button" id="applyModalCoupon" class="btn btn-main">Apply Coupon</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div> --}}
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-   document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('input[name="addressId"]').forEach(radio => {
-         radio.addEventListener('change', function () {
-            const newAddressForm = document.getElementById('newAddressForm');
-            if (this.value === 'new') {
-               newAddressForm.style.display = 'block';
-            } else {
-               newAddressForm.style.display = 'none';
-            }
-         });
-      });
-
-      document.getElementById('openCouponModal').addEventListener('click', function (event) {
-         event.preventDefault();
-         $('#coupon-modal').modal('show');
-      });
-
-       document.getElementById('applyModalCoupon').addEventListener('click', function () {
-        const couponCode = document.getElementById('modalCouponCode').value;
+document.addEventListener('DOMContentLoaded', function () {
+    // Function to handle applying a coupon
+    function applyCoupon(couponCode) {
         fetch('/api/apply-coupon', {
             method: 'POST',
             headers: {
@@ -157,22 +154,14 @@
         .then(data => {
             if (data.success) {
                 document.getElementById('hiddenCouponCode').value = couponCode;
-                document.getElementById('removeCoupon').style.display = 'inline';
-
-                const newTotalPriceElement = document.querySelector('.summary-total .price');
-                const couponInfo = document.getElementById('couponInfo');
-
-                if (newTotalPriceElement && couponInfo) {
-                    newTotalPriceElement.textContent = `$${data.newTotal}`;
-                    couponInfo.innerHTML = `Coupon Applied: -$${data.discountAmount} <a href="#" id="removeCoupon">Remove Coupon</a>`;
-                    $('#coupon-modal').modal('hide');
-                    Swal.fire({
-                        title: 'Coupon Applied',
-                        text: `Discount applied: $${data.discountAmount}`,
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    });
-                }
+                updateCouponInfo(data.discountAmount, data.newTotal);
+                
+                Swal.fire({
+                    title: 'Coupon Applied',
+                    text: `Discount applied: $${data.discountAmount}`,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
             } else {
                 Swal.fire({
                     title: 'Invalid Coupon',
@@ -191,58 +180,107 @@
                 confirmButtonText: 'OK'
             });
         });
-    });
+    }
 
-    document.addEventListener('click', function(event) {
-        if (event.target && event.target.id === 'removeCoupon') {
-            event.preventDefault();
-            fetch('/api/remove-coupon', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('hiddenCouponCode').value = '';
-                    document.getElementById('removeCoupon').style.display = 'none';
+    // Function to handle removing a coupon
+    function removeCoupon() {
+        fetch('/api/remove-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('hiddenCouponCode').value = '';
+                updateCouponInfo(0, data.totalAmount);
 
-                    const newTotalPriceElement = document.querySelector('.summary-total .price');
-                    const couponInfo = document.getElementById('couponInfo');
-
-                    if (newTotalPriceElement && couponInfo) {
-                        newTotalPriceElement.textContent = `$${data.totalAmount}`;
-                        couponInfo.innerHTML = `<span>Coupon Code:</span> <span><a href="#" id="openCouponModal">Enter Coupon Code</a></span>`;
-                        Swal.fire({
-                            title: 'Coupon Removed',
-                            text: 'Coupon has been removed.',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'An error occurred while removing the coupon. Please try again later.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error removing coupon:', error);
+                Swal.fire({
+                    title: 'Coupon Removed',
+                    text: 'Coupon has been removed successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            } else {
                 Swal.fire({
                     title: 'Error',
                     text: 'An error occurred while removing the coupon. Please try again later.',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
+            }
+        })
+        .catch(error => {
+            console.error('Error removing coupon:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred while removing the coupon. Please try again later.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+    }
+
+    // Function to update the coupon information in the DOM
+    function updateCouponInfo(discountAmount, totalAmount) {
+        const couponInfo = document.getElementById('couponInfo');
+        const newTotalPriceElement = document.querySelector('.summary-total .price');
+
+        if (discountAmount > 0) {
+            couponInfo.innerHTML = `Coupon Applied: -$${discountAmount} <a href="#" id="removeCoupon" class="btn btn-danger">Remove</a>`;
+        } else {
+            couponInfo.innerHTML = `<span>Coupon Code:</span> <span><a href="#" id="openCouponModal">Enter Coupon Code</a></span>`;
+        }
+        
+        if (newTotalPriceElement) {
+            newTotalPriceElement.textContent = `$${totalAmount}`;
+        }
+    }
+
+    // Event listener for opening the coupon modal
+    document.addEventListener('click', function (event) {
+        if (event.target && event.target.id === 'openCouponModal') {
+            event.preventDefault();
+
+            Swal.fire({
+                title: 'Enter Coupon Code',
+                input: 'text',
+                inputPlaceholder: 'Enter your coupon code here',
+                showCancelButton: true,
+                confirmButtonText: 'Apply Coupon',
+                cancelButtonText: 'Cancel'
+            }).then(result => {
+                if (result.isConfirmed && result.value) {
+                    const couponCode = result.value.trim();
+                    applyCoupon(couponCode);
+                }
             });
         }
     });
 
-      document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
+    // Event delegation for removing the coupon
+    document.addEventListener('click', function (event) {
+        if (event.target && event.target.id === 'removeCoupon') {
+            event.preventDefault();
+
+            Swal.fire({
+                title: 'Remove Coupon',
+                text: 'Are you sure you want to remove the coupon?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'No, keep it'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    removeCoupon();
+                }
+            });
+        }
+    });
+
+    // Event listener for form submission
+    document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
         event.preventDefault();
 
         const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
@@ -268,7 +306,6 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 if (selectedPaymentMethod === 'Razorpay') {
-                    // Fetch order details from the server
                     fetch('/api/create-order', {
                         method: 'POST',
                         headers: {
@@ -292,7 +329,6 @@
                                 description: 'Order Payment',
                                 order_id: data.razorpayOrderId,
                                 handler: function (response) {
-                                    // Verify payment on the server
                                     fetch('/api/verify-payment', {
                                         method: 'POST',
                                         headers: {
@@ -363,62 +399,103 @@
                         });
                     });
                 } else {
-                    event.target.submit();
+                    fetch('/api/place-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            addressId: selectedAddressRadio.value,
+                            paymentMethod: selectedPaymentMethod,
+                            ...addressDetails,
+                            couponCode: document.getElementById('hiddenCouponCode').value
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Order Placed Successfully',
+                                text: 'Your order has been placed successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = '/confirm';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Order Failed',
+                                text: data.message || 'There was an error placing your order. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Order placement failed:', error);
+                        Swal.fire({
+                            title: 'Order Placement Failed',
+                            text: 'There was an error placing your order. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    });
                 }
             }
         });
     });
 });
-    function deleteAddress(id) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/address/${id}`, { method: 'DELETE' })
-                .then(response => {
-                    if (response.ok) {
-                         window.location.href = `/checkout`;
-                        Swal.fire({
-                            title: 'Deleted!',
-                            text: 'Your address has been deleted.',
-                            icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            const row = document.querySelector(`tr[data-id="${id}"]`);
-                            if (row) {
-                                row.remove();
-                            }
-                        });
-                    } else {
-                        response.json().then(data => {
-                            Swal.fire({
-                                title: 'Failed!',
-                                text: data.message || 'Failed to delete address.',
-                                icon: 'error'
-                            });
-                        });
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'An error occurred while deleting the address.',
-                        icon: 'error'
-                    });
-                    console.error('Error deleting address:', error);
-                });
-        }
-    });
-}
 
-function editAddress(id) {
-    window.location.href = `/address/edit/${id}`;
-}
+    function deleteAddress(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/address/${id}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = `/checkout`;
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Your address has been deleted.',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                const row = document.querySelector(`tr[data-id="${id}"]`);
+                                if (row) {
+                                    row.remove();
+                                }
+                            });
+                        } else {
+                            response.json().then(data => {
+                                Swal.fire({
+                                    title: 'Failed!',
+                                    text: data.message || 'Failed to delete address.',
+                                    icon: 'error'
+                                });
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while deleting the address.',
+                            icon: 'error'
+                        });
+                        console.error('Error deleting address:', error);
+                    });
+            }
+        });
+    }
+
+    function editAddress(id) {
+        window.location.href = `/address/edit/${id}`;
+    }
 </script>

@@ -1,5 +1,6 @@
 const Admin = require('../models/adminSchema');
 const User = require('../models/userSchema');
+const bestSelling = require('../helpers/topSelling')
 require('dotenv').config()
 const bcrypt = require('bcrypt')
 
@@ -10,7 +11,17 @@ const getHomePage = async (req, res) => {
     try {
         const locals = { title: "Hosssom Dashboard" };
         if(req.session.admin){
-            res.render('admin/dashboard', { title: locals.title , layout:'adminlayout', admin: req.session.admin });
+            const bestsellingProducts = await bestSelling.getBestSellingProducts();
+            const topCategories = await bestSelling.getTopCategories();
+            console.log(bestsellingProducts);
+
+            res.render('admin/dashboard', { 
+                title: locals.title, 
+                layout: 'adminlayout', 
+                admin: req.session.admin,
+                topCategories, 
+                bestsellingProducts,
+            });
         } else {
             res.render('admin/login', { layout: 'adminlayout' });
         }

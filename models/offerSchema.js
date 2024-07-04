@@ -1,4 +1,3 @@
-// models/offerSchema.js
 const mongoose = require('mongoose');
 
 const offerSchema = new mongoose.Schema({
@@ -10,6 +9,14 @@ const offerSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+    },
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+    },
     startDate: {
         type: Date,
         required: true,
@@ -18,20 +25,10 @@ const offerSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    type: {
+    status: {
         type: String,
-        enum: ['product', 'category'],
-        required: true,
-    },
-    product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: function() { return this.type === 'product'; }
-    },
-    category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category',
-        required: function() { return this.type === 'category'; }
+        enum: ['active', 'inactive'],
+        default: 'active',
     },
 }, { timestamps: true });
 

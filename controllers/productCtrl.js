@@ -176,18 +176,43 @@ const getOrderList = async (req, res) => {
         if (!req.session.admin) {
             return res.redirect('/admin/login');
         }
-        const orders = await Order.find()
-        .populate('user', 'firstname lastname')
-        .populate('address')
-        .lean()
-        .sort({ createdAt: -1 });
 
-        return res.render('admin/ordermanagement', { orders, layout: 'adminlayout', title: "Order Management" });
+        // Get page and limit from query parameters with default values
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        // Calculate the number of documents to skip
+        const skip = (page - 1) * limit;
+
+        // Get the total count of orders for pagination
+        const totalOrders = await Order.countDocuments();
+
+        // Fetch the orders with pagination
+        const orders = await Order.find()
+            .populate('user', 'firstname lastname')
+            .populate('address')
+            .lean()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        // Calculate the total number of pages
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        return res.render('admin/ordermanagement', {
+            orders,
+            layout: 'adminlayout',
+            title: "Order Management",
+            currentPage: page,
+            totalPages,
+            limit
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).send('Server Error');
     }
 };
+
 
 const updateOrderStatus = async (req, res) => {
     try {
@@ -209,7 +234,7 @@ const updateOrderStatus = async (req, res) => {
         if (order.paymentMethod === 'COD' && orderStatus === 'Delivered') {
             order.paymentStatus = 'Paid';
         }
-
+        order.deliveryDate = new Date();
         await order.save();
 
         res.json({ success: true, message: 'Order status updated' });

@@ -22,6 +22,9 @@
                     <div class="card-body">
                         <div class="table-responsive">
                             <a href="/admin/coupon/add" class="btn btn-danger">Add Coupon</a>
+                            {{#if error_msg}}
+            <div class="alert alert-danger">{{error_msg}}</div>
+        {{/if}}
                             <table id="couponTable" class="display table table-bordered" style="min-width: 845px">
                                 <thead>
                                     <tr>
@@ -75,6 +78,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
+        // Initialize DataTable
         $('#couponTable').DataTable({
             "paging": true,
             "searching": true,
@@ -120,5 +124,18 @@
                 }
             });
         });
+
+        // Check if there's an error message in the URL (from server-side validation)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            const errorMsg = urlParams.get('error');
+            Swal.fire({
+                title: 'Error',
+                text: errorMsg,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
     });
 </script>
+

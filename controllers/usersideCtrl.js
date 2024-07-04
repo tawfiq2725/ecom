@@ -1,6 +1,6 @@
 const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
-const Offer = require('../models/offerSchema'); // Add this line to require the Offer model
+const Offer = require('../models/offerSchema');
 require('dotenv').config();
 
 const getProducts = async (req, res) => {
@@ -13,17 +13,25 @@ const getProducts = async (req, res) => {
         const productType = req.query.productType;
         const searchQuery = req.query.search;
 
+        // Initialize filter with active status
         const filter = { status: true };
-        
-        if (category) filter.category = category;
 
+        // Apply search filter if present
         if (searchQuery) {
             filter.$or = [
                 { name: { $regex: searchQuery, $options: 'i' } },
                 { description: { $regex: searchQuery, $options: 'i' } }
             ];
+
+
+        }
+        // Apply category filter if present
+        if (category) {
+            filter.category = category;
         }
 
+
+        // Initialize sorting option
         let sortOption = {};
         if (sort === 'priceLow') {
             sortOption = { price: 1 };
@@ -31,18 +39,19 @@ const getProducts = async (req, res) => {
             sortOption = { price: -1 };
         }
 
+        // Apply product type filter if present
+        const today = new Date();
         if (productType === 'new') {
-            const today = new Date();
             const tenDaysAgo = new Date(today);
             tenDaysAgo.setDate(today.getDate() - 10);
             filter.createdAt = { $gte: tenDaysAgo };
         } else if (productType === 'old') {
-            const today = new Date();
             const tenDaysAgo = new Date(today);
             tenDaysAgo.setDate(today.getDate() - 10);
             filter.createdAt = { $lt: tenDaysAgo };
         }
 
+        // Fetch categories, total products count, and products
         const [categories, totalProducts, products] = await Promise.all([
             Category.find(),
             Product.countDocuments(filter),
@@ -55,27 +64,20 @@ const getProducts = async (req, res) => {
 
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Fetch active offers
-        const today = new Date();
+        // Fetch active category offers
         const activeOffers = await Offer.find({
             startDate: { $lte: today },
-            endDate: { $gte: today }
-        }).populate('product category');
+            endDate: { $gte: today },
+            status: 'active'
+        }).populate('category');
 
-        // Apply the best offer to the products
+        // Apply the best category offer to the products
         const productsWithOffers = products.map(product => {
-            let productOffer = activeOffers
-                .filter(offer => offer.type === 'product' && offer.product.toString() === product._id.toString())
-                .reduce((best, current) => (current.discount > (best?.discount || 0) ? current : best), null);
-
             let categoryOffer = activeOffers
-                .filter(offer => offer.type === 'category' && offer.category.toString() === product.category._id.toString())
+                .filter(offer => offer.category._id.toString() === product.category._id.toString())
                 .reduce((best, current) => (current.discount > (best?.discount || 0) ? current : best), null);
 
-            if (productOffer && (!categoryOffer || productOffer.discount > categoryOffer.discount)) {
-                product.discountedPrice = product.price - (product.price * productOffer.discount / 100);
-                product.offerLabel = `${productOffer.discount}% off on this product`;
-            } else if (categoryOffer) {
+            if (categoryOffer) {
                 product.discountedPrice = product.price - (product.price * categoryOffer.discount / 100);
                 product.offerLabel = `${categoryOffer.discount}% off on this category`;
             }
@@ -83,6 +85,7 @@ const getProducts = async (req, res) => {
             return product;
         });
 
+        // Render the products page with all applied filters
         res.render('user/products', {
             title: "Products",
             products: productsWithOffers,
@@ -100,6 +103,10 @@ const getProducts = async (req, res) => {
         res.status(500).send("Server Error");
     }
 };
+
+
+
+
 
 const getProductDetails = async (req, res) => {
     try {

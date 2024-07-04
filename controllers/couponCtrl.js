@@ -26,6 +26,14 @@ const showAddCouponForm = (req, res) => {
 const addCoupon = async (req, res) => {
     try {
         const { code, minPurchaseAmount, discountRate, maxDiscount, expiryDate } = req.body;
+
+        // Check if the coupon code already exists
+        const existingCoupon = await Coupon.findOne({ code });
+        if (existingCoupon) {
+            return res.redirect(`/admin/coupons?error=The coupon code already exists`);
+        }
+
+        // Create a new coupon
         const newCoupon = new Coupon({
             code,
             minPurchaseAmount,
@@ -37,7 +45,7 @@ const addCoupon = async (req, res) => {
         res.redirect('/admin/coupons');
     } catch (error) {
         console.error(error);
-        res.status(500).send('Server Error');
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 };
 

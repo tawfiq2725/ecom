@@ -74,6 +74,11 @@ routes.get('/offers/add', offerController.getAddOfferPage);
 routes.post('/offers/add', offerController.addOffer);
 routes.get('/offers/edit/:id', offerController.getEditOfferPage);
 routes.post('/offers/edit/:id', offerController.updateOffer);
-routes.delete('/offers/delete/:id', offerController.deleteOffer);
-
+routes.post('/offers/toggle/:id', offerController.toggleOfferStatus);
+routes.get('/offers/productOffers', offerController.getProductOffers);
+routes.get('/offers/productOffers/add', offerController.getAddProductOfferPage);
+routes.post('/offers/productOffers/add', offerController.addProductOffer);
+routes.get('/offers/productOffers/edit/:id', offerController.getEditProductOfferPage);
+routes.post('/offers/productOffers/edit/:id', offerController.updateProductOffer);
+routes.post('/offers/productOffers/toggle/:id', offerController.toggleProductOfferStatus)
 module.exports = routes;

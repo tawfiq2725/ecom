@@ -1,0 +1,117 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-2 mt-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Product Offers Management</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <div class="card-header">
+            <h4 class="card-title">Product Offer Management</h4>
+        </div>
+        <a href="/admin/offers/productOffers/add" class="btn btn-primary mb-3 mt-3">Add Product Offer</a>
+        {{#if success_msg}}
+            <div class="alert alert-success" role="alert">
+                {{success_msg}}
+            </div>
+        {{/if}}
+        {{#if error_msg}}
+            <div class="alert alert-danger" role="alert">
+                {{error_msg}}
+            </div>
+        {{/if}}
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Offer Name</th>
+                            <th>Discount (%)</th>
+                            <th>Product</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Edit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each offers}}
+                            <tr>
+                                <td>{{this.name}}</td>
+                                <td>{{this.discount}}</td>
+                                <td>{{this.product.name}}</td>
+                                <td>{{formatDate this.startDate}}</td>
+                                <td>{{formatDate this.endDate}}</td>
+                                <td>{{this.status}}</td>
+                                <td>
+                                    <a href="/admin/offers/productOffers/edit/{{this._id}}" class="btn btn-warning btn-sm">Edit</a>
+                                </td>
+                                <td>
+                                    <button class="btn btn-secondary btn-sm" onclick="toggleStatus('{{this._id}}', '{{this.status}}')">
+                                        {{#if (eq this.status 'active')}}Deactivate{{else}}Activate{{/if}}
+                                    </button>
+                                </td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    function toggleStatus(offerId, currentStatus) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, change it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/productOffers/toggle/${offerId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Changed!',
+                            `Offer status has been ${data.message}.`,
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'There was an error updating the status.',
+                            'error'
+                        );
+                    }
+                })
+                .catch(error => {
+                    Swal.fire(
+                        'Error!',
+                        'There was an error updating the status.',
+                        'error'
+                    );
+                    console.error('Error:', error);
+                });
+            }
+        });
+    }
+</script>
+

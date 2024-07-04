@@ -26,7 +26,10 @@ const sendMail = async (email, otp) => {
             from: process.env.BREVO_MAIL,
             to: email,
             subject: "Verify Your OTP",
-            html: `<p>Your OTP is ${otp}. It will expire in 5 minutes.</p>`
+            html: `
+            <h1>Hossom Shirts </h1>
+            <br>
+            <p>Your OTP is ${otp}. It will expire in 5 minutes.</p>`
         });
 
         return emailDetails;

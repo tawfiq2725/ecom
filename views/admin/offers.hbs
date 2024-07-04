@@ -1,4 +1,3 @@
-<!-- views/admin/offers.hbs -->
 <div class="content-body">
     <div class="container-fluid">
         <div class="row mb-2 mt-4">
@@ -6,7 +5,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Offer Management</li>
+                        <li class="breadcrumb-item active" aria-current="page">Offers Management</li>
                     </ol>
                 </nav>
             </div>
@@ -14,49 +13,62 @@
         <div class="card-header">
             <h4 class="card-title">Offer Management</h4>
         </div>
-        <a href="/admin/offers/add" class="btn btn-danger mb-3 mt-3">Add Offer</a>
-        <table class="table" id="example">
+        <a href="/admin/offers/add" class="btn btn-primary mb-3 mt-3">Add Offer</a>
+        {{#if success_msg}}
+            <div class="alert alert-success">{{success_msg}}</div>
+        {{/if}}
+        {{#if error_msg}}
+            <div class="alert alert-danger">{{error_msg}}</div>
+        {{/if}}
+        <table class="table table-bordered" id="example">
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Name</th>
                     <th>Discount</th>
-                    <th>Type</th>
-                    <th>Product/Category</th>
+                    <th>Category</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Edit</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {{#each offers}}
-                <tr>
-                    <td>{{@index}}</td>
-                    <td>{{this.name}}</td>
-                    <td>{{this.discount}}%</td>
-                    <td>{{this.type}}</td>
-                    <td>
-                        {{#if this.product}}
-                        {{this.product.name}}
-                        {{else if this.category}}
-                        {{this.category.name}}
-                        {{/if}}
-                    </td>
-                    <td>
-                        <a href="/admin/offers/edit/{{this._id}}" class="btn btn-warning">Edit</a>
-                        <button class="btn btn-danger delete-offer" data-id="{{this._id}}">Delete</button>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>{{this.name}}</td>
+                        <td>{{this.discount}}%</td>
+                        <td>{{this.category.name}}</td>
+                        <td>{{formatDate this.startDate}}</td>
+                        <td>{{formatDate this.endDate}}</td>
+                        <td>{{this.status}}</td>
+                        <td><a href="/admin/offers/edit/{{this._id}}" class="btn btn-warning">Edit</a></td>
+                        <td>
+                            <button class="btn btn-danger toggle-status" data-id="{{this._id}}">{{#if (eq this.status 'active')}}Deactivate{{else}}Activate{{/if}}</button>
+                        </td>
+                    </tr>
                 {{/each}}
             </tbody>
         </table>
     </div>
 </div>
-
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
 <script>
-    $(document).ready(function () {
-        $('.delete-offer').on('click', function () {
+   $(document).ready(function() {
+        $('#example').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": false,
+            "pageLength": 10
+        });
+
+        // SweetAlert for Toggle button
+        $('.toggle-status').on('click', function() {
             var offerId = $(this).data('id');
+            var button = $(this);
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -64,33 +76,33 @@
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: 'Yes, change it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/admin/offers/delete/${offerId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
+                    $.ajax({
+                        url: `/admin/offers/toggle/${offerId}`,
+                        type: 'POST',
+                        success: function(response) {
+                            if(response.success) {
                                 Swal.fire(
-                                    'Deleted!',
-                                    'Offer has been deleted.',
+                                    'Changed!',
+                                    'Offer status has been changed.',
                                     'success'
-                                ).then(() => {
-                                    location.reload(); // Reload the page after deletion
-                                });
+                                );
+                                if (button.text() == 'Deactivate') {
+                                    button.text('Activate');
+                                } else {
+                                    button.text('Deactivate');
+                                }
                             } else {
                                 Swal.fire(
                                     'Error!',
-                                    'There was an error deleting the offer.',
+                                    'There was an error changing the status.',
                                     'error'
                                 );
                             }
-                        });
+                        }
+                    });
                 }
             });
         });

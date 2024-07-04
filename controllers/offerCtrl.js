@@ -1,14 +1,12 @@
-// controllers/offerController.js
 const Offer = require('../models/offerSchema');
-const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
-// Get All Offers
+const Product = require('../models/productSchema');
+
+
+// Get all offers
 const getOffers = async (req, res) => {
     try {
-        if (!req.session.admin) {
-            return res.redirect('/admin/login');
-        }
-        const offers = await Offer.find().populate('product').populate('category');
+        const offers = await Offer.find().populate('category');
         res.render('admin/offers', { title: "Offer List", offers, layout: 'adminlayout' });
     } catch (error) {
         console.error(error);
@@ -16,39 +14,23 @@ const getOffers = async (req, res) => {
     }
 };
 
-// Get Add Offer Page
+// Add offer page
 const getAddOfferPage = async (req, res) => {
     try {
-        if (!req.session.admin) {
-            return res.redirect('/admin/login');
-        }
-        const products = await Product.find();
         const categories = await Category.find();
-        res.render('admin/addOffer', { title: "Add Offer", products, categories, layout: 'adminlayout' });
+        res.render('admin/addOffer', { title: "Add Offer", categories, layout: 'adminlayout' });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
     }
 };
 
-// Add New Offer
+// Add a new offer
 const addOffer = async (req, res) => {
     try {
-        if (!req.session.admin) {
-            return res.redirect('/admin/login');
-        }
-        const { name, discount, startDate, endDate, type, product, category } = req.body;
+        const { name, discount, category, startDate, endDate } = req.body;
 
-        const newOffer = new Offer({
-            name,
-            discount,
-            startDate,
-            endDate,
-            type,
-            product: type === 'product' ? product : null,
-            category: type === 'category' ? category : null
-        });
-
+        const newOffer = new Offer({ name, discount, category, startDate, endDate });
         await newOffer.save();
 
         req.flash('success_msg', 'Offer added successfully');
@@ -60,41 +42,24 @@ const addOffer = async (req, res) => {
     }
 };
 
-// Get Edit Offer Page
+// Edit offer page
 const getEditOfferPage = async (req, res) => {
     try {
-        if (!req.session.admin) {
-            return res.redirect('/admin/login');
-        }
-        const offer = await Offer.findById(req.params.id);
-        const products = await Product.find();
+        const offer = await Offer.findById(req.params.id).populate('category');
         const categories = await Category.find();
-        res.render('admin/editOffer', { title: "Edit Offer", offer, products, categories, layout: 'adminlayout' });
+        res.render('admin/editOffer', { title: "Edit Offer", offer, categories, layout: 'adminlayout' });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
     }
 };
 
-// Update Offer
+// Update an existing offer
 const updateOffer = async (req, res) => {
     try {
-        if (!req.session.admin) {
-            return res.redirect('/admin/login');
-        }
-        const { name, discount, startDate, endDate, type, product, category } = req.body;
+        const { name, discount, category, startDate, endDate } = req.body;
 
-        const updateData = {
-            name,
-            discount,
-            startDate,
-            endDate,
-            type,
-            product: type === 'product' ? product : null,
-            category: type === 'category' ? category : null
-        };
-
-        await Offer.findByIdAndUpdate(req.params.id, updateData);
+        await Offer.findByIdAndUpdate(req.params.id, { name, discount, category, startDate, endDate });
 
         req.flash('success_msg', 'Offer updated successfully');
         res.redirect('/admin/offers');
@@ -105,19 +70,109 @@ const updateOffer = async (req, res) => {
     }
 };
 
-// Delete Offer
-const deleteOffer = async (req, res) => {
+// Toggle offer status
+const toggleOfferStatus = async (req, res) => {
     try {
-        if (!req.session.admin) {
-            return res.redirect('/admin/login');
-        }
-        await Offer.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
+        const offer = await Offer.findById(req.params.id);
+        const newStatus = offer.status === 'active' ? 'inactive' : 'active';
+
+        offer.status = newStatus;
+        await offer.save();
+
+        res.json({ success: true, message: `Offer ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully` });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, error: error.message });
+        res.status(500).json({ success: false, message: 'Error updating offer status' });
     }
 };
+
+
+// Get all product offers
+const getProductOffers = async (req, res) => {
+    try {
+        const offers = await Offer.find({ product: { $exists: true } }).populate('product');
+        res.render('admin/productOffers', { title: "Product Offer List", offers, layout: 'adminlayout' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+};
+
+// Add offer page for products
+const getAddProductOfferPage = async (req, res) => {
+    try {
+        const products = await Product.find();
+        res.render('admin/addProductOffer', { title: "Add Product Offer", products, layout: 'adminlayout' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+};
+
+// Add a new product offer
+const addProductOffer = async (req, res) => {
+    try {
+        const { name, discount, product, startDate, endDate } = req.body;
+
+        const newOffer = new Offer({ name, discount, product, startDate, endDate });
+        await newOffer.save();
+
+        req.flash('success_msg', 'Product offer added successfully');
+        res.redirect('/admin/offers/productOffers');
+    } catch (error) {
+        console.error(error);
+        req.flash('error_msg', 'Error adding product offer');
+        res.redirect('/admin/offers/productOffers');
+    }
+};
+
+// Edit offer page for products
+const getEditProductOfferPage = async (req, res) => {
+    try {
+        const offer = await Offer.findById(req.params.id).populate('product');
+        const products = await Product.find();
+        res.render('admin/editProductOffer', { title: "Edit Product Offer", offer, products, layout: 'adminlayout' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+};
+
+// Update an existing product offer
+const updateProductOffer = async (req, res) => {
+    try {
+        const { name, discount, product, startDate, endDate } = req.body;
+
+        await Offer.findByIdAndUpdate(req.params.id, { name, discount, product, startDate, endDate });
+
+        req.flash('success_msg', 'Product offer updated successfully');
+        res.redirect('/admin/offers/productOffers');
+    } catch (error) {
+        console.error(error);
+        req.flash('error_msg', 'Error updating product offer');
+        res.redirect('/admin/offers/productOffers');
+    }
+};
+
+// Toggle product offer status
+const toggleProductOfferStatus = async (req, res) => {
+    try {
+        const offer = await Offer.findById(req.params.id);
+        if (!offer) {
+            return res.status(404).json({ success: false, message: 'Offer not found' });
+        }
+
+        const newStatus = offer.status === 'active' ? 'inactive' : 'active';
+        offer.status = newStatus;
+        await offer.save();
+
+        res.json({ success: true, message: `Offer ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully` });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error updating offer status' });
+    }
+};
+
 
 module.exports = {
     getOffers,
@@ -125,5 +180,11 @@ module.exports = {
     addOffer,
     getEditOfferPage,
     updateOffer,
-    deleteOffer
+    toggleOfferStatus,
+    getProductOffers,
+    getAddProductOfferPage,
+    addProductOffer,
+    getEditProductOfferPage,
+    updateProductOffer,
+    toggleProductOfferStatus
 };
