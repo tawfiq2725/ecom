@@ -8,7 +8,8 @@
                     <li><a href="/wallet">Wallet</a></li>
                     <li><a href="/wishlist">Whislist</a></li>
                     <li><a class="active" href="/orders">Orders</a></li>
-                     <li><a href="/returns">Returns</a></li>
+                    <li><a href="/returns">Returns</a></li>
+                    <li><a href="/referrals">Referrals</a></li>
                 </ul>
                 <div class="dashboard-wrapper user-dashboard">
                     <div class="table-responsive">
@@ -20,6 +21,7 @@
                                     <th>Items</th>
                                     <th>Total Price</th>
                                     <th>Status</th>
+                                    <th>Invoice</th>
                                     <th>View</th>
                                 </tr>
                             </thead>
@@ -30,8 +32,11 @@
                                     <td>{{formatDate this.createdAt}}</td>
                                     <td>{{this.items.length}}</td>
                                     <td>${{this.totalAmount}}</td>
-                                    <td><span
-                                            class="label label-{{this.orderStatus}} btn btn-primary">{{this.orderStatus}}</span>
+                                    <td><span class="label label-{{this.orderStatus}} btn btn-primary">{{this.orderStatus}}</span></td>
+                                    <td>
+                                        {{#if (or (eq this.paymentMethod 'Wallet') (eq this.paymentMethod 'Razorpay') (eq this.orderStatus 'Delivered'))}}
+                                        <a href="/orders/{{this._id}}/invoice" class="btn btn-default">Download</a>
+                                        {{/if}}
                                     </td>
                                     <td><a href="/orders/{{this._id}}" class="btn btn-default">View</a></td>
                                 </tr>

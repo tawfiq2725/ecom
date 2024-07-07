@@ -1,26 +1,177 @@
+const Order = require('../models/orderSchema');
+const Product = require('../models/productSchema');
+const Category = require('../models/categorySchema');
+const bestSelling = require('../helpers/topSelling');
 const Admin = require('../models/adminSchema');
 const User = require('../models/userSchema');
-const bestSelling = require('../helpers/topSelling')
-require('dotenv').config()
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+require('dotenv').config();
 
+const getSaleChartData = async (filter) => {
+    let matchStage = {};
+    if (filter === 'monthly') {
+        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) } };
+    } else if (filter === 'weekly') {
+        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } };
+    }
+
+    const orders = await Order.aggregate([
+        { $match: matchStage },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                totalSales: { $sum: "$totalAmount" }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+
+    const labels = orders.map(order => order._id);
+    const data = orders.map(order => order.totalSales);
+
+    return {
+        labels,
+        datasets: [{
+            label: 'Sales',
+            data,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    };
+};
+
+const getOrderTypeChartData = async (filter) => {
+    let matchStage = {};
+    if (filter === 'monthly') {
+        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) } };
+    } else if (filter === 'weekly') {
+        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } };
+    }
+
+    const orders = await Order.aggregate([
+        { $match: matchStage },
+        {
+            $group: {
+                _id: "$paymentMethod",
+                count: { $sum: 1 }
+            }
+        }
+    ]);
+
+    const labels = orders.map(order => order._id);
+    const data = orders.map(order => order.count);
+
+    return {
+        labels,
+        datasets: [{
+            label: 'Order Types',
+            data,
+            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1
+        }]
+    };
+};
+
+const getCategoryChartData = async (filter) => {
+    let matchStage = {};
+    if (filter === 'monthly') {
+        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) } };
+    } else if (filter === 'weekly') {
+        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } };
+    }
+
+    const categories = await Product.aggregate([
+        { $lookup: { from: 'orders', localField: '_id', foreignField: 'items.product', as: 'orders' } },
+        { $unwind: "$orders" },
+        { $match: matchStage },
+        {
+            $group: {
+                _id: "$category",
+                count: { $sum: 1 }
+            }
+        },
+        { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'categoryDetails' } },
+        { $unwind: "$categoryDetails" }
+    ]);
+
+    const labels = categories.map(category => category.categoryDetails.name);
+    const data = categories.map(category => category.count);
+
+    return {
+        labels,
+        datasets: [{
+            label: 'Categories',
+            data,
+            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 1
+        }]
+    };
+};
+
+const getOrderQuantityChartData = async (filter) => {
+    let matchStage = {};
+    if (filter === 'monthly') {
+        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) } };
+    } else if (filter === 'weekly') {
+        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } };
+    }
+
+    const orders = await Order.aggregate([
+        { $match: matchStage },
+        { $unwind: "$items" },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                totalQuantity: { $sum: "$items.quantity" }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+
+    const labels = orders.map(order => order._id);
+    const data = orders.map(order => order.totalQuantity);
+
+    return {
+        labels,
+        datasets: [{
+            label: 'Order Quantity',
+            data,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    };
+};
 
 // Home Page
-
 const getHomePage = async (req, res) => {
     try {
         const locals = { title: "Hosssom Dashboard" };
-        if(req.session.admin){
+        if (req.session.admin) {
             const bestsellingProducts = await bestSelling.getBestSellingProducts();
             const topCategories = await bestSelling.getTopCategories();
-            console.log(bestsellingProducts);
 
-            res.render('admin/dashboard', { 
-                title: locals.title, 
-                layout: 'adminlayout', 
+            const filter = req.query.filter || 'yearly'; // Default to yearly if no filter is provided
+
+            // Fetch chart data
+            const saleChartInfo = await getSaleChartData(filter);
+            const orderTypeChartInfo = await getOrderTypeChartData(filter);
+            const categoryChartInfo = await getCategoryChartData(filter);
+            const orderQuantityChartInfo = await getOrderQuantityChartData(filter);
+
+            res.render('admin/dashboard', {
+                title: locals.title,
+                layout: 'adminlayout',
                 admin: req.session.admin,
-                topCategories, 
+                topCategories,
                 bestsellingProducts,
+                saleChartInfo,
+                orderTypeChartInfo,
+                categoryChartInfo,
+                orderQuantityChartInfo
             });
         } else {
             res.render('admin/login', { layout: 'adminlayout' });
@@ -29,8 +180,6 @@ const getHomePage = async (req, res) => {
         console.log("Something went wrong: " + error);
     }
 };
-
-
 // Login Page
 
 const getLoginPage = async (req, res) => {

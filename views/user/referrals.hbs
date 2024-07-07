@@ -1,0 +1,61 @@
+<section class="user-dashboard page-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="list-inline dashboard-menu text-center">
+                    <li><a href="/profile">Profile Details</a></li>
+                    <li><a href="/address">Address</a></li>
+                    <li><a href="/wallet">Wallet</a></li>
+                    <li><a href="/wishlist">Wishlist</a></li>
+                    <li><a href="/orders">Orders</a></li>
+                    <li><a href="/returns">Returns</a></li>
+                    <li><a href="/referrals">Referrals</a></li> 
+                </ul>
+                <div class="dashboard-wrapper user-dashboard">
+                    <div class="referrals-summary">
+    <h2>Referral Code: {{user.referralCode}}</h2>
+    <button id="copyReferralCode" class="btn btn-primary">Copy Referral Code</button>
+</div>
+<div class="table-responsive">
+    <h3>Referrals List</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Join Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each referrals}}
+            <tr>
+                <td>{{this.referred.firstname}} {{this.referred.lastname}}</td>
+                <td>{{this.referred.email}}</td>
+                <td>{{formatDate this.createdAt}}</td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="3">You have no referrals yet.</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.getElementById('copyReferralCode').addEventListener('click', function() {
+    const referralCode = '{{user.referralCode}}';
+    navigator.clipboard.writeText(referralCode).then(() => {
+        Swal.fire('Copied!', 'Referral code copied to clipboard: ' + referralCode, 'success');
+    }).catch(err => {
+        Swal.fire('Failed', 'Failed to copy referral code: ' + err, 'error');
+    });
+});
+</script>

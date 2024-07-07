@@ -1,3 +1,4 @@
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!--*******************
         Preloader start
     ********************-->
@@ -127,7 +128,152 @@
 
             </div>
         </div>
+        <div class="content-body">
+  <div class="container-fluid">
+    <!-- Filters -->
+    <div class="row mb-4">
+      <div class="col">
+        <select id="timeFilter" class="form-control">
+          <option value="yearly">Yearly</option>
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Sales Chart -->
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Sales Chart</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="saleChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <!-- Order Type Chart -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Order Type Chart</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="orderTypeChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Chart -->
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Category Chart</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <!-- Order Quantity Chart -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Order Quantity Chart</h4>
+          </div>
+          <div class="card-body">
+            <canvas id="orderQuantityChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
         <!--**********************************
             Content body end
         ***********************************-->
+<script>
+  // Initialize charts
+  let saleChart, orderTypeChart, categoryChart, orderQuantityChart;
 
+  // Function to create charts
+  const createCharts = (data) => {
+    const ctxSale = document.getElementById('saleChart').getContext('2d');
+    const ctxOrderType = document.getElementById('orderTypeChart').getContext('2d');
+    const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+    const ctxOrderQuantity = document.getElementById('orderQuantityChart').getContext('2d');
+
+    saleChart = new Chart(ctxSale, {
+      type: 'bar',
+      data: data.saleChartInfo,
+      options: {
+        responsive: true,
+        scales: {
+          x: { beginAtZero: true },
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    orderTypeChart = new Chart(ctxOrderType, {
+      type: 'pie',
+      data: data.orderTypeChartInfo,
+      options: { responsive: true }
+    });
+
+    categoryChart = new Chart(ctxCategory, {
+      type: 'doughnut',
+      data: data.categoryChartInfo,
+      options: { responsive: true }
+    });
+
+    orderQuantityChart = new Chart(ctxOrderQuantity, {
+      type: 'line',
+      data: data.orderQuantityChartInfo,
+      options: {
+        responsive: true,
+        scales: {
+          x: { beginAtZero: true },
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  };
+
+  // Update charts on filter change
+  document.getElementById('timeFilter').addEventListener('change', async (event) => {
+    const filter = event.target.value;
+    try {
+      const response = await fetch(`/admin/dashboard?filter=${filter}`);
+      const data = await response.json();
+
+      saleChart.data = data.saleChartInfo;
+      saleChart.update();
+
+      orderTypeChart.data = data.orderTypeChartInfo;
+      orderTypeChart.update();
+
+      categoryChart.data = data.categoryChartInfo;
+      categoryChart.update();
+
+      orderQuantityChart.data = data.orderQuantityChartInfo;
+      orderQuantityChart.update();
+    } catch (error) {
+      console.error('Error updating chart data:', error);
+    }
+  });
+
+  // Initial chart creation
+  document.addEventListener('DOMContentLoaded', () => {
+    const initialData = {
+      saleChartInfo: {{{json saleChartInfo}}},
+      orderTypeChartInfo: {{{json orderTypeChartInfo}}},
+      categoryChartInfo: {{{json categoryChartInfo}}},
+      orderQuantityChartInfo: {{{json orderQuantityChartInfo}}}
+    };
+    createCharts(initialData);
+  });
+</script>

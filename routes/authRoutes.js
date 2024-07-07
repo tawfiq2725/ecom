@@ -7,6 +7,7 @@ const orderCtrl = require('../controllers/orderCtrl');
 const paymentCtrl = require('../controllers/paymentCtrl');
 const whislistCtrl = require('../controllers/whislistCtrl');
 const returnController = require('../controllers/returnCtrl');
+const referralController = require('../controllers/referalCtrl')
 const passport = require('../config/passport-config');
 const multer = require('multer');
 const upload = multer();
@@ -38,6 +39,9 @@ router.get('/forgot-pass', userController.getForgotPasswordPage);
 router.post('/auth/forgot-pass', userController.handleForgotPassword);
 router.get('/reset', userController.handleResetPasswordPageAndRequest);
 router.post('/auth/reset', userController.handleResetPasswordPageAndRequest);
+
+// Referrals
+router.get('/referrals', referralController.getUserReferrals);
 
 // Profile Routes
 router.get('/profile', userController.gotoProfile);
@@ -71,6 +75,7 @@ router.post('/api/remove-coupon', orderCtrl.removeCoupon);
 router.get('/confirm', orderCtrl.orderConfirm);
 router.get('/orders', orderCtrl.getUserOrders);
 router.get('/orders/:id', orderCtrl.getOrderDetails);
+router.get('/orders/:id/invoice',orderCtrl.downloadInvoice)
 router.post('/orders/:id/cancel', orderCtrl.cancelOrder);
 
 // New Routes for Razorpay Integration

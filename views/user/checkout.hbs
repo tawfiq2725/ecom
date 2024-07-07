@@ -89,7 +89,7 @@
                                 <li id="coupon">
                                     {{#if couponDetails}}
                                     <div id="couponInfo">
-                                        <span>Coupon Applied: -$${{couponDetails.discountAmount}}</span>
+                                        <span>Coupon Applied: -₹{{couponDetails.discountAmount}}</span>
                                         <a href="#" id="removeCoupon" class="btn btn-danger">Remove</a>
                                     </div>
                                     {{else}}
@@ -102,7 +102,7 @@
                             </ul>
                             <div class="summary-total">
                                 <span>Total</span>
-                                <span class="price">${{cart.totalPrice}}</span>
+                                <span class="price">₹{{cart.totalPrice}}</span>
                             </div>
 
                             <div class="verified-icon">
@@ -115,27 +115,38 @@
         </div>
     </div>
 </div>
-
-<!-- Modal -->
-{{!-- <div class="modal fade" id="coupon-modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-body">
-                <form id="couponForm">
-                    <div class="form-group">
-                        <input id="modalCouponCode" class="form-control" type="text" placeholder="Enter Coupon Code">
-                    </div>
-                    <button type="button" id="applyModalCoupon" class="btn btn-main">Apply Coupon</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div> --}}
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    function toggleCOD() {
+        const totalPriceElement = document.querySelector('.summary-total .price');
+        const totalAmount = parseFloat(totalPriceElement.textContent.replace('₹', '').replace(',', ''));
+
+        const codOption = document.getElementById('cod');
+        if (totalAmount >= 1000) {
+            codOption.disabled = true;
+            if (codOption.checked) {
+                // If COD was selected and is now disabled, select another payment method
+                document.getElementById('wallet').checked = true;
+            }
+        } else {
+            codOption.disabled = false;
+        }
+    }
+
+    // Initial check
+    toggleCOD();
+
+    // Re-check COD availability on coupon apply or remove
+    document.getElementById('removeCoupon')?.addEventListener('click', function () {
+        setTimeout(toggleCOD, 500); // Timeout to wait for DOM update
+    });
+
+    document.getElementById('openCouponModal')?.addEventListener('click', function () {
+        setTimeout(toggleCOD, 500); // Timeout to wait for DOM update
+    });
     // Function to handle applying a coupon
     function applyCoupon(couponCode) {
         fetch('/api/apply-coupon', {
@@ -280,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Event listener for form submission
-    document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
+     document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
         event.preventDefault();
 
         const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
@@ -306,6 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }).then((result) => {
             if (result.isConfirmed) {
                 if (selectedPaymentMethod === 'Razorpay') {
+                    // Fetch order details from the server
                     fetch('/api/create-order', {
                         method: 'POST',
                         headers: {
@@ -329,6 +341,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 description: 'Order Payment',
                                 order_id: data.razorpayOrderId,
                                 handler: function (response) {
+                                    // Verify payment on the server
                                     fetch('/api/verify-payment', {
                                         method: 'POST',
                                         headers: {
@@ -399,47 +412,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
                     });
                 } else {
-                    fetch('/api/place-order', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            addressId: selectedAddressRadio.value,
-                            paymentMethod: selectedPaymentMethod,
-                            ...addressDetails,
-                            couponCode: document.getElementById('hiddenCouponCode').value
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Order Placed Successfully',
-                                text: 'Your order has been placed successfully.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.href = '/confirm';
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Order Failed',
-                                text: data.message || 'There was an error placing your order. Please try again.',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Order placement failed:', error);
-                        Swal.fire({
-                            title: 'Order Placement Failed',
-                            text: 'There was an error placing your order. Please try again.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    });
+                    event.target.submit();
                 }
             }
         });

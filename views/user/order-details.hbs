@@ -7,6 +7,7 @@
                     <li><a href="/address">Address</a></li>
                     <li><a href="/wallet">Wallet</a></li>
                     <li><a href="/orders" class="active">Orders</a></li>
+                    <li><a href="/referrals">Referrals</a></li> 
                 </ul>
                 <div class="dashboard-wrapper user-dashboard">
                     <div class="order-details-content">
@@ -17,16 +18,8 @@
                                     <th>Order ID</th>
                                     <th>Date</th>
                                     <th>Total Items</th>
-                                    <th>
-                                        {{#if order.coupon.code}}
-                                        Coupon
-                                        {{/if}}
-                                    </th>
-                                    <th>
-                                        {{#if order.coupon.code}}
-                                          Discount Amount
-                                        {{/if}}
-                                    </th>
+                                    <th>{{#if order.coupon.code}}Coupon{{/if}}</th>
+                                    <th>{{#if order.coupon.code}}Discount Amount{{/if}}</th>
                                     <th>Total Price</th>
                                     <th>Status</th>
                                 </tr>
@@ -36,15 +29,10 @@
                                     <td>#{{order._id}}</td>
                                     <td>{{formatDate order.createdAt}}</td>
                                     <td>{{order.items.length}}</td>
-                                    <td>{{#if order.coupon.code}}
-                                        <p> {{order.coupon.code}}</p>
-                                        {{/if}}
-                                    </td>
-                                    <td><p>{{#if order.coupon.code}}{{order.coupon.discountAmount}}</p>{{/if}}</td>
+                                    <td>{{#if order.coupon.code}}<p>{{order.coupon.code}}</p>{{/if}}</td>
+                                    <td><p>{{#if order.coupon.code}}{{order.coupon.discountAmount}}{{/if}}</p></td>
                                     <td>${{order.totalAmount}}</td>
-                                    <td><span
-                                            class="label label-{{order.orderStatus}} btn btn-primary">{{order.orderStatus}}</span>
-                                    </td>
+                                    <td><span class="label label-{{order.orderStatus}} btn btn-primary">{{order.orderStatus}}</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -72,18 +60,20 @@
                             </tbody>
                         </table>
                         <h4>Shipping Address</h4>
-                        <p>{{order.address.place}}, {{order.address.houseNumber}}, {{order.address.street}},
-                            {{order.address.city}}, {{order.address.zipcode}}, {{order.address.country}}</p>
+                        <p>{{order.address.place}}, {{order.address.houseNumber}}, {{order.address.street}}, {{order.address.city}}, {{order.address.zipcode}}, {{order.address.country}}</p>
                         <h4>Payment Method</h4>
                         <p>{{order.paymentMethod}}</p>
                         <h4>Payment Status</h4>
                         <p>{{order.paymentStatus}}</p>
                         {{#ifCond order.orderStatus '===' 'Pending'}}
-                        <a  class="btn btn-main btn-small" id="cancelOrderBtn">Cancel Order</a>
+                        <a class="btn btn-main btn-small" id="cancelOrderBtn">Cancel Order</a>
                         {{/ifCond}}
-                      {{#ifCond order.orderStatus '===' 'Delivered'}}
-<a class="btn btn-main btn-small" href="/orders/{{order._id}}/return">Return Order</a>
-{{/ifCond}}
+                        {{#ifCond order.orderStatus '===' 'Delivered'}}
+                        <a class="btn btn-main btn-small" href="/orders/{{order._id}}/return">Return Order</a>
+                        {{/ifCond}}
+                        {{#if (or (eq order.paymentMethod 'Wallet') (eq order.paymentMethod 'Razorpay') (eq order.orderStatus 'Delivered'))}}
+                        <a class="btn btn-main btn-small" href="/orders/{{order._id}}/invoice">Download Invoice</a>
+                        {{/if}}
                     </div>
                 </div>
             </div>
@@ -93,7 +83,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    
     // Cancel Order
     document.getElementById('cancelOrderBtn').addEventListener('click', function () {
         Swal.fire({
@@ -128,5 +117,4 @@
             }
         });
     });
-
 </script>

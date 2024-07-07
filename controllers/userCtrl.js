@@ -3,7 +3,9 @@ const Otp = require('../models/otpSchema');
 const Product = require('../models/productSchema');
 const Cart = require('../models/cartSchema');
 const Address = require('../models/addressSchema')
+const Wallet = require('../models/walletSchema')
 const { GenerateOtp, sendMail } = require('../helpers/otpverification');
+const { handleReferral } = require('../controllers/referalCtrl');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 
@@ -53,24 +55,33 @@ const getSignupPage = async (req, res) => {
         console.log(error.message);
     }
 };
-
 // Register New Member
 const newUserRegistration = async (req, res) => {
-    let firstname, lastname, mobile, email, password, password2;
+    let { firstname, lastname, mobile, email, password, password2, referralCode } = req.body;
     try {
-        ({ firstname, lastname, mobile, email, password, password2 } = req.body);
-
         if (password !== password2) {
             return res.render("user/signup", { error_msg: "The confirm password does not match.", firstname, lastname, email, mobile });
         }
 
-        const findUser = await User.findOne({ email });
-        if (findUser) {
+        const findUserByEmail = await User.findOne({ email });
+        if (findUserByEmail) {
             return res.render("user/signup", { error_msg: "User with this email already exists.", firstname, lastname, email, mobile });
+        }
+
+        const findUserByMobile = await User.findOne({ mobile });
+        if (findUserByMobile) {
+            return res.render("user/signup", { error_msg: "User with this mobile number already exists.", firstname, lastname, email, mobile });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const referrer = referralCode ? await User.findOne({ referralCode }) : null;
+        const referredBy = referrer ? referrer._id : null;
+
+        const generateReferralCode = () => {
+            return Math.random().toString(36).substring(2, 8); // Generates a random 8-character code
+        };
+       
         const newUser = new User({
             firstname,
             lastname,
@@ -79,22 +90,48 @@ const newUserRegistration = async (req, res) => {
             password: hashedPassword,
             isBlocked: false,
             isVerified: false,
-            isAdmin: false
+            isAdmin: false,
+            referredBy,
+            referralCode: generateReferralCode()
         });
 
         const savedUser = await newUser.save();
-        console.log('User saved:', savedUser);
+        console.log(referralCode)
+
+        if (!savedUser) {
+            return res.render("user/signup", { error_msg: "Failed to register user. Please try again.", firstname, lastname, email, mobile });
+        }
+
+        // Handle the referral code if provided
+        if (referrer) {
+            await handleReferral(referralCode, savedUser);
+        }
+
+        // Create wallet for the new user
+        const userWallet = new Wallet({ userId: savedUser._id });
+        const savedWallet = await userWallet.save();
+
+        if (!savedWallet) {
+            return res.render("user/signup", { error_msg: "Failed to create user wallet. Please try again.", firstname, lastname, email, mobile });
+        }
+
+        // Link wallet to user
+        savedUser.wallet = userWallet._id;
+        const finalSavedUser = await savedUser.save();
+
+        if (!finalSavedUser) {
+            return res.render("user/signup", { error_msg: "Failed to link wallet to user. Please try again.", firstname, lastname, email, mobile });
+        }
 
         const otpcode = GenerateOtp();
         const otpData = new Otp({
             userId: savedUser._id,
             otp: otpcode,
             createdAt: Date.now(),
-            expiresAt: Date.now() + (5 * 60 * 1000)
+            expiresAt: Date.now() + (5 * 60 * 1000) // 5 minutes
         });
 
         await otpData.save();
-        console.log('Generated OTP:', otpcode);
 
         const sendmail = await sendMail(email, otpcode);
         if (sendmail) {
@@ -110,6 +147,8 @@ const newUserRegistration = async (req, res) => {
         res.status(500).render("user/signup", { error_msg: "An error occurred during registration.", firstname, lastname, email, mobile });
     }
 };
+
+
 
 // Resend Otp Page
 const resendOtp = async (req, res) => {

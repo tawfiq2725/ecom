@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
     firstname: {
         type: String,
         required: [true, 'First name is required'],
@@ -40,18 +41,29 @@ const userSchema = new mongoose.Schema({
         default: false,
     },
     wishlist: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Product'
     }],
     wallet: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Wallet' // Reference to the Wallet document
-    }
+    },
+    referralCode: {
+        type: String,
+        unique: true
+    },
+    referredBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    referrals: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }]
 }, {
     timestamps: true,
 });
 
-// Define a virtual field for full name
 userSchema.virtual('fullName').get(function() {
     return `${this.firstname} ${this.lastname}`;
 });
