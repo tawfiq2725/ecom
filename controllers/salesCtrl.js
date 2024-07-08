@@ -89,6 +89,8 @@ const downloadSalesReport = async (req, res) => {
         .populate('address')
         .lean();
 
+    const reportDetails = calculateReportDetails(orders);
+
     if (format === 'excel') {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
@@ -137,7 +139,16 @@ const downloadSalesReport = async (req, res) => {
 
         doc.pipe(res);
 
-        doc.fontSize(25).text('Sales Report', { align: 'center' });
+        doc.fontSize(25).text('HOSSOM SHIRTS', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(18).text('Sales Report', { align: 'center' });
+        doc.moveDown();
+        
+        // Add report details
+        doc.fontSize(14).text(`Total Orders: ${reportDetails.totalOrders}`, { align: 'left' });
+        doc.fontSize(14).text(`Total Amount:  ${reportDetails.totalAmount}`, { align: 'left' });
+        doc.fontSize(14).text(`Total Discount:  ${reportDetails.totalDiscount}`, { align: 'left' });
+        doc.moveDown();
 
         orders.forEach(order => {
             doc.fontSize(12).text(`Order ID: ${order._id}`, { continued: true }).text(`Order Date: ${moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss')}`);
@@ -151,6 +162,7 @@ const downloadSalesReport = async (req, res) => {
             doc.fontSize(12).text(`Coupon Discount: ₹${order.coupon ? order.coupon.discountAmount : 0}`);
             doc.fontSize(12).text(`Payable: ₹${order.totalAmount - (order.coupon ? order.coupon.discountAmount : 0)}`);
             doc.fontSize(12).text(`Category Discount: ₹${order.discountAmount}`);
+            doc.moveDown();
             doc.moveDown();
         });
 

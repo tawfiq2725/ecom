@@ -41,7 +41,10 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "pdfkit": "^0.15.0",
-    "razorpay": "^2.9.4"
+    "pdfkit-table": "^0.1.99",
+    "pdfmake": "^0.2.10",
+    "razorpay": "^2.9.4",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

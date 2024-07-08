@@ -146,40 +146,59 @@ const getOrderQuantityChartData = async (filter) => {
     };
 };
 
+
 // Home Page
 const getHomePage = async (req, res) => {
     try {
-        const locals = { title: "Hosssom Dashboard" };
-        if (req.session.admin) {
-            const bestsellingProducts = await bestSelling.getBestSellingProducts();
-            const topCategories = await bestSelling.getTopCategories();
+        const filter = req.query.filter || 'yearly'; // Default to yearly if no filter is provided
 
-            const filter = req.query.filter || 'yearly'; // Default to yearly if no filter is provided
+        // Fetch chart data
+        const saleChartInfo = await getSaleChartData(filter);
+        const orderTypeChartInfo = await getOrderTypeChartData(filter);
+        const categoryChartInfo = await getCategoryChartData(filter);
+        const orderQuantityChartInfo = await getOrderQuantityChartData(filter);
 
-            // Fetch chart data
-            const saleChartInfo = await getSaleChartData(filter);
-            const orderTypeChartInfo = await getOrderTypeChartData(filter);
-            const categoryChartInfo = await getCategoryChartData(filter);
-            const orderQuantityChartInfo = await getOrderQuantityChartData(filter);
-
-            res.render('admin/dashboard', {
-                title: locals.title,
-                layout: 'adminlayout',
-                admin: req.session.admin,
-                topCategories,
-                bestsellingProducts,
+        // If the request is for charts data (AJAX request)
+        if (req.xhr) {
+            return res.json({
                 saleChartInfo,
                 orderTypeChartInfo,
                 categoryChartInfo,
                 orderQuantityChartInfo
             });
-        } else {
-            res.render('admin/login', { layout: 'adminlayout' });
         }
+
+        // Fetch total counts
+        const totalUsers = await User.countDocuments();
+        const totalProducts = await Product.countDocuments();
+        const totalOrders = await Order.countDocuments({ orderStatus: 'Delivered' });
+        const totalRevenue = await Order.aggregate([
+            { $match: { orderStatus: 'Delivered' } }, // Only include delivered orders
+            { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+        ]);
+
+        res.render('admin/dashboard', {
+            title: "Hossom Dashboard",
+            layout: 'adminlayout',
+            admin: req.session.admin,
+            topCategories: await bestSelling.getTopCategories(),
+            bestsellingProducts: await bestSelling.getBestSellingProducts(),
+            saleChartInfo,
+            orderTypeChartInfo,
+            categoryChartInfo,
+            orderQuantityChartInfo,
+            totalUsers,
+            totalProducts,
+            totalOrders,
+            totalRevenue: totalRevenue[0]?.total || 0
+        });
     } catch (error) {
         console.log("Something went wrong: " + error);
+        res.status(500).send("Server error");
     }
 };
+
+
 // Login Page
 
 const getLoginPage = async (req, res) => {

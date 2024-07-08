@@ -21,59 +21,55 @@
         <!--**********************************
             Content body start
         ***********************************-->
-        <div class="content-body">
-            <!-- row -->
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-3 col-sm-6">
-                        <div class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Today Expenses </div>
-                                    <div class="stat-digit"> <i class="fa fa-usd"></i>8500</div>
-                                </div>
-                                
-
-                            </div>
+<div class="content-body">
+    <!-- row -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-sm-6">
+                <div class="card">
+                    <div class="stat-widget-two card-body">
+                        <div class="stat-content">
+                            <div class="stat-text">Total Users</div>
+                            <div class="stat-digit"><i class="fa fa-users"></i> {{totalUsers}}</div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Income Detail</div>
-                                    <div class="stat-digit"> <i class="fa fa-usd"></i>7800</div>
-                                </div>
-                              
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Task Completed</div>
-                                    <div class="stat-digit"> <i class="fa fa-usd"></i> 500</div>
-                                </div>
-                               
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Task Completed</div>
-                                    <div class="stat-digit"> <i class="fa fa-usd"></i>650</div>
-                                </div>
-                               
-                            </div>
-                        </div>
-                        <!-- /# card -->
-                    </div>
-                    <!-- /# column -->
                 </div>
-                 <!-- Top Categories Section -->
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="card">
+                    <div class="stat-widget-two card-body">
+                        <div class="stat-content">
+                            <div class="stat-text">Total Products</div>
+                            <div class="stat-digit"><i class="fa fa-cubes"></i> {{totalProducts}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="card">
+                    <div class="stat-widget-two card-body">
+                        <div class="stat-content">
+                            <div class="stat-text">Total Orders</div>
+                            <div class="stat-digit"><i class="fa fa-shopping-cart"></i> {{totalOrders}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="card">
+                    <div class="stat-widget-two card-body">
+                        <div class="stat-content">
+                            <div class="stat-text">Total Revenue</div>
+                            <div class="stat-digit"><i class="fa fa-usd"></i> {{totalRevenue}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /# column -->
+        </div>
+        <!-- Top Categories Section -->
+    </div>
+
 <div class="row">
     <div class="col-lg-12">
         <div class="card">
@@ -128,19 +124,16 @@
 
             </div>
         </div>
-        <div class="content-body">
+       <div class="content-body">
   <div class="container-fluid">
     <!-- Filters -->
-    <div class="row mb-4">
-      <div class="col">
-        <select id="timeFilter" class="form-control">
-          <option value="yearly">Yearly</option>
-          <option value="monthly">Monthly</option>
-          <option value="weekly">Weekly</option>
-        </select>
-      </div>
-    </div>
-
+<div class="row mb-4">
+  <div class="col">
+    <button id="filterYearly" class="btn btn-primary mr-2">Yearly</button>
+    <button id="filterMonthly" class="btn btn-primary mr-2">Monthly</button>
+    <button id="filterWeekly" class="btn btn-primary">Weekly</button>
+  </div>
+</div>
     <!-- Sales Chart -->
     <div class="row">
       <div class="col-lg-6">
@@ -192,88 +185,100 @@
     </div>
   </div>
 </div>
-        <!--**********************************
-            Content body end
-        ***********************************-->
+
 <script>
-  // Initialize charts
-  let saleChart, orderTypeChart, categoryChart, orderQuantityChart;
+    let saleChart, orderTypeChart, categoryChart, orderQuantityChart;
 
-  // Function to create charts
-  const createCharts = (data) => {
-    const ctxSale = document.getElementById('saleChart').getContext('2d');
-    const ctxOrderType = document.getElementById('orderTypeChart').getContext('2d');
-    const ctxCategory = document.getElementById('categoryChart').getContext('2d');
-    const ctxOrderQuantity = document.getElementById('orderQuantityChart').getContext('2d');
+    const createCharts = (data) => {
+        const ctx1 = document.getElementById('saleChart').getContext('2d');
+        saleChart = new Chart(ctx1, {
+            type: 'bar',
+            data: data.saleChartInfo,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
 
-    saleChart = new Chart(ctxSale, {
-      type: 'bar',
-      data: data.saleChartInfo,
-      options: {
-        responsive: true,
-        scales: {
-          x: { beginAtZero: true },
-          y: { beginAtZero: true }
-        }
-      }
-    });
+        const ctx2 = document.getElementById('orderTypeChart').getContext('2d');
+        orderTypeChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: data.orderTypeChartInfo,
+            options: {
+                responsive: true,
+            }
+        });
 
-    orderTypeChart = new Chart(ctxOrderType, {
-      type: 'pie',
-      data: data.orderTypeChartInfo,
-      options: { responsive: true }
-    });
+        const ctx3 = document.getElementById('categoryChart').getContext('2d');
+        categoryChart = new Chart(ctx3, {
+            type: 'bar',
+            data: data.categoryChartInfo,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
 
-    categoryChart = new Chart(ctxCategory, {
-      type: 'doughnut',
-      data: data.categoryChartInfo,
-      options: { responsive: true }
-    });
-
-    orderQuantityChart = new Chart(ctxOrderQuantity, {
-      type: 'line',
-      data: data.orderQuantityChartInfo,
-      options: {
-        responsive: true,
-        scales: {
-          x: { beginAtZero: true },
-          y: { beginAtZero: true }
-        }
-      }
-    });
-  };
-
-  // Update charts on filter change
-  document.getElementById('timeFilter').addEventListener('change', async (event) => {
-    const filter = event.target.value;
-    try {
-      const response = await fetch(`/admin/dashboard?filter=${filter}`);
-      const data = await response.json();
-
-      saleChart.data = data.saleChartInfo;
-      saleChart.update();
-
-      orderTypeChart.data = data.orderTypeChartInfo;
-      orderTypeChart.update();
-
-      categoryChart.data = data.categoryChartInfo;
-      categoryChart.update();
-
-      orderQuantityChart.data = data.orderQuantityChartInfo;
-      orderQuantityChart.update();
-    } catch (error) {
-      console.error('Error updating chart data:', error);
-    }
-  });
-
-  // Initial chart creation
-  document.addEventListener('DOMContentLoaded', () => {
-    const initialData = {
-      saleChartInfo: {{{json saleChartInfo}}},
-      orderTypeChartInfo: {{{json orderTypeChartInfo}}},
-      categoryChartInfo: {{{json categoryChartInfo}}},
-      orderQuantityChartInfo: {{{json orderQuantityChartInfo}}}
+        const ctx4 = document.getElementById('orderQuantityChart').getContext('2d');
+        orderQuantityChart = new Chart(ctx4, {
+            type: 'line',
+            data: data.orderQuantityChartInfo,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
     };
-    createCharts(initialData);
-  });
+
+    const updateCharts = async (filter) => {
+        try {
+            const response = await fetch(`/admin/dashboard?filter=${filter}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+
+            saleChart.data = data.saleChartInfo;
+            saleChart.update();
+
+            orderTypeChart.data = data.orderTypeChartInfo;
+            orderTypeChart.update();
+
+            categoryChart.data = data.categoryChartInfo;
+            categoryChart.update();
+
+            orderQuantityChart.data = data.orderQuantityChartInfo;
+            orderQuantityChart.update();
+        } catch (error) {
+            console.error('Error updating chart data:', error);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialData = {
+            saleChartInfo: {{{json saleChartInfo}}},
+            orderTypeChartInfo: {{{json orderTypeChartInfo}}},
+            categoryChartInfo: {{{json categoryChartInfo}}},
+            orderQuantityChartInfo: {{{json orderQuantityChartInfo}}}
+        };
+        createCharts(initialData);
+    });
 </script>

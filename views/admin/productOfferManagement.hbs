@@ -1,0 +1,64 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Product Offer Management</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+                {{#if messages.error}}
+        <div class="alert alert-danger">
+            {{messages.error}}
+        </div>
+        {{/if}}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Product Offer Management</h4>
+                        <a href="/admin/productOffers/create" class="btn btn-primary">Create Product Offer</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Offer</th>
+                                        <th>Category</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each productOffers}}
+                                    <tr>
+                                        <td>{{this.product.name}}</td>
+                                        <td>{{this.offer}}</td>
+                                        <td>{{this.category.name}}</td>
+                                        <td>{{formatDate this.startDate}}</td>
+                                        <td>{{formatDate this.endDate}}</td>
+                                        <td>{{this.status}}</td>
+                                        <td>
+                                            <a href="/admin/productOffers/edit/{{this._id}}" class="btn btn-warning">Edit</a>
+                                            <form action="/admin/productOffers/delete/{{this._id}}" method="post" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
