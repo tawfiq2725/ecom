@@ -46,7 +46,7 @@
             <div class="col-md-9">
                 <div class="row">
                     {{#if products.length}}
-                  {{#each products}}
+                {{#each products}}
 <div class="col-md-4">
     <div class="product-item" data-product-id="{{this._id}}">
         <div class="product-thumb">
@@ -67,11 +67,15 @@
         </div>
         <div class="product-content">
             <h4><a href="/products/{{this._id}}">{{this.name}}</a></h4>
-            {{#if this.discountedPrice}}
-            <p class="product-price"><del>₹{{this.price}}</del> ₹{{this.discountedPrice}}</p>
-            {{else}}
-            <p class="product-price">₹{{this.price}}</p>
-            {{/if}}
+            <p class="product-price">
+                {{#if this.effectiveOffer}}
+                <del>₹{{this.price}}</del>
+                <span>₹{{this.effectivePrice}}</span>
+                <span class="offer-tag">{{this.effectiveOffer}}% off</span>
+                {{else}}
+                ₹{{this.price}}
+                {{/if}}
+            </p>
             {{#if this.variants.length}}
             <div class="variant-selection">
                 <select class="form-control variant-size">
@@ -85,7 +89,6 @@
     </div>
 </div>
 {{/each}}
-
                     {{else}}
                     <div class="col-md-12">
                         <div class="alert alert-info" role="alert">

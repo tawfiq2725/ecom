@@ -1,7 +1,6 @@
 const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
 require('dotenv').config();
-
 const getProducts = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -12,23 +11,30 @@ const getProducts = async (req, res) => {
         const productType = req.query.productType;
         const searchQuery = req.query.search;
 
-        // Initialize filter with active status
+        // Initialize the filter
         const filter = { status: true };
 
-        // Apply search filter if present
-        if (searchQuery) {
+        // Combine search query and category filters using $and
+        if (searchQuery && category) {
+            filter.$and = [
+                {
+                    $or: [
+                        { name: { $regex: searchQuery, $options: 'i' } },
+                        { description: { $regex: searchQuery, $options: 'i' } }
+                    ]
+                },
+                { category }
+            ];
+        } else if (searchQuery) {
             filter.$or = [
                 { name: { $regex: searchQuery, $options: 'i' } },
                 { description: { $regex: searchQuery, $options: 'i' } }
             ];
-        }
-
-        // Apply category filter if present
-        if (category) {
+        } else if (category) {
             filter.category = category;
         }
 
-        // Initialize sorting option
+        // Sorting options
         let sortOption = {};
         if (sort === 'priceLow') {
             sortOption = { price: 1 };
@@ -36,7 +42,7 @@ const getProducts = async (req, res) => {
             sortOption = { price: -1 };
         }
 
-        // Apply product type filter if present
+        // Apply product type filter
         const today = new Date();
         if (productType === 'new') {
             const tenDaysAgo = new Date(today);
@@ -48,7 +54,7 @@ const getProducts = async (req, res) => {
             filter.createdAt = { $lt: tenDaysAgo };
         }
 
-        // Fetch categories, total products count, products, and category offers
+        // Fetch categories, total products count, and products
         const [categories, totalProducts, products] = await Promise.all([
             Category.find(),
             Product.countDocuments(filter),
@@ -59,13 +65,26 @@ const getProducts = async (req, res) => {
                 .limit(limit)
         ]);
 
+        // Calculate total pages
         const totalPages = Math.ceil(totalProducts / limit);
 
+        // Calculate effective offer and price for each product
+        const productsWithOffers = products.map(product => {
+            const categoryOffer = product.category.offerRate || 0;
+            const productOffer = product.discount || 0;
+            const effectiveOffer = Math.max(categoryOffer, productOffer);
+            const effectivePrice = product.price - (product.price * (effectiveOffer / 100));
+            return {
+                ...product.toObject(),
+                effectiveOffer,
+                effectivePrice
+            };
+        });
 
-        // Render the products page with all applied filters and category offers
+        // Render the products page with the filtered and sorted products
         res.render('user/products', {
             title: "Products",
-            products,
+            products: productsWithOffers,
             categories,
             currentPage: page,
             totalPages,
@@ -74,7 +93,6 @@ const getProducts = async (req, res) => {
             sort,
             productType,
             searchQuery,
-             
         });
     } catch (error) {
         console.error(error);
@@ -84,12 +102,15 @@ const getProducts = async (req, res) => {
 
 
 
-
-
 const getProductDetails = async (req, res) => {
     try {
         const productId = req.params.id;
         const product = await Product.findById(productId).populate('category');
+
+        const categoryOffer = product.category.offerRate || 0;
+        const productOffer = product.discount || 0;
+        const effectiveOffer = Math.max(categoryOffer, productOffer);
+        const effectivePrice = product.price - (product.price * (effectiveOffer / 100));
 
         let availableSizes = product.variants.filter(variant => variant.stock > 0);
         if (availableSizes.length === 0) {
@@ -107,11 +128,25 @@ const getProductDetails = async (req, res) => {
             relatedProducts = await Product.find({ _id: { $ne: product._id } }).limit(4);
         }
 
-        
+        const relatedProductsWithOffers = relatedProducts.map(relatedProduct => {
+            const categoryOffer = relatedProduct.category.offerRate || 0;
+            const productOffer = relatedProduct.discount || 0;
+            const effectiveOffer = Math.max(categoryOffer, productOffer);
+            const effectivePrice = relatedProduct.price - (relatedProduct.price * (effectiveOffer / 100));
+            return {
+                ...relatedProduct.toObject(),
+                effectiveOffer,
+                effectivePrice
+            };
+        });
 
         res.render('user/productDetails', {
-            product,
-            relatedProducts,
+            product: {
+                ...product.toObject(),
+                effectiveOffer,
+                effectivePrice
+            },
+            relatedProducts: relatedProductsWithOffers,
             admin: req.session.admin,
             title: "Product Details"
         });
@@ -120,6 +155,7 @@ const getProductDetails = async (req, res) => {
         res.status(500).send("Server Error");
     }
 };
+
 
 
 module.exports = {

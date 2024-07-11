@@ -13,105 +13,142 @@
         <div class="card-header">
             <h4 class="card-title">Product Offer Management</h4>
         </div>
-        <a href="/admin/offers/productOffers/add" class="btn btn-primary mb-3 mt-3">Add Product Offer</a>
+        <a href="#" class="btn btn-primary mb-3 mt-3" data-bs-toggle="modal" data-bs-target="#addEditOfferModal">Add
+            Product Offer</a>
         {{#if success_msg}}
-            <div class="alert alert-success" role="alert">
-                {{success_msg}}
-            </div>
+        <div class="alert alert-success">{{success_msg}}</div>
         {{/if}}
         {{#if error_msg}}
-            <div class="alert alert-danger" role="alert">
-                {{error_msg}}
-            </div>
+        <div class="alert alert-danger">{{error_msg}}</div>
         {{/if}}
-        <div class="card">
-            <div class="card-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Offer Name</th>
-                            <th>Discount (%)</th>
-                            <th>Product</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Status</th>
-                            <th>Edit</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each offers}}
-                            <tr>
-                                <td>{{this.name}}</td>
-                                <td>{{this.discount}}</td>
-                                <td>{{this.product.name}}</td>
-                                <td>{{formatDate this.startDate}}</td>
-                                <td>{{formatDate this.endDate}}</td>
-                                <td>{{this.status}}</td>
-                                <td>
-                                    <a href="/admin/offers/productOffers/edit/{{this._id}}" class="btn btn-warning btn-sm">Edit</a>
-                                </td>
-                                <td>
-                                    <button class="btn btn-secondary btn-sm" onclick="toggleStatus('{{this._id}}', '{{this.status}}')">
-                                        {{#if (eq this.status 'active')}}Deactivate{{else}}Activate{{/if}}
-                                    </button>
-                                </td>
-                            </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
+        <table class="table table-bordered" id="example">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Offer Status</th>
+                    <th>Price</th>
+                    <th>Discount %</th>
+                    <th>Offer Price</th>
+                    <th>Actions</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each products}}
+                <tr>
+                    <td>{{this.name}}</td>
+                    <td><img src="/uploads/products/{{this.mainImage}}" alt="{{this.name}}" style="width: 100px;"></td>
+                    <td>{{#if this.offerIsActive}}Listed{{else}}Not Listed{{/if}}</td>
+                    <td>{{this.price}}</td>
+                    <td>{{this.discount}}%</td>
+                    <td>₹{{this.offerPrice}}</td>
+                    <td>
+                        <button class="btn btn-warning activate-offer" data-id="{{this._id}}"
+                            data-active="{{this.offerIsActive}}">
+                            {{#if this.offerIsActive}}Deactivate{{else}}Activate{{/if}}
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary edit-offer" data-bs-toggle="modal"
+                            data-bs-target="#addEditOfferModal" data-id="{{this._id}}" data-offer="{{this.discount}}">
+                            Edit/Add
+                        </button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="addEditOfferModal" tabindex="-1" aria-labelledby="addEditOfferModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addEditOfferModalLabel">Add/Edit Discount</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="offerForm" method="POST" action="/admin/product/offers/add-edit">
+                    <div class="mb-3">
+                        <label for="offer-rate" class="col-form-label">Discount Percent</label>
+                        <input type="number" class="form-control" id="offer-rate" name="offerRate">
+                        <input type="hidden" id="product-id" name="productId">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+    integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+    crossorigin="anonymous"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function toggleStatus(offerId, currentStatus) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, change it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/admin/productOffers/toggle/${offerId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire(
-                            'Changed!',
-                            `Offer status has been ${data.message}.`,
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire(
-                            'Error!',
-                            'There was an error updating the status.',
-                            'error'
-                        );
-                    }
-                })
-                .catch(error => {
-                    Swal.fire(
-                        'Error!',
-                        'There was an error updating the status.',
-                        'error'
-                    );
-                    console.error('Error:', error);
-                });
-            }
+    $(document).ready(function () {
+        $('#example').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": false,
+            "pageLength": 10
         });
-    }
-</script>
 
+        $('.edit-offer').on('click', function () {
+            var productId = $(this).data('id');
+            var offerRate = $(this).data('offer');
+            $('#product-id').val(productId);
+            $('#offer-rate').val(offerRate);
+        });
+
+        $('.activate-offer').on('click', function () {
+            var button = $(this);
+            var productId = button.data('id');
+            var isActive = button.data('active');
+            var action = isActive ? 'deactivate' : 'activate';
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to ${action} this offer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Yes, ${action} it!`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/admin/product/offers/activate',
+                        method: 'POST',
+                        data: { productId: productId, isActive: !isActive },
+                        success: function (response) {
+                            Swal.fire({
+                                title: `${action.charAt(0).toUpperCase() + action.slice(1)}d!`,
+                                text: response.message,
+                                icon: 'success'
+                            }).then(() => {
+                                // Update button and status text
+                                button.data('active', !isActive);
+                                button.text(!isActive ? 'Deactivate' : 'Activate');
+                                button.closest('tr').find('td:eq(2)').text(!isActive ? 'Listed' : 'Not Listed');
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>

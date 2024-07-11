@@ -43,6 +43,20 @@ const productSchema = new mongoose.Schema({
     highlights: {
         type: [String],
     },
+    offerStatus:{
+        type:Boolean,
+        default:false
+    },
+    discount:{
+        type:Number,
+        default:0,
+        min:0
+    },
+    offerPrice:{
+        type: Number,
+        min: 0,
+        default: 0
+    },
     variants: [variantSchema] 
 },
 { timestamps: true }

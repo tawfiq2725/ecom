@@ -17,19 +17,33 @@ const getWallet = async (req, res) => {
         }
 
         const userId = req.session.user._id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 transactions per page
+        const skip = (page - 1) * limit;
+
         const wallet = await Wallet.findOne({ userId });
-        const transactions = await Transaction.find({ userId }).sort({ createdAt: -1 }); // Sort transactions by date
+        const totalTransactions = await Transaction.countDocuments({ userId }); // Count total transactions
+        const transactions = await Transaction.find({ userId })
+            .sort({ createdAt: -1 }) // Sort transactions by date
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalTransactions / limit);
 
         res.render('user/wallet', {
             title: "Wallet",
             wallet: wallet || { balance: 0 },
-            transactions
+            transactions,
+            currentPage: page,
+            totalPages,
+            limit,
         });
     } catch (error) {
         console.error('Error fetching wallet data:', error);
         res.status(500).send('Server error');
     }
 };
+
 
 // Render the add money form
 const addMoneyForm = async (req, res) => {

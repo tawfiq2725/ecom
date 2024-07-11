@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 Swal.fire({
                     title: 'Coupon Applied',
-                    text: `Discount applied: $${data.discountAmount}`,
+                    text: `Discount applied: ₹${data.discountAmount}`,
                     icon: 'success',
                     confirmButtonText: 'OK'
                 });
@@ -239,13 +239,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const newTotalPriceElement = document.querySelector('.summary-total .price');
 
         if (discountAmount > 0) {
-            couponInfo.innerHTML = `Coupon Applied: -$${discountAmount} <a href="#" id="removeCoupon" class="btn btn-danger">Remove</a>`;
+            couponInfo.innerHTML = `Coupon Applied: -₹${discountAmount} <a href="#" id="removeCoupon" class="btn btn-danger">Remove</a>`;
         } else {
             couponInfo.innerHTML = `<span>Coupon Code:</span> <span><a href="#" id="openCouponModal">Enter Coupon Code</a></span>`;
         }
         
         if (newTotalPriceElement) {
-            newTotalPriceElement.textContent = `$${totalAmount}`;
+            newTotalPriceElement.textContent = `₹${totalAmount}`;
         }
     }
 

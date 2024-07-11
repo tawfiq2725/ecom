@@ -108,11 +108,25 @@ const getUserReturnRequests = async (req, res) => {
 
     try {
         const userId = req.session.user._id;
-        const returnRequests = await Return.find({ user: userId }).populate('order items.product');
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 return requests per page
+        const skip = (page - 1) * limit;
+
+        const totalReturnRequests = await Return.countDocuments({ user: userId }); // Count total return requests
+        const returnRequests = await Return.find({ user: userId })
+            .populate('order items.product')
+            .sort({ createdAt: -1 }) // Sort return requests by date
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalReturnRequests / limit);
 
         res.render('user/returns', {
             title: "Return Requests",
-            returnRequests
+            returnRequests,
+            currentPage: page,
+            totalPages,
+            limit
         });
     } catch (error) {
         console.error('Error fetching return requests:', error);
