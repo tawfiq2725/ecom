@@ -16,9 +16,9 @@ const showReturnForm = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found or not delivered' });
         }
 
-        const deliveryDate = new Date(order.deliveryDate); // Assume 'deliveryDate' is a field in the order schema
+        const deliveryDate = new Date(order.deliveryDate); 
         const currentDate = new Date();
-        const twoWeeksInMillis = 14 * 24 * 60 * 60 * 1000; // Two weeks in milliseconds
+        const twoWeeksInMillis = 7 * 24 * 60 * 60 * 1000; 
 
         if (currentDate - deliveryDate > twoWeeksInMillis) {
             return res.status(400).json({ success: false, message: 'Return period has expired' });
@@ -62,9 +62,9 @@ const createReturnRequest = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Return request can only be made for delivered orders' });
         }
 
-        const deliveryDate = new Date(order.deliveryDate); // Assume 'deliveryDate' is a field in the order schema
+        const deliveryDate = new Date(order.deliveryDate); 
         const currentDate = new Date();
-        const oneWeek = 7 * 24 * 60 * 60 * 1000; // Two weeks in milliseconds
+        const oneWeek = 7 * 24 * 60 * 60 * 1000; 
 
         if (currentDate - deliveryDate > oneWeek) {
             return res.status(400).json({ success: false, message: 'Return period has expired' });

@@ -147,19 +147,26 @@ const getOrderQuantityChartData = async (filter) => {
 };
 
 
+
 // Home Page
 const getHomePage = async (req, res) => {
     try {
-        const filter = req.query.filter || 'yearly'; // Default to yearly if no filter is provided
+        if (!req.session.admin) {
+            console.log("Redirecting to login");
+            return res.redirect('/admin/login');
+        }
 
-        // Fetch chart data
+        const filter = req.query.filter || 'yearly';
+
+        // Fetch chart data based on the filter
         const saleChartInfo = await getSaleChartData(filter);
         const orderTypeChartInfo = await getOrderTypeChartData(filter);
         const categoryChartInfo = await getCategoryChartData(filter);
         const orderQuantityChartInfo = await getOrderQuantityChartData(filter);
 
-        // If the request is for charts data (AJAX request)
+        // If it's an AJAX request, respond with JSON
         if (req.xhr) {
+            console.log("Sending JSON response for AJAX request");
             return res.json({
                 saleChartInfo,
                 orderTypeChartInfo,
@@ -168,16 +175,18 @@ const getHomePage = async (req, res) => {
             });
         }
 
-        // Fetch total counts
+        // Fetch other data needed for the dashboard rendering
         const totalUsers = await User.countDocuments();
         const totalProducts = await Product.countDocuments();
         const totalOrders = await Order.countDocuments({ orderStatus: 'Delivered' });
         const totalRevenue = await Order.aggregate([
-            { $match: { orderStatus: 'Delivered' } }, // Only include delivered orders
+            { $match: { orderStatus: 'Delivered' } },
             { $group: { _id: null, total: { $sum: "$totalAmount" } } }
         ]);
 
-        res.render('admin/dashboard', {
+        // Render the dashboard view with all necessary data
+        console.log("Rendering dashboard view");
+        return res.render('admin/dashboard', {
             title: "Hossom Dashboard",
             layout: 'adminlayout',
             admin: req.session.admin,
@@ -190,14 +199,19 @@ const getHomePage = async (req, res) => {
             totalUsers,
             totalProducts,
             totalOrders,
-            totalRevenue: totalRevenue[0]?.total || 0
+            totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].total : 0
         });
     } catch (error) {
-        console.log("Something went wrong: " + error);
-        res.status(500).send("Server error");
+        console.error("Error fetching dashboard data:", error);
+
+        if (req.xhr) {
+            console.log("Sending JSON error response for AJAX request");
+            return res.status(500).json({ error: "Server error" });
+        }
+        console.log("Sending HTML error response");
+        return res.status(500).send("Server error");
     }
 };
-
 
 // Login Page
 

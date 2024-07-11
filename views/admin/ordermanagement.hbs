@@ -54,9 +54,8 @@
                                     </tr>
                                     {{/each}}
                                 </tbody>
-                       
-
                             </table>
+                           
                         </div>
                     </div>
                 </div>
@@ -64,95 +63,73 @@
         </div>
     </div>
 </div>
-         <div id="pagination" class="d-flex justify-content-center mt-4">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            {{#if (gt currentPage 1)}}
-                <li >
-                    <a  href="?page={{subtract currentPage 1}}&limit={{limit}}" aria-label="Previous">
-                        <span aria-hidden="true" class="btn btn-primary">&laquo;Previous</span>
-                    </a>
-                </li>
-            {{/if}}
-            {{#each (range totalPages)}}
-                <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}">
-                    <a class="page-link" href="?page={{this}}&limit={{../limit}}">{{this}}</a>
-                </li>
-            {{/each}}
-            {{#if (lt currentPage totalPages)}}
-                <li >
-                    <a  href="?page={{add currentPage 1}}&limit={{limit}}" aria-label="Next">
-                        <span aria-hidden="true" class="btn btn-primary">Next</span>
-                    </a>
-                </li>
-            {{/if}}
-        </ul>
-    </nav>
-</div>
+         
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    $(document).ready(function() {
-        $('#orderTable').DataTable({
-            "paging": false,
-            "searching": true,
-            "info": true,
-            "lengthChange": false,
-            "pageLength": 20
-        });
+   $(document).ready(function() {
+    $('#orderTable').DataTable({
+        "paging": true,
+        "searching": true,
+        "info": true,
+        "lengthChange": false,
+        "pageLength": 15
+    });
 
-        $('.change-status').on('change', function() {
-            var orderId = $(this).data('id');
-            var newStatus = $(this).val();
-            var currentStatus = $(this).data('current-status');
+    // Use event delegation to handle change event
+    $(document).on('change', '.change-status', function() {
+        var orderId = $(this).data('id');
+        var newStatus = $(this).val();
+        var currentStatus = $(this).data('current-status');
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `You want to change the status from "${currentStatus}" to "${newStatus}"!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, change it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/admin/order/status/${orderId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ orderStatus: newStatus })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire(
-                                'Changed!',
-                                'Order status has been changed.',
-                                'success'
-                            ).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire(
-                                'Error!',
-                                data.message || 'There was an error changing the order status.',
-                                'error'
-                            );
-                        }
-                    })
-                    .catch(err => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `You want to change the status from "${currentStatus}" to "${newStatus}"!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, change it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/order/status/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderStatus: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Changed!',
+                            'Order status has been changed.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
                         Swal.fire(
                             'Error!',
-                            err.message || 'There was an error processing your request.',
+                            data.message || 'There was an error changing the order status.',
                             'error'
                         );
-                    });
-                } else {
-                    $(this).val(currentStatus);
-                }
-            });
+                    }
+                })
+                .catch(err => {
+                    Swal.fire(
+                        'Error!',
+                        err.message || 'There was an error processing your request.',
+                        'error'
+                    );
+                });
+            } else {
+                $(this).val(currentStatus);
+            }
         });
     });
+});
+
 </script>

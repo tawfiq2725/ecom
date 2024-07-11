@@ -5,9 +5,8 @@ const adminController = require('../controllers/adminCtrl');
 const categoryController = require('../controllers/categoryCtrl');
 const productController = require('../controllers/productCtrl');
 const couponController = require('../controllers/couponCtrl.js')
-const offerController = require('../controllers/offerCtrl.js');
-const productOfferController = require('../controllers/productOfferCtrl.js');
 const salesCtrl = require('../controllers/salesCtrl.js')
+const {gotoCategoryOffer,addOrEditOffer,activateOffer} = require('../controllers/offerCtrl.js')
 
 // Admin routes
 routes.get(['/', '/login'], adminController.getLoginPage);
@@ -68,20 +67,9 @@ routes.post('/coupon/edit/:id', couponController.editCoupon);
 routes.get('/coupon/list/:id', couponController.listCoupon);
 routes.get('/coupon/unlist/:id', couponController.unlistCoupon);
 
+
 // Category Offer
-routes.get('/offers', offerController.getAllOffers);
-routes.get('/offers/create', offerController.getCreateOfferPage);
-routes.post('/offers/create', offerController.createOffer);
-routes.get('/offers/edit/:id', offerController.getEditOfferPage);
-routes.post('/offers/edit/:id', offerController.updateOffer);
-routes.post('/offers/delete/:id', offerController.deleteOffer);
-
-
-routes.get('/productOffers', productOfferController.getAllProductOffers);
-routes.get('/productOffers/create', productOfferController.getCreateProductOfferPage);
-routes.post('/productOffers/create', productOfferController.createProductOffer);
-routes.get('/productOffers/edit/:id', productOfferController.getEditProductOfferPage);
-routes.post('/productOffers/edit/:id', productOfferController.updateProductOffer);
-routes.post('/productOffers/delete/:id', productOfferController.deleteProductOffer);
-
+routes.get('/category/offers', gotoCategoryOffer);
+routes.post('/category/offers/add-edit', addOrEditOffer);
+routes.post('/category/offers/activate', activateOffer);
 module.exports = routes;

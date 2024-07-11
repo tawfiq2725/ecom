@@ -46,7 +46,7 @@
             <div class="col-md-9">
                 <div class="row">
                     {{#if products.length}}
-                      {{#each products}}
+                  {{#each products}}
 <div class="col-md-4">
     <div class="product-item" data-product-id="{{this._id}}">
         <div class="product-thumb">
@@ -57,7 +57,7 @@
                         <a href="/products/{{this._id}}"><i class="tf-ion-ios-search-strong"></i></a>
                     </li>
                     <li>
-                        <a href="#!"><i class="tf-ion-ios-heart"></i></a>
+                        <a href="#!" class="add-to-wishlist"><i class="tf-ion-ios-heart"></i></a>
                     </li>
                     <li>
                         <a href="#!" class="add-to-cart"><i class="tf-ion-android-cart"></i></a>
@@ -68,34 +68,61 @@
         <div class="product-content">
             <h4><a href="/products/{{this._id}}">{{this.name}}</a></h4>
             {{#if this.discountedPrice}}
-                <p class="product-price">
-                    <del>₹{{this.price}}</del> ₹{{this.discountedPrice}}
-                </p>
-                {{#if this.offerLabel}}
-                    <p class="offer-label">{{this.offerLabel}}</p>
-                {{/if}}
+            <p class="product-price"><del>₹{{this.price}}</del> ₹{{this.discountedPrice}}</p>
             {{else}}
-                ₹{{this.price}}
+            <p class="product-price">₹{{this.price}}</p>
+            {{/if}}
+            {{#if this.variants.length}}
+            <div class="variant-selection">
+                <select class="form-control variant-size">
+                    {{#each this.variants}}
+                    <option value="{{size}}" data-stock="{{stock}}">{{size}} ({{stock}} in stock)</option>
+                    {{/each}}
+                </select>
+            </div>
             {{/if}}
         </div>
     </div>
 </div>
-                      {{/each}}
+{{/each}}
+
                     {{else}}
-                      <p>No products found.</p>
+                    <div class="col-md-12">
+                        <div class="alert alert-info" role="alert">
+                            No products available. Please try a different category or filter.
+                        </div>
+                    </div>
                     {{/if}}
                 </div>
-                <div class="pagination">
-                    {{#if (gt totalPages 1)}}
-                      <ul>
+
+                <!-- Pagination -->
+                {{#if totalPages}}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {{#if (gt currentPage 1)}}
+                        <li class="page-item">
+                            <a class="page-link" href="/products?page={{subtract currentPage 1}}{{#if ../category}}&category={{../category}}{{/if}}{{#if ../sort}}&sort={{../sort}}{{/if}}{{#if ../productType}}&productType={{../productType}}{{/if}}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo; Previous</span>
+                            </a>
+                        </li>
+                        {{/if}}
+
                         {{#each (range 1 totalPages)}}
-                          <li class="{{#if (eq this ../currentPage)}}active{{/if}}">
-                            <a href="?page={{this}}{{#if ../category}}&category={{../category}}{{/if}}{{#if ../sort}}&sort={{../sort}}{{/if}}{{#if ../productType}}&productType={{../productType}}{{/if}}{{#if ../searchQuery}}&search={{../searchQuery}}{{/if}}">{{this}}</a>
-                          </li>
+                        <li class="page-item {{#eq this ../currentPage}}active{{/eq}}">
+                            <a class="page-link" href="/products?page={{this}}{{#if ../category}}&category={{../category}}{{/if}}{{#if ../sort}}&sort={{../sort}}{{/if}}{{#if ../productType}}&productType={{../productType}}{{/if}}">{{this}}</a>
+                        </li>
                         {{/each}}
-                      </ul>
-                    {{/if}}
-                </div>
+
+                        {{#if (lt currentPage totalPages)}}
+                        <li class="page-item">
+                            <a class="page-link" href="/products?page={{add currentPage 1}}{{#if ../category}}&category={{../category}}{{/if}}{{#if ../sort}}&sort={{../sort}}{{/if}}{{#if ../productType}}&productType={{../productType}}{{/if}}" aria-label="Next">
+                                <span aria-hidden="true">Next &raquo;</span>
+                            </a>
+                        </li>
+                        {{/if}}
+                    </ul>
+                </nav>
+                {{/if}}
             </div>
         </div>
     </div>
@@ -103,130 +130,165 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-   document.addEventListener("DOMContentLoaded", function () {
-    const sortRadioButtons = document.querySelectorAll('input[type="radio"][name="sort"]');
-    sortRadioButtons.forEach(function (radioButton) {
-        radioButton.addEventListener('click', function () {
-            const sortValue = this.value;
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('sort', sortValue);
-            window.location.href = currentUrl.toString();
+    document.addEventListener("DOMContentLoaded", function () {
+        const sortRadioButtons = document.querySelectorAll('input[type="radio"][name="sort"]');
+        sortRadioButtons.forEach(function (radioButton) {
+            radioButton.addEventListener('click', function () {
+                const sortValue = this.value;
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('sort', sortValue);
+                window.location.href = currentUrl.toString();
+            });
         });
-    });
 
-    const productTypeRadioButtons = document.querySelectorAll('input[type="radio"][name="productType"]');
-    productTypeRadioButtons.forEach(function (radioButton) {
-        radioButton.addEventListener('click', function () {
-            const productTypeValue = this.value;
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('productType', productTypeValue);
-            window.location.href = currentUrl.toString();
+        const productTypeRadioButtons = document.querySelectorAll('input[type="radio"][name="productType"]');
+        productTypeRadioButtons.forEach(function (radioButton) {
+            radioButton.addEventListener('click', function () {
+                const productTypeValue = this.value;
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('productType', productTypeValue);
+                window.location.href = currentUrl.toString();
+            });
         });
-    });
 
-    const categoryLinks = document.querySelectorAll('.product-category a');
-    categoryLinks.forEach(function (link) {
-        link.addEventListener('click', function (event) {
-            event.preventDefault();
-            const categoryValue = new URL(this.href).searchParams.get('category');
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('category', categoryValue);
-            window.location.href = currentUrl.toString();
-        });
-    });
+        // Check if the user is logged in
+        const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
 
-    const clearFilterButton = document.querySelector('.clear-filter a');
-    clearFilterButton.addEventListener('click', function (event) {
-        event.preventDefault();
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.delete('category');
-        currentUrl.searchParams.delete('sort');
-        currentUrl.searchParams.delete('productType');
-        currentUrl.searchParams.delete('search');
-        window.location.href = currentUrl.toString();
-    });
+        const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
+        addToWishlistButtons.forEach(function (button) {
+            button.addEventListener('click', async function (event) {
+                event.preventDefault(); // Prevent the default link click behavior
+                const productItem = this.closest('.product-item');
+                const productId = productItem.dataset.productId;
 
-    // Check if the user is logged in
-    const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
-
-    // Event listener for the "Add to Cart" buttons
-    const addToCartButtons = document.querySelectorAll('.add-to-cart');
-    addToCartButtons.forEach(function (button) {
-        button.addEventListener('click', async function (event) {
-            event.preventDefault(); // Prevent the default link click behavior
-            const productItem = this.closest('.product-item');
-            const productId = productItem.dataset.productId;
-            const sizeSelect = productItem.querySelector('.variant-size');
-            const variantSize = sizeSelect ? sizeSelect.value : null;
-            const stock = sizeSelect ? parseInt(sizeSelect.selectedOptions[0].getAttribute('data-stock'), 10) : null;
-
-            if (!isLoggedIn) {
-                Swal.fire({
-                    title: 'Not Logged In',
-                    text: 'You need to log in to add items to the cart.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Log In',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/login';
-                    }
-                });
-                return;
-            }
-
-            // Check if stock is available before proceeding
-            if (stock === 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Out of Stock',
-                    text: 'The selected size is currently out of stock. Please choose a different size.',
-                });
-                return;
-            }
-
-            try {
-                const response = await fetch(`/add-to-cart`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ productId, quantity: 1, variantSize })
-                });
-
-                const result = await response.json();
-
-                if (response.status === 200 && result.success) {
+                if (!isLoggedIn) {
                     Swal.fire({
-                        title: 'Added to cart',
-                        text: 'Continue shopping?',
-                        icon: 'success',
+                        title: 'Not Logged In',
+                        text: 'You need to log in to add items to the wishlist.',
+                        icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonText: 'Yes',
-                        cancelButtonText: 'Go to Cart'
+                        confirmButtonText: 'Log In',
+                        cancelButtonText: 'Cancel'
                     }).then((result) => {
-                        if (result.dismiss === Swal.DismissReason.cancel) {
-                            window.location.href = '/cart/data';
+                        if (result.isConfirmed) {
+                            window.location.href = '/login';
                         }
                     });
-                } else {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/wishlist/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ productId })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.status === 200 && result.success) {
+                        Swal.fire({
+                            title: 'Added to wishlist',
+                            text: 'Product added to your wishlist.',
+                            icon: 'success'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: result.message || 'Something went wrong',
+                            icon: 'error'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error adding to wishlist:', error);
                     Swal.fire({
                         title: 'Error',
-                        text: result.message || 'Something went wrong',
+                        text: 'An error occurred. Please try again.',
                         icon: 'error'
                     });
                 }
-            } catch (error) {
-                console.error('Error adding to cart:', error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'An error occurred. Please try again.',
-                    icon: 'error'
-                });
-            }
+            });
+        });
+
+        // Event listener for the "Add to Cart" buttons
+        const addToCartButtons = document.querySelectorAll('.add-to-cart');
+        addToCartButtons.forEach(function (button) {
+            button.addEventListener('click', async function (event) {
+                event.preventDefault(); // Prevent the default link click behavior
+                const productItem = this.closest('.product-item');
+                const productId = productItem.dataset.productId;
+                const sizeSelect = productItem.querySelector('.variant-size');
+                const variantSize = sizeSelect ? sizeSelect.value : null;
+                const stock = sizeSelect ? parseInt(sizeSelect.selectedOptions[0].getAttribute('data-stock'), 10) : null;
+
+                if (!isLoggedIn) {
+                    Swal.fire({
+                        title: 'Not Logged In',
+                        text: 'You need to log in to add items to the cart.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Log In',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/login';
+                        }
+                    });
+                    return;
+                }
+
+                // Check if stock is available before proceeding
+                if (stock === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Out of Stock',
+                        text: 'The selected size is currently out of stock. Please choose a different size.',
+                    });
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/add-to-cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ productId, quantity: 1, variantSize })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.status === 200 && result.success) {
+                        Swal.fire({
+                            title: 'Added to cart',
+                            text: 'Continue shopping?',
+                            icon: 'success',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes',
+                            cancelButtonText: 'Go to Cart'
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.cancel) {
+                                window.location.href = '/cart';
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: result.message || 'Something went wrong',
+                            icon: 'error'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error adding to cart:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.',
+                        icon: 'error'
+                    });
+                }
+            });
         });
     });
-});
-
 </script>

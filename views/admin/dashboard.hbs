@@ -128,12 +128,13 @@
   <div class="container-fluid">
     <!-- Filters -->
 <div class="row mb-4">
-  <div class="col">
-    <button id="filterYearly" class="btn btn-primary mr-2">Yearly</button>
-    <button id="filterMonthly" class="btn btn-primary mr-2">Monthly</button>
-    <button id="filterWeekly" class="btn btn-primary">Weekly</button>
-  </div>
+    <div class="col">
+        <button id="filterYearly" class="btn btn-primary mr-2">Yearly</button>
+        <button id="filterMonthly" class="btn btn-primary mr-2">Monthly</button>
+        <button id="filterWeekly" class="btn btn-primary">Weekly</button>
+    </div>
 </div>
+
     <!-- Sales Chart -->
     <div class="row">
       <div class="col-lg-6">
@@ -242,35 +243,39 @@
         });
     };
 
-    const updateCharts = async (filter) => {
-        try {
-            const response = await fetch(`/admin/dashboard?filter=${filter}`, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+const updateCharts = async (filter) => {
+    try {
+        const response = await fetch(`/admin/dashboard?filter=${filter}`, {
+            headers: {
+                'Accept': 'application/json'
             }
+        });
 
-            const data = await response.json();
-
-            saleChart.data = data.saleChartInfo;
-            saleChart.update();
-
-            orderTypeChart.data = data.orderTypeChartInfo;
-            orderTypeChart.update();
-
-            categoryChart.data = data.categoryChartInfo;
-            categoryChart.update();
-
-            orderQuantityChart.data = data.orderQuantityChartInfo;
-            orderQuantityChart.update();
-        } catch (error) {
-            console.error('Error updating chart data:', error);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-    };
+
+        const data = await response.json();
+
+        saleChart.data = data.saleChartInfo;
+        saleChart.update();
+
+        orderTypeChart.data = data.orderTypeChartInfo;
+        orderTypeChart.update();
+
+        categoryChart.data = data.categoryChartInfo;
+        categoryChart.update();
+
+        orderQuantityChart.data = data.orderQuantityChartInfo;
+        orderQuantityChart.update();
+    } catch (error) {
+        console.error('Error updating chart data:', error);
+        alert('Failed to update chart data. Please try again later.');
+    }
+};
+
+
+
 
     document.addEventListener('DOMContentLoaded', () => {
         const initialData = {
@@ -280,5 +285,11 @@
             orderQuantityChartInfo: {{{json orderQuantityChartInfo}}}
         };
         createCharts(initialData);
+
+        // Add event listeners to filter buttons
+        document.getElementById('filterYearly').addEventListener('click', () => updateCharts('yearly'));
+        document.getElementById('filterMonthly').addEventListener('click', () => updateCharts('monthly'));
+        document.getElementById('filterWeekly').addEventListener('click', () => updateCharts('weekly'));
     });
 </script>
+

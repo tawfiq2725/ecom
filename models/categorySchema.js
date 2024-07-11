@@ -17,6 +17,15 @@ const categorySchema = new mongoose.Schema({
         type: String,
         enum: ['active', 'inactive'],
         default: 'active',
+    },
+    offerIsActive:{
+        type:Boolean,
+        default:false
+    },
+    offerRate:{
+        type:Number,
+        min:0,
+        default:0
     }
 }
 ,

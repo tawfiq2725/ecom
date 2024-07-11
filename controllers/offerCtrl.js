@@ -1,115 +1,70 @@
-const Offer = require('../models/offerSchema');
-const Category = require('../models/categorySchema');
+const Category = require('../models/categorySchema')
 
-// Display all offers
-const getAllOffers = async (req, res) => {
+const gotoCategoryOffer = async (req, res) => {
     try {
-        const offers = await Offer.find().populate('category');
-        res.render('admin/offerManagement', {
-            layout: 'adminlayout',
-            title: "Offer Management",
-            offers: offers
-        });
-    } catch (err) {
-        console.log(err.message);
-        res.redirect('/admin/dashboard');
+        if (!req.session.admin) {
+            res.redirect('/admin/login')
+        }
+        const categories = await Category.find()
+        res.render('admin/categoryOffer', {
+            title: "Category Offer",
+            categories,
+            layout: 'adminLayout'
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong"
+        })
+        console.log("Error Occurred: " + error)
     }
-};
+}
 
-// Show form to create a new offer
-const getCreateOfferPage = async (req, res) => {
+const addOrEditOffer = async (req, res) => {
     try {
-        const categories = await Category.find();
-        res.render('admin/createOffer', {
-            layout: 'adminlayout',
-            title: "Create Offer",
-            categories: categories
-        });
-    } catch (err) {
-        console.log(err.message);
-        res.redirect('/admin/dashboard');
+        if (!req.session.admin) {
+            res.redirect('/admin/login')
+        }
+        const { offerRate, categoryId } = req.body;
+        if (offerRate >= 95) {
+            req.flash('error_msg', 'Offer must be below 95%');
+            return res.redirect('/admin/category/offers');
+        }
+        const category = await Category.findById(categoryId);
+        category.offerRate = offerRate;
+        await category.save();
+        req.flash('success_msg', 'Offer added/edited successfully');
+        res.redirect('/admin/category/offers');
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong"
+        })
+        console.log("Error Occurred: " + error)
     }
-};
+}
 
-// Create a new offer
-const createOffer = async (req, res) => {
+const activateOffer = async (req, res) => {
     try {
-        const { name, discount, category, startDate, endDate } = req.body;
-
-        const newOffer = new Offer({
-            name,
-            discount,
-            category,
-            startDate,
-            endDate,
-            status: 'active'
-        });
-
-        await newOffer.save();
-        res.redirect('/admin/offers');
-    } catch (err) {
-        console.log(err.message);
-        res.redirect('/admin/dashboard');
+        if (!req.session.admin) {
+            res.redirect('/admin/login')
+        }
+        const { categoryId, isActive } = req.body;
+        const category = await Category.findById(categoryId);
+        category.offerIsActive = isActive;
+        await category.save();
+        res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully` });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong"
+        })
+        console.log("Error Occurred: " + error)
     }
-};
-
-// Show form to edit an existing offer
-const getEditOfferPage = async (req, res) => {
-    try {
-        const offerId = req.params.id;
-        const offer = await Offer.findById(offerId).populate('category');
-        const categories = await Category.find();
-        res.render('admin/editOffer', {
-            layout: 'adminlayout',
-            title: "Edit Offer",
-            offer: offer,
-            categories: categories
-        });
-    } catch (err) {
-        console.log(err.message);
-        res.redirect('/admin/dashboard');
-    }
-};
-
-// Update an existing offer
-const updateOffer = async (req, res) => {
-    try {
-        const offerId = req.params.id;
-        const { name, discount, category, startDate, endDate, status } = req.body;
-
-        await Offer.findByIdAndUpdate(offerId, {
-            name,
-            discount,
-            category,
-            startDate,
-            endDate,
-            status
-        });
-
-        res.redirect('/admin/offers');
-    } catch (err) {
-        console.log(err.message);
-        res.redirect('/admin/dashboard');
-    }
-};
-
-// Delete an offer
-const deleteOffer = async (req, res) => {
-    try {
-        const offerId = req.params.id;
-        await Offer.findByIdAndDelete(offerId);
-        res.redirect('/admin/offers');
-    } catch (err) {
-        console.log(err.message);
-        res.redirect('/admin/dashboard');
-    }
-};
+}
 
 module.exports = {
-    getAllOffers,
-    getCreateOfferPage,
-    createOffer,
-    getEditOfferPage,
-    updateOffer,
-    deleteOffer
-};
+    gotoCategoryOffer,
+    addOrEditOffer,
+    activateOffer
+}

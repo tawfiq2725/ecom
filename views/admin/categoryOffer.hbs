@@ -1,0 +1,137 @@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row mb-2 mt-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Categories Offers</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <div class="card-header">
+            <h4 class="card-title">Category Offers</h4>
+        </div>
+        {{#if success_msg}}
+            <div class="alert alert-success">{{success_msg}}</div>
+        {{/if}}
+        {{#if error_msg}}
+            <div class="alert alert-danger">{{error_msg}}</div>
+        {{/if}}
+        <table class="table table-bordered" id="example">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Offer Status</th>
+                    <th>Discount %</th>
+                    <th>Actions</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each categories}}
+                    <tr>
+                        <td>{{this.name}}</td>
+                        <td><img src="/uploads/categories/{{this.image}}" alt="{{this.name}}" style="width: 100px;"></td>
+                        <td>{{this.offerIsActive}}</td>
+                        <td>{{this.offerRate}}</td>
+                        <td>
+                            <button class="btn btn-warning activate-offer" data-id="{{this._id}}" data-active="{{this.offerIsActive}}">
+                                {{#if this.offerIsActive}}Deactivate{{else}}Activate{{/if}}
+                            </button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary edit-offer" data-bs-toggle="modal" data-bs-target="#exampleModal" data-id="{{this._id}}" data-offer="{{this.offerRate}}">
+                                Edit/Add
+                            </button>
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Add/Edit Discount</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="offerForm" method="POST" action="/admin/category/offers/add-edit">
+          <div class="mb-3">
+            <label for="offer-rate" class="col-form-label">Discount Percent</label>
+            <input type="number" class="form-control" id="offer-rate" name="offerRate">
+            <input type="hidden" id="category-id" name="categoryId">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function () {
+        $('#example').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "lengthChange": false,
+            "pageLength": 10
+        });
+
+        $('.edit-offer').on('click', function () {
+            var categoryId = $(this).data('id');
+            var offerRate = $(this).data('offer');
+            $('#category-id').val(categoryId);
+            $('#offer-rate').val(offerRate);
+        });
+
+        $('.activate-offer').on('click', function () {
+            var categoryId = $(this).data('id');
+            var isActive = $(this).data('active');
+            var action = isActive ? 'deactivate' : 'activate';
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to ${action} this offer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Yes, ${action} it!`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/admin/category/offers/activate',
+                        method: 'POST',
+                        data: { categoryId: categoryId, isActive: !isActive },
+                        success: function (response) {
+                            Swal.fire({
+                                title: `${action.charAt(0).toUpperCase() + action.slice(1)}d!`,
+                                text: response.message,
+                                icon: 'success'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>

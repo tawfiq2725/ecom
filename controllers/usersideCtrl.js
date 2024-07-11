@@ -1,6 +1,5 @@
 const Product = require('../models/productSchema');
 const Category = require('../models/categorySchema');
-const Offer = require('../models/offerSchema');
 require('dotenv').config();
 
 const getProducts = async (req, res) => {
@@ -22,14 +21,12 @@ const getProducts = async (req, res) => {
                 { name: { $regex: searchQuery, $options: 'i' } },
                 { description: { $regex: searchQuery, $options: 'i' } }
             ];
-
-
         }
+
         // Apply category filter if present
         if (category) {
             filter.category = category;
         }
-
 
         // Initialize sorting option
         let sortOption = {};
@@ -51,7 +48,7 @@ const getProducts = async (req, res) => {
             filter.createdAt = { $lt: tenDaysAgo };
         }
 
-        // Fetch categories, total products count, and products
+        // Fetch categories, total products count, products, and category offers
         const [categories, totalProducts, products] = await Promise.all([
             Category.find(),
             Product.countDocuments(filter),
@@ -64,31 +61,11 @@ const getProducts = async (req, res) => {
 
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Fetch active category offers
-        const activeOffers = await Offer.find({
-            startDate: { $lte: today },
-            endDate: { $gte: today },
-            status: 'active'
-        }).populate('category');
 
-        // Apply the best category offer to the products
-        const productsWithOffers = products.map(product => {
-            let categoryOffer = activeOffers
-                .filter(offer => offer.category._id.toString() === product.category._id.toString())
-                .reduce((best, current) => (current.discount > (best?.discount || 0) ? current : best), null);
-
-            if (categoryOffer) {
-                product.discountedPrice = product.price - (product.price * categoryOffer.discount / 100);
-                product.offerLabel = `${categoryOffer.discount}% off on this category`;
-            }
-
-            return product;
-        });
-
-        // Render the products page with all applied filters
+        // Render the products page with all applied filters and category offers
         res.render('user/products', {
             title: "Products",
-            products: productsWithOffers,
+            products,
             categories,
             currentPage: page,
             totalPages,
@@ -96,7 +73,8 @@ const getProducts = async (req, res) => {
             category,
             sort,
             productType,
-            searchQuery
+            searchQuery,
+             
         });
     } catch (error) {
         console.error(error);
@@ -129,35 +107,7 @@ const getProductDetails = async (req, res) => {
             relatedProducts = await Product.find({ _id: { $ne: product._id } }).limit(4);
         }
 
-        // Fetch active offers for this product or its category
-        const today = new Date();
-        const activeOffers = await Offer.find({
-            startDate: { $lte: today },
-            endDate: { $gte: today },
-            $or: [
-                { type: 'product', product: productId },
-                { type: 'category', category: product.category._id }
-            ]
-        });
-
-        // Apply the best offer to the product
-        if (activeOffers.length > 0) {
-            const productOffer = activeOffers
-                .filter(offer => offer.type === 'product')
-                .reduce((best, current) => (current.discount > (best?.discount || 0) ? current : best), null);
-
-            const categoryOffer = activeOffers
-                .filter(offer => offer.type === 'category')
-                .reduce((best, current) => (current.discount > (best?.discount || 0) ? current : best), null);
-
-            if (productOffer && (!categoryOffer || productOffer.discount > categoryOffer.discount)) {
-                product.discountedPrice = product.price - (product.price * productOffer.discount / 100);
-                product.offerLabel = `${productOffer.discount}% off on this product`;
-            } else if (categoryOffer) {
-                product.discountedPrice = product.price - (product.price * categoryOffer.discount / 100);
-                product.offerLabel = `${categoryOffer.discount}% off on this category`;
-            }
-        }
+        
 
         res.render('user/productDetails', {
             product,
