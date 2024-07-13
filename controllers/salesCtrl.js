@@ -1,7 +1,7 @@
 const Order = require('../models/orderSchema');
 const moment = require('moment');
 const ExcelJS = require('exceljs');
-const PDFDocument = require('pdfkit');
+const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 
 const getSalesReportPage = async (req, res) => {
@@ -15,7 +15,7 @@ const generateSalesReport = async (req, res) => {
     try {
         const { type, fromDate, toDate } = req.query;
 
-        let filter = { orderStatus: 'Delivered' }; // Only include delivered orders
+        let filter = { orderStatus: 'Delivered' };
         const today = moment();
 
         if (type && type !== 'custom') {
@@ -35,7 +35,7 @@ const generateSalesReport = async (req, res) => {
         const orders = await Order.find(filter)
             .populate({
                 path: 'items.product',
-                select: 'name' 
+                select: 'name'
             })
             .populate('user', 'firstname lastname')
             .populate('address')
@@ -50,8 +50,6 @@ const generateSalesReport = async (req, res) => {
     }
 };
 
-
-
 const calculateReportDetails = (orders) => {
     const totalOrders = orders.length;
     const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -60,10 +58,81 @@ const calculateReportDetails = (orders) => {
     return { totalOrders, totalAmount, totalDiscount };
 };
 
+const generateHTMLContent = (orders, reportDetails, fromDate, toDate) => {
+    const styles = `
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding: 8px;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+        </style>
+    `;
+
+    const formattedFromDate = fromDate ? moment(fromDate).format('YYYY-MM-DD') : 'N/A';
+    const formattedToDate = toDate ? moment(toDate).format('YYYY-MM-DD') : 'N/A';
+
+    const header = `
+        <h1>HOSSOM SHIRTS</h1>
+        <p>From Date: ${formattedFromDate}</p>
+        <p>To Date: ${formattedToDate}</p>
+        <h2>Sales Report</h2>
+        <p>Total Orders: ${reportDetails.totalOrders}</p>
+        <p>Total Amount: ₹${reportDetails.totalAmount}</p>
+        <p>Total Discount: ₹${reportDetails.totalDiscount}</p>
+    `;
+
+    const tableHeaders = `
+        <tr>
+            <th>Order ID</th>
+            <th>Order Date</th>
+            <th>User</th>
+            <th>Products</th>
+            <th>Shipping Address</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th>Total Amount</th>
+            <th>Coupon</th>
+            <th>Coupon Discount</th>
+            <th>Payable</th>
+            <th>Category Discount</th>
+        </tr>
+    `;
+
+    const tableRows = orders.map(order => `
+        <tr>
+            <td>${order._id}</td>
+            <td>${moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss')}</td>
+            <td>${order.user.firstname} ${order.user.lastname}</td>
+            <td>${order.items.map(item => `${item.product.name} - ${item.quantity} x ${item.size} - ₹${item.price}`).join(', ')}</td>
+            <td>${order.address.houseNumber}, ${order.address.street}, ${order.address.city}, ${order.address.zipcode}, ${order.address.country}</td>
+            <td>${order.paymentMethod}</td>
+            <td>${order.orderStatus}</td>
+            <td>₹${order.totalAmount}</td>
+            <td>${order.coupon ? order.coupon.code : ''}</td>
+            <td>₹${order.coupon ? order.coupon.discountAmount : 0}</td>
+            <td>₹${order.totalAmount - (order.coupon ? order.coupon.discountAmount : 0)}</td>
+            <td>₹${order.discountAmount}</td>
+        </tr>
+    `).join('');
+
+    const table = `<table>${tableHeaders}${tableRows}</table>`;
+
+    return `<html><head>${styles}</head><body>${header}${table}</body></html>`;
+};
+
+
 const downloadSalesReport = async (req, res) => {
     const { type, fromDate, toDate, format } = req.body;
 
-    let filter = { orderStatus: 'Delivered' }; // Only include delivered orders
+    let filter = { orderStatus: 'Delivered' };
 
     if (type && type !== 'custom') {
         const today = moment();
@@ -84,7 +153,7 @@ const downloadSalesReport = async (req, res) => {
         .populate('user', 'firstname lastname')
         .populate({
             path: 'items.product',
-            select: 'name' 
+            select: 'name'
         })
         .populate('address')
         .lean();
@@ -133,44 +202,26 @@ const downloadSalesReport = async (req, res) => {
         await workbook.xlsx.write(res);
         res.end();
     } else if (format === 'pdf') {
-        const doc = new PDFDocument();
+        const htmlContent = generateHTMLContent(orders, reportDetails, fromDate, toDate);
+
+        const browser = await puppeteer.launch({ 
+            executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'  // Update this path as needed
+        });
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({ format: 'A3', printBackground: true });
+
+        await browser.close();
+
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=SalesReport.pdf');
-
-        doc.pipe(res);
-
-        doc.fontSize(25).text('HOSSOM SHIRTS', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(18).text('Sales Report', { align: 'center' });
-        doc.moveDown();
-        
-        // Add report details
-        doc.fontSize(14).text(`Total Orders: ${reportDetails.totalOrders}`, { align: 'left' });
-        doc.fontSize(14).text(`Total Amount:  ${reportDetails.totalAmount}`, { align: 'left' });
-        doc.fontSize(14).text(`Total Discount:  ${reportDetails.totalDiscount}`, { align: 'left' });
-        doc.moveDown();
-
-        orders.forEach(order => {
-            doc.fontSize(12).text(`Order ID: ${order._id}`, { continued: true }).text(`Order Date: ${moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss')}`);
-            doc.fontSize(12).text(`User: ${order.user.firstname} ${order.user.lastname}`);
-            doc.fontSize(12).text(`Products: ${order.items.map(item => `${item.product.name} - ${item.quantity} x ${item.size} - ₹${item.price}`).join(', ')}`);
-            doc.fontSize(12).text(`Shipping Address: ${order.address.houseNumber}, ${order.address.street}, ${order.address.city}, ${order.address.zipcode}, ${order.address.country}`);
-            doc.fontSize(12).text(`Payment Method: ${order.paymentMethod}`);
-            doc.fontSize(12).text(`Status: ${order.orderStatus}`);
-            doc.fontSize(12).text(`Total Amount: ₹${order.totalAmount}`);
-            doc.fontSize(12).text(`Coupon: ${order.coupon ? order.coupon.code : ''}`);
-            doc.fontSize(12).text(`Coupon Discount: ₹${order.coupon ? order.coupon.discountAmount : 0}`);
-            doc.fontSize(12).text(`Payable: ₹${order.totalAmount - (order.coupon ? order.coupon.discountAmount : 0)}`);
-            doc.fontSize(12).text(`Category Discount: ₹${order.discountAmount}`);
-            doc.moveDown();
-            doc.moveDown();
-        });
-
-        doc.end();
+        res.send(pdfBuffer);
     } else {
         res.status(400).send('Invalid format');
     }
 };
+
 
 
 module.exports = {
