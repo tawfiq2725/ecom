@@ -7,13 +7,11 @@ const orderCtrl = require('../controllers/orderCtrl');
 const paymentCtrl = require('../controllers/paymentCtrl');
 const whislistCtrl = require('../controllers/whislistCtrl');
 const returnController = require('../controllers/returnCtrl');
-const referralController = require('../controllers/referalCtrl')
+const referralController = require('../controllers/referalCtrl');
 const passport = require('../config/passport-config');
 const multer = require('multer');
 const upload = multer();
-const isBlocked = require('../middlewares/auth');
-
-router.use(isBlocked);
+const { checkProductExists } = require('../middlewares/auth'); // Correct import
 
 // User Routes
 router.get('/pageNotFound', userController.pageNotFound);
@@ -65,7 +63,7 @@ router.get('/api/product/:productId/variant/:size', userController.getProductVar
 
 // Product Page
 router.get('/products', usersideCtrl.getProducts);
-router.get('/products/:id', usersideCtrl.getProductDetails);
+router.get('/products/:id', checkProductExists, usersideCtrl.getProductDetails); // Apply middleware here
 
 // Order Management
 router.get('/checkout', orderCtrl.checkout);
@@ -75,7 +73,7 @@ router.post('/api/remove-coupon', orderCtrl.removeCoupon);
 router.get('/confirm', orderCtrl.orderConfirm);
 router.get('/orders', orderCtrl.getUserOrders);
 router.get('/orders/:id', orderCtrl.getOrderDetails);
-router.get('/orders/:id/invoice',orderCtrl.downloadInvoice)
+router.get('/orders/:id/invoice', orderCtrl.downloadInvoice);
 router.post('/orders/:id/cancel', orderCtrl.cancelOrder);
 
 // New Routes for Razorpay Integration

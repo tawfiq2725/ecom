@@ -99,6 +99,16 @@
                                     </div>
                                     {{/if}}
                                 </li>
+                                 <li>
+                                    <h5>Coupons</h5>
+                                    <select name="coupons" id="#">
+                                    {{#each coupons}}
+                                    <option value="none">See the Coupons</option>
+                                    <option value="{{this.code}}">{{this.code}}</option>
+                                    {{/each}}
+                                    </select>
+                                </li>
+
                             </ul>
                             <div class="summary-total">
                                 <span>Total</span>
@@ -291,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Event listener for form submission
-     document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
+       document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
         event.preventDefault();
 
         const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
@@ -317,7 +327,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }).then((result) => {
             if (result.isConfirmed) {
                 if (selectedPaymentMethod === 'Razorpay') {
-                    // Fetch order details from the server
                     fetch('/api/create-order', {
                         method: 'POST',
                         headers: {
@@ -326,7 +335,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         body: JSON.stringify({
                             addressId: selectedAddressRadio.value,
                             paymentMethod: selectedPaymentMethod,
-                            ...addressDetails,
                             couponCode: document.getElementById('hiddenCouponCode').value
                         })
                     })
@@ -341,7 +349,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 description: 'Order Payment',
                                 order_id: data.razorpayOrderId,
                                 handler: function (response) {
-                                    // Verify payment on the server
                                     fetch('/api/verify-payment', {
                                         method: 'POST',
                                         headers: {
@@ -366,6 +373,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 text: 'There was an issue with your payment. Please try again.',
                                                 icon: 'error',
                                                 confirmButtonText: 'OK'
+                                            }).then(() => {
+                                                window.location.href = '/orders';
                                             });
                                         }
                                     })
@@ -392,6 +401,16 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             };
                             const rzp = new Razorpay(options);
+                            rzp.on('payment.failed', function (response) {
+                                Swal.fire({
+                                    title: 'Payment Failed',
+                                    text: 'There was an issue with your payment. Please try again.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    window.location.href = '/orders';
+                                });
+                            });
                             rzp.open();
                         } else {
                             Swal.fire({
@@ -418,6 +437,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
 
     function deleteAddress(id) {
         Swal.fire({

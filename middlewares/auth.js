@@ -1,6 +1,7 @@
 const User = require('../models/userSchema');
 const Admin = require('../models/adminSchema');
-
+const Product = require('../models/productSchema'); 
+const mongoose = require('mongoose');
 const checkUserStatus = async (req, res, next) => {
     if (req.session && (req.session.user || req.session.admin)) {
         try {
@@ -46,4 +47,40 @@ const checkUserStatus = async (req, res, next) => {
     }
 };
 
-module.exports = checkUserStatus;
+
+
+const checkProductExists = async (req, res, next) => {
+    try {
+        const productId = req.params.id;
+
+        // Check if productId is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return res.status(404).render('user/productNotFound', {
+                title: "Product Not Found",
+                admin: req.session.admin
+            });
+        }
+
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).render('user/productNotFound', {
+                title: "Product Not Found",
+                admin: req.session.admin
+            });
+        }
+
+        req.product = product;
+        next();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+    }
+};
+
+
+
+module.exports = {
+    checkUserStatus,
+    checkProductExists
+};

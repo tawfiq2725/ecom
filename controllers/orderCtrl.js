@@ -230,7 +230,9 @@ const createRazorpayOrder = async (req, res) => {
         });
 
         await order.save();
-
+     cart.items = [];
+        cart.totalPrice = 0;
+        await cart.save();
         res.json({
             success: true,
             razorpayOrderId: razorpayOrder.id,

@@ -7,7 +7,7 @@ const nocache = require('nocache');
 const flash = require('connect-flash');
 const passport = require('./config/passport-config');
 const Handlebars = require('handlebars'); // Ensure Handlebars is required
-const checkUserStatus = require('./middlewares/auth');
+const { checkUserStatus } = require('./middlewares/auth'); // Ensure middleware is correctly imported
 
 // Configurations
 require('dotenv').config();
@@ -141,7 +141,9 @@ Handlebars.registerHelper('formatDate', function (date) {
         year: 'numeric'
     });
 });
-
+Handlebars.registerHelper('and', function (a, b) {
+    return a && b;
+});
 // Express handlebars
 app.engine('hbs', engine({
     extname: 'hbs',
