@@ -38,6 +38,7 @@ const checkout = async (req, res) => {
             couponDetails = req.session.coupon;
             totalPrice -= parseFloat(req.session.coupon.discountAmount);
         }
+        const coupons = await Coupon.find();
 
         res.render('user/checkout', {
             title: "Checkout",

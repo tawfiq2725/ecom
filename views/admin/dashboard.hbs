@@ -1,24 +1,24 @@
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!--*******************
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!--*******************
         Preloader start
     ********************-->
-    <div id="preloader">
-        <div class="sk-three-bounce">
-            <div class="sk-child sk-bounce1"></div>
-            <div class="sk-child sk-bounce2"></div>
-            <div class="sk-child sk-bounce3"></div>
-        </div>
+<div id="preloader">
+    <div class="sk-three-bounce">
+        <div class="sk-child sk-bounce1"></div>
+        <div class="sk-child sk-bounce2"></div>
+        <div class="sk-child sk-bounce3"></div>
     </div>
-    <!--*******************
+</div>
+<!--*******************
         Preloader end
     ********************-->
 
 
-    <!--**********************************
+<!--**********************************
         Main wrapper start
     ***********************************-->
 
-        <!--**********************************
+<!--**********************************
             Content body start
         ***********************************-->
 <div class="content-body">
@@ -70,226 +70,176 @@
         <!-- Top Categories Section -->
     </div>
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">Top Categories</h4>
+   
+        <div class="container-fluid">
+
+            <!-- Chart Section with Filters -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">Order Analysis</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-lg-4">
+                                    <select id="filterType" class="form-control">
+                                        <option value="products">Products</option>
+                                        <option value="categories">Categories</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4">
+                                    <select id="dateRange" class="form-control">
+                                        <option value="today">Today</option>
+                                        <option value="month">This Month</option>
+                                        <option value="year">This Year</option>
+                                        <option value="custom">Custom Date</option>
+                                    </select>
+                                    <input type="text" id="filterDate" class="form-control" placeholder="Select Date"
+                                        style="display:none;">
+                                </div>
+                                <div class="col-lg-4">
+                                    <button id="applyFilter" class="btn btn-primary">Apply Filter</button>
+                                </div>
+                            </div>
+                            <canvas id="orderAnalysisChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                {{#if topCategories.length}}
+            <!-- End of Chart Section -->
+
+        </div>
+  
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Top Categories</h4>
+                </div>
+                <div class="card-body">
+                    {{#if topCategories.length}}
                     <ul class="list-group">
                         {{#each topCategories}}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>{{this.categoryName}}</span>
-                                <span class="badge badge-primary badge-pill">{{this.count}} sold</span>
-                            </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{this.categoryName}}</span>
+                            <span class="badge badge-primary badge-pill">{{this.count}} sold</span>
+                        </li>
                         {{/each}}
                     </ul>
-                {{else}}
+                    {{else}}
                     <p>No top categories found.</p>
-                {{/if}}
+                    {{/if}}
+                </div>
             </div>
         </div>
     </div>
-</div>
-                <div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">Best Selling Products</h4>
-            </div>
-            <div class="card-body">
-                {{#if bestsellingProducts.length}}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Best Selling Products</h4>
+                </div>
+                <div class="card-body">
+                    {{#if bestsellingProducts.length}}
                     <ul class="list-group">
                         {{#each bestsellingProducts}}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <img src="/uploads/products/{{this.productImage}}" alt="{{this.productName}}" class="img-thumbnail" style="width: 50px; height: 50px;">
-                                    <span class="ml-3">{{this.productName}}</span>
-                                </div>
-                                <span class="badge badge-primary badge-pill">{{this.count}} sold</span>
-                            </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <img src="/uploads/products/{{this.productImage}}" alt="{{this.productName}}"
+                                    class="img-thumbnail" style="width: 50px; height: 50px;">
+                                <span class="ml-3">{{this.productName}}</span>
+                            </div>
+                            <span class="badge badge-primary badge-pill">{{this.count}} sold</span>
+                        </li>
                         {{/each}}
                     </ul>
-                {{else}}
+                    {{else}}
                     <p>No best selling products found.</p>
-                {{/if}}
-            </div>
-        </div>
-    </div>
+                    {{/if}}
                 </div>
-
-               
-
             </div>
         </div>
-       <div class="content-body">
-  <div class="container-fluid">
-    <!-- Filters -->
-<div class="row mb-4">
-    <div class="col">
-        <button id="filterYearly" class="btn btn-primary mr-2">Yearly</button>
-        <button id="filterMonthly" class="btn btn-primary mr-2">Monthly</button>
-        <button id="filterWeekly" class="btn btn-primary">Weekly</button>
     </div>
+
+
+
 </div>
 
-    <!-- Sales Chart -->
-    <div class="row">
-      <div class="col-lg-6">
-        <div class="card">
-          <div class="card-header">
-            <h4 class="card-title">Sales Chart</h4>
-          </div>
-          <div class="card-body">
-            <canvas id="saleChart"></canvas>
-          </div>
-        </div>
-      </div>
-      <!-- Order Type Chart -->
-      <div class="col-lg-6">
-        <div class="card">
-          <div class="card-header">
-            <h4 class="card-title">Order Type Chart</h4>
-          </div>
-          <div class="card-body">
-            <canvas id="orderTypeChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Category Chart -->
-    <div class="row">
-      <div class="col-lg-6">
-        <div class="card">
-          <div class="card-header">
-            <h4 class="card-title">Category Chart</h4>
-          </div>
-          <div class="card-body">
-            <canvas id="categoryChart"></canvas>
-          </div>
-        </div>
-      </div>
-      <!-- Order Quantity Chart -->
-      <div class="col-lg-6">
-        <div class="card">
-          <div class="card-header">
-            <h4 class="card-title">Order Quantity Chart</h4>
-          </div>
-          <div class="card-body">
-            <canvas id="orderQuantityChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
+<!-- JavaScript to Toggle Listings -->
 <script>
-    let saleChart, orderTypeChart, categoryChart, orderQuantityChart;
 
-    const createCharts = (data) => {
-        const ctx1 = document.getElementById('saleChart').getContext('2d');
-        saleChart = new Chart(ctx1, {
-            type: 'bar',
-            data: data.saleChartInfo,
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+    document.getElementById('applyFilter').addEventListener('click', function () {
+        const filterType = document.getElementById('filterType').value;
+        const dateRange = document.getElementById('dateRange').value;
+        const filterDate = document.getElementById('filterDate').value;
+
+        console.log(`Fetching data for filterType=${filterType},dateRange=${dateRange}, filterDate=${filterDate}`);
+
+        fetch(`/admin/order-analysis?filterType=${filterType}&dateRange=${dateRange}&filterDate=${filterDate}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-            }
-        });
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received data:', data);
+                updateChart(data);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    });
 
-        const ctx2 = document.getElementById('orderTypeChart').getContext('2d');
-        orderTypeChart = new Chart(ctx2, {
-            type: 'doughnut',
-            data: data.orderTypeChartInfo,
-            options: {
-                responsive: true,
-            }
-        });
-
-        const ctx3 = document.getElementById('categoryChart').getContext('2d');
-        categoryChart = new Chart(ctx3, {
-            type: 'bar',
-            data: data.categoryChartInfo,
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        const ctx4 = document.getElementById('orderQuantityChart').getContext('2d');
-        orderQuantityChart = new Chart(ctx4, {
-            type: 'line',
-            data: data.orderQuantityChartInfo,
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    };
-
-const updateCharts = async (filter) => {
-    try {
-        const response = await fetch(`/admin/dashboard?filter=${filter}`, {
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+    document.getElementById('dateRange').addEventListener('change', function () {
+        const dateRange = this.value;
+        const filterDate = document.getElementById('filterDate');
+        if (dateRange === 'custom') {
+            filterDate.style.display = 'block';
+        } else {
+            filterDate.style.display = 'none';
         }
+    });
 
-        const data = await response.json();
+    const ctx = document.getElementById('orderAnalysisChart').getContext('2d');
+    let orderAnalysisChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [], // Will be updated dynamically
+            datasets: [{
+                label: 'Orders',
+                data: [], // Will be updated dynamically
+                backgroundColor: 'rgba(227, 256, 211, 0.2)',
+                borderColor: 'rgba(65, 61, 180, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 
-        saleChart.data = data.saleChartInfo;
-        saleChart.update();
-
-        orderTypeChart.data = data.orderTypeChartInfo;
-        orderTypeChart.update();
-
-        categoryChart.data = data.categoryChartInfo;
-        categoryChart.update();
-
-        orderQuantityChart.data = data.orderQuantityChartInfo;
-        orderQuantityChart.update();
-    } catch (error) {
-        console.error('Error updating chart data:', error);
-        alert('Failed to update chart data. Please try again later.');
+    function updateChart(data) {
+        orderAnalysisChart.data.labels = data.labels;
+        orderAnalysisChart.data.datasets[0].data = data.orders;
+        orderAnalysisChart.update();
     }
-};
 
-
-
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const initialData = {
-            saleChartInfo: {{{json saleChartInfo}}},
-            orderTypeChartInfo: {{{json orderTypeChartInfo}}},
-            categoryChartInfo: {{{json categoryChartInfo}}},
-            orderQuantityChartInfo: {{{json orderQuantityChartInfo}}}
-        };
-        createCharts(initialData);
-
-        // Add event listeners to filter buttons
-        document.getElementById('filterYearly').addEventListener('click', () => updateCharts('yearly'));
-        document.getElementById('filterMonthly').addEventListener('click', () => updateCharts('monthly'));
-        document.getElementById('filterWeekly').addEventListener('click', () => updateCharts('weekly'));
+    $(document).ready(function () {
+        $('#filterDate').datepicker({
+            dateFormat: 'yy-mm-dd'
+        });
     });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

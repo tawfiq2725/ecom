@@ -4,9 +4,10 @@ const { productUpload, categoryUpload } = require('../helpers/multer');
 const adminController = require('../controllers/adminCtrl');
 const categoryController = require('../controllers/categoryCtrl');
 const productController = require('../controllers/productCtrl');
-const couponController = require('../controllers/couponCtrl.js')
-const salesCtrl = require('../controllers/salesCtrl.js')
-const offerCtrl = require('../controllers/offerCtrl.js')
+const couponController = require('../controllers/couponCtrl.js');
+const salesCtrl = require('../controllers/salesCtrl.js');
+const offerCtrl = require('../controllers/offerCtrl.js');
+const Order = require('../models/orderSchema.js')
 
 // Admin routes
 routes.get(['/', '/login'], adminController.getLoginPage);
@@ -15,6 +16,125 @@ routes.get('/dashboard', adminController.getHomePage);
 routes.post('/auth/register', adminController.newUserRegistration);
 routes.post('/auth/login', adminController.loginUser);
 routes.get('/auth/logout', adminController.logoutUser);
+
+// Helper function to get date range based on selected option
+function getDateRange(dateRange, filterDate) {
+    const now = new Date();
+    let startDate, endDate;
+
+    switch (dateRange) {
+        case 'today':
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 1);
+            break;
+        case 'month':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            break;
+        case 'year':
+            startDate = new Date(now.getFullYear(), 0, 1);
+            endDate = new Date(now.getFullYear() + 1, 0, 1);
+            break;
+        case 'custom':
+            startDate = new Date(filterDate);
+            endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 1);
+            break;
+        default:
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 1);
+            break;
+    }
+
+    return { startDate, endDate };
+}
+
+routes.get('/order-analysis', async (req, res) => {
+    const { filterType,dateRange, filterDate } = req.query;
+
+    console.log(`Received request for filterType=${filterType},dateRange=${dateRange}, filterDate=${filterDate}`);
+
+    try {
+        let data;
+        if (filterType === 'products') {
+            data = await getProductOrderAnalysis(dateRange, filterDate);
+        } else {
+            data = await getCategoryOrderAnalysis(dateRange, filterDate);
+        }
+
+        console.log('Sending data:', data);
+        res.json(data);
+    } catch (error) {
+        console.error('Error processing request:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Updated function for product order analysis
+async function getProductOrderAnalysis(dateRange, filterDate) {
+    const { startDate, endDate } = getDateRange(dateRange, filterDate);
+
+    const orders = await Order.aggregate([
+        { $match: { createdAt: { $gte: startDate, $lt: endDate } } },
+        { $unwind: '$items' },
+        { $lookup: {
+            from: 'products',
+            localField: 'items.product',
+            foreignField: '_id',
+            as: 'productDetails'
+        }},
+        { $unwind: '$productDetails' },
+        { $group: {
+            _id: '$productDetails.name',
+            totalQuantity: { $sum: '$items.quantity' }
+        }},
+        { $sort: { totalQuantity: -1 } },
+        { $limit: 10 }
+    ]);
+
+    const labels = orders.map(order => order._id);
+    const data = orders.map(order => order.totalQuantity);
+
+    return { labels, orders: data };
+}
+
+// Updated function for category order analysis
+async function getCategoryOrderAnalysis(dateRange, filterDate) {
+    const { startDate, endDate } = getDateRange(dateRange, filterDate);
+
+    const orders = await Order.aggregate([
+        { $match: { createdAt: { $gte: startDate, $lt: endDate } } },
+        { $unwind: '$items' },
+        { $lookup: {
+            from: 'products',
+            localField: 'items.product',
+            foreignField: '_id',
+            as: 'productDetails'
+        }},
+        { $unwind: '$productDetails' },
+        { $lookup: {
+            from: 'categories',
+            localField: 'productDetails.category',
+            foreignField: '_id',
+            as: 'categoryDetails'
+        }},
+        { $unwind: '$categoryDetails' },
+        { $group: {
+            _id: '$categoryDetails.name',
+            totalQuantity: { $sum: '$items.quantity' }
+        }},
+        { $sort: { totalQuantity: -1 } },
+        { $limit: 10 }
+    ]);
+
+    const labels = orders.map(order => order._id);
+    const data = orders.map(order => order.totalQuantity);
+
+    return { labels, orders: data };
+}
+
 
 // Management
 routes.get('/userm', adminController.getAllUsers);
