@@ -78,7 +78,8 @@ router.post('/orders/:id/cancel', orderCtrl.cancelOrder);
 
 // New Routes for Razorpay Integration
 router.post('/api/create-order', orderCtrl.createRazorpayOrder);
-router.post('/confirm-razorpay-payment', orderCtrl.handleRazorpayPayment);
+router.post('/api/verify-payment', orderCtrl.confirmRazorpayPayment);
+router.post('/confirm-razorpay-payment', orderCtrl.verifyRazorpayPayment);
 
 
 // Return Management (Use only returnController)

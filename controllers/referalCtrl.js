@@ -5,36 +5,42 @@ const Transaction = require('../models/transactionSchema');
 // Handle referral logic when a new user registers
 const handleReferral = async (referralCode, newUser) => {
     try {
-        if (!referralCode) return;
+        if (!referralCode) {
+            newUser.isEligibleForReferralReward = false;
+            await newUser.save();
+            return;
+        }
 
-        // Find the referrer
         const referringUser = await User.findOne({ referralCode });
-        if (!referringUser) return;
+        if (!referringUser) {
+            newUser.isEligibleForReferralReward = false;
+            await newUser.save();
+            return;
+        }
 
-        // Add referral to referrer's list
         referringUser.referrals.push(newUser._id);
         await referringUser.save();
 
-        // Reward the referrer
         const rewardAmount = 250; // Rs. 250 for the referrer
-        const referrerWallet = await Wallet.findOne({ userId: referringUser._id });
-        if (referrerWallet) {
+        let referrerWallet = await Wallet.findOne({ userId: referringUser._id });
+        if (!referrerWallet) {
+            referrerWallet = new Wallet({ userId: referringUser._id, balance: rewardAmount });
+        } else {
             referrerWallet.balance += rewardAmount;
-            const transaction = new Transaction({
-                userId: referringUser._id,
-                amount: rewardAmount,
-                description: 'Referral reward',
-                type: 'credit',
-            });
-            await transaction.save();
-            referrerWallet.transactions.push(transaction._id);
-            await referrerWallet.save();
         }
 
-        // Create wallet for the new user
-        const newUserWallet = new Wallet({ userId: newUser._id });
-        await newUserWallet.save();
-        
+        const transaction = new Transaction({
+            userId: referringUser._id,
+            amount: rewardAmount,
+            description: 'Referral reward',
+            type: 'credit',
+        });
+        await transaction.save();
+        referrerWallet.transactions.push(transaction._id);
+        await referrerWallet.save();
+
+        newUser.isEligibleForReferralReward = true;
+        await newUser.save();
     } catch (error) {
         console.error('Error handling referral:', error);
     }

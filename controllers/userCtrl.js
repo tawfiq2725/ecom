@@ -96,7 +96,6 @@ const newUserRegistration = async (req, res) => {
         });
 
         const savedUser = await newUser.save();
-        console.log(referralCode)
 
         if (!savedUser) {
             return res.render("user/signup", { error_msg: "Failed to register user. Please try again.", firstname, lastname, email, mobile });
@@ -147,6 +146,7 @@ const newUserRegistration = async (req, res) => {
         res.status(500).render("user/signup", { error_msg: "An error occurred during registration.", firstname, lastname, email, mobile });
     }
 };
+
 
 
 

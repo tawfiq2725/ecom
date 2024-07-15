@@ -3,6 +3,7 @@ const Order = require('../models/orderSchema');
 const Cart = require('../models/cartSchema');
 const Address = require('../models/addressSchema');
 const Product = require('../models/productSchema');
+const User = require('../models/userSchema')
 const Coupon = require('../models/couponSchema')
 const Wallet = require('../models/walletSchema')
 const Transaction = require('../models/transactionSchema')
@@ -98,14 +99,14 @@ const createOrder = async (req, res) => {
             }
         }
 
-        // Check if payment method is Wallet
+        let paymentStatus = 'Pending';
+
         if (paymentMethod === 'Wallet') {
             const wallet = await Wallet.findOne({ userId });
             if (!wallet || wallet.balance < totalAmount) {
                 return res.status(400).json({ success: false, message: 'Insufficient balance in wallet' });
             }
 
-            // Deduct amount from wallet balance
             wallet.balance -= totalAmount;
             const transaction = new Transaction({
                 userId,
@@ -115,10 +116,11 @@ const createOrder = async (req, res) => {
                 status: 'completed'
             });
 
-            // Save transaction and update wallet
             await transaction.save();
             wallet.transactions.push(transaction._id);
             await wallet.save();
+
+            paymentStatus = 'Paid';
         }
 
         const order = new Order({
@@ -128,7 +130,7 @@ const createOrder = async (req, res) => {
             discountAmount,
             address: address._id,
             paymentMethod,
-            paymentStatus: paymentMethod === 'Wallet' ? 'Paid' : 'Pending',
+            paymentStatus,
             orderStatus: 'Pending',
             coupon: couponCode ? { code: couponCode, discountAmount } : undefined
         });
@@ -148,27 +150,34 @@ const createOrder = async (req, res) => {
         cart.totalPrice = 0;
         await cart.save();
 
-        // Handle different payment methods response
-        if (paymentMethod === 'Razorpay') {
-            res.json({
-                success: true,
-                razorpayOrderId: order.razorpayOrderId,
-                razorpayKeyId: process.env.RAZORPAY_KEY_ID,
-                totalAmount,
-                user: req.session.user,
-                address
+        const user = await User.findById(userId);
+        if (user.isEligibleForReferralReward) {
+            const newUserWallet = await Wallet.findOne({ userId });
+            const rewardAmount = 150; // Rs. 150 for the new user upon first order
+            newUserWallet.balance += rewardAmount;
+            const transaction = new Transaction({
+                userId,
+                amount: rewardAmount,
+                description: 'First order referral reward',
+                type: 'credit',
             });
-        } else {
-            res.status(201).redirect('/confirm');
+            await transaction.save();
+            newUserWallet.transactions.push(transaction._id);
+            await newUserWallet.save();
+
+            user.isEligibleForReferralReward = false;
+            await user.save();
         }
+
+        return res.redirect('/confirm');
+
     } catch (error) {
-        console.error('Error creating order:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error('Order creation error:', error);
+        return res.status(500).json({ success: false, message: 'An error occurred while creating the order' });
     }
 };
 
 
-// Create Razorpay Order
 const createRazorpayOrder = async (req, res) => {
     try {
         const userId = req.session.user._id;
@@ -232,9 +241,9 @@ const createRazorpayOrder = async (req, res) => {
         });
 
         await order.save();
-     cart.items = [];
-        cart.totalPrice = 0;
-        await cart.save();
+
+
+
         res.json({
             success: true,
             razorpayOrderId: razorpayOrder.id,
@@ -249,9 +258,10 @@ const createRazorpayOrder = async (req, res) => {
     }
 };
 
-// Confirm Razorpay Payment
+
 const confirmRazorpayPayment = async (req, res) => {
     try {
+        const userId = req.session.user._id;
         const { razorpayPaymentId, razorpayOrderId } = req.body;
         const order = await Order.findOne({ razorpayOrderId });
 
@@ -277,6 +287,25 @@ const confirmRazorpayPayment = async (req, res) => {
         cart.totalPrice = 0;
         await cart.save();
 
+        const user = await User.findById(userId);
+        if (user.isEligibleForReferralReward) {
+            const newUserWallet = await Wallet.findOne({ userId });
+            const rewardAmount = 150; // Rs. 150 for the new user upon first order
+            newUserWallet.balance += rewardAmount;
+            const transaction = new Transaction({
+                userId,
+                amount: rewardAmount,
+                description: 'First order referral reward',
+                type: 'credit',
+            });
+            await transaction.save();
+            newUserWallet.transactions.push(transaction._id);
+            await newUserWallet.save();
+
+            user.isEligibleForReferralReward = false;
+            await user.save();
+        }
+
         res.status(200).json({ success: true, message: 'Payment confirmed and order completed' });
     } catch (error) {
         console.error('Error confirming payment:', error);
@@ -284,8 +313,6 @@ const confirmRazorpayPayment = async (req, res) => {
     }
 };
 
-
-// Verify Razorpay Payment
 const verifyRazorpayPayment = async (req, res) => {
     try {
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
@@ -315,7 +342,6 @@ const verifyRazorpayPayment = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
-
 
 
 const orderConfirm = async (req, res) => {

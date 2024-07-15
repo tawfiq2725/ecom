@@ -59,7 +59,11 @@ const userSchema = new Schema({
     referrals: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }]
+    }],
+    isEligibleForReferralReward: {
+        type: Boolean,
+        default: false
+    }
 }, {
     timestamps: true,
 });
