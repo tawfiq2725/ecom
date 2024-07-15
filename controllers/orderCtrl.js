@@ -47,7 +47,8 @@ const checkout = async (req, res) => {
             totalPrice: totalPrice.toFixed(2),
             razorKeyId,
             user: req.session.user,
-            couponDetails // Pass coupon details to the view
+            couponDetails, // Pass coupon details to the view
+            coupons
         });
     } catch (error) {
         console.error('Error rendering checkout page:', error);
