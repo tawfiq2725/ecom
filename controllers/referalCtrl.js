@@ -49,18 +49,37 @@ const handleReferral = async (referralCode, newUser) => {
 // Fetch referrals for a user
 const getUserReferrals = async (req, res) => {
     try {
-        if(!req.session.user){
+        if (!req.session.user) {
             return res.redirect('/login');
         }
-        const userId = req.session.user._id;
-        const referrals = await User.find({ referredBy: userId }).populate('referrals');
 
-        res.render('user/referrals', { referrals });
+        const userId = req.session.user._id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 referrals per page
+        const skip = (page - 1) * limit;
+
+        const totalReferrals = await User.countDocuments({ referredBy: userId });
+        const referrals = await User.find({ referredBy: userId })
+            .populate('referrals')
+            .sort({ createdAt: -1 }) // Sort referrals by date
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(totalReferrals / limit);
+
+        res.render('user/referrals', {
+            referrals,
+            title: "My Referrals",
+            currentPage: page,
+            totalPages,
+            limit
+        });
     } catch (error) {
         console.error('Error fetching referrals:', error);
         res.status(500).send('Server Error');
     }
 };
+
 
 
 module.exports = {

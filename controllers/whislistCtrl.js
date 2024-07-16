@@ -59,22 +59,40 @@ const removeFromWishlist = async (req, res) => {
 
 // Get wishlist page
 const getWishlistPage = async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+
     try {
-        if(!req.session.user){
-            res.redirect('/login')
-        }
-        else{
-           
-            const userId = req.session.user._id;
-            const wishlist = await Wishlist.findOne({ user: userId }).populate('products');
-    
-            res.render('user/wishlist', { title: 'My Wishlist', wishlist: wishlist ? wishlist.products : [] });
-        }
-        
+        const userId = req.session.user._id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+        const skip = (page - 1) * limit;
+
+        const wishlist = await Wishlist.findOne({ user: userId }).populate({
+            path: 'products',
+            options: {
+                sort: { createdAt: -1 }, // Sort products by date
+                skip,
+                limit
+            }
+        });
+
+        const totalWishlistItems = wishlist ? wishlist.products.length : 0;
+        const totalPages = Math.ceil(totalWishlistItems / limit);
+
+        res.render('user/wishlist', {
+            title: 'My Wishlist',
+            wishlist: wishlist ? wishlist.products : [],
+            currentPage: page,
+            totalPages,
+            limit
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Server Error');
+        console.error('Error fetching wishlist:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
 
 module.exports = { addToWishlist, removeFromWishlist, getWishlistPage };

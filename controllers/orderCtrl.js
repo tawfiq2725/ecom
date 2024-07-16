@@ -41,6 +41,10 @@ const checkout = async (req, res) => {
         }
         const coupons = await Coupon.find();
 
+        const user = await User.findById(userId).populate('wallet');
+        const walletBalance = user.wallet ? user.wallet.balance : 0;
+
+        console.log(walletBalance)
         res.render('user/checkout', {
             title: "Checkout",
             cart,
@@ -49,13 +53,15 @@ const checkout = async (req, res) => {
             razorKeyId,
             user: req.session.user,
             couponDetails, // Pass coupon details to the view
-            coupons
+            coupons,
+            walletBalance: walletBalance
         });
     } catch (error) {
         console.error('Error rendering checkout page:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
 
 // Create Order (modified to handle different payment methods)
 const createOrder = async (req, res) => {
@@ -259,21 +265,31 @@ const createRazorpayOrder = async (req, res) => {
 };
 
 
+// Adding logs to confirmRazorpayPayment
 const confirmRazorpayPayment = async (req, res) => {
     try {
+        console.log('confirmRazorpayPayment called'); // Debug log
         const userId = req.session.user._id;
         const { razorpayPaymentId, razorpayOrderId } = req.body;
-        const order = await Order.findOne({ razorpayOrderId });
 
+        const order = await Order.findOne({ razorpayOrderId });
         if (!order) {
+            console.log('Order not found'); // Debug log
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
+        // Only update order status if payment is verified successfully
         order.paymentStatus = 'Paid';
         order.razorpayPaymentId = razorpayPaymentId;
+        order.orderStatus = 'Pending';
         await order.save();
 
         const cart = await Cart.findOne({ user: order.user }).populate('items.product');
+        if (!cart) {
+            console.log('Cart not found'); // Debug log
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+        }
+
         for (const item of cart.items) {
             const product = await Product.findById(item.product._id);
             const variant = product.variants.find(v => v.size === item.size);
@@ -283,9 +299,11 @@ const confirmRazorpayPayment = async (req, res) => {
             await product.save();
         }
 
+        console.log('Cart clearing start'); // Debug log
         cart.items = [];
         cart.totalPrice = 0;
         await cart.save();
+        console.log('Cart cleared and saved'); // Debug log
 
         const user = await User.findById(userId);
         if (user.isEligibleForReferralReward) {
@@ -308,13 +326,15 @@ const confirmRazorpayPayment = async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Payment confirmed and order completed' });
     } catch (error) {
-        console.error('Error confirming payment:', error);
+        console.error('Error confirming payment:', error); // Enhanced error log
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
 
+// Adding logs to verifyRazorpayPayment
 const verifyRazorpayPayment = async (req, res) => {
     try {
+        console.log('verifyRazorpayPayment called'); // Debug log
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
 
         const crypto = require('crypto');
@@ -323,22 +343,24 @@ const verifyRazorpayPayment = async (req, res) => {
         const generatedSignature = hmac.digest('hex');
 
         if (generatedSignature !== razorpay_signature) {
+            console.log('Invalid signature'); // Debug log
             return res.status(400).json({ success: false, message: 'Invalid signature' });
         }
 
         const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
         if (!order) {
+            console.log('Order not found'); // Debug log
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
-
-        order.paymentStatus = 'Paid';
-        order.orderStatus = 'Pending';
-        order.razorpayPaymentId = razorpay_payment_id;
-        await order.save();
-
-        res.json({ success: true, message: 'Payment verified successfully' });
+        
+        // Call confirmRazorpayPayment function to finalize the order
+        req.body = {
+            razorpayPaymentId: razorpay_payment_id,
+            razorpayOrderId: razorpay_order_id
+        };
+        await confirmRazorpayPayment(req, res);
     } catch (error) {
-        console.error('Error verifying Razorpay payment:', error);
+        console.error('Error verifying Razorpay payment:', error); // Enhanced error log
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };

@@ -7,9 +7,27 @@ const getAddresses = async (req, res) => {
     if (!req.session.user) {
       return res.redirect('/login');
     }
-    const addresses = await Address.find({ userId: req.session.user._id });
-    console.log('Addresses:', addresses);
-    res.render('user/address', { addresses , title:"Address Page"});
+
+    const userId = req.session.user._id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 addresses per page
+    const skip = (page - 1) * limit;
+
+    const totalAddresses = await Address.countDocuments({ userId }); // Count total addresses
+    const addresses = await Address.find({ userId })
+      .sort({ createdAt: -1 }) // Sort addresses by date
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(totalAddresses / limit);
+
+    res.render('user/address', {
+      addresses,
+      title: "Address Page",
+      currentPage: page,
+      totalPages,
+      limit
+    });
   } catch (err) {
     console.error('Error fetching addresses:', err);
     res.status(500).send(err.message);

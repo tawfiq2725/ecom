@@ -24,6 +24,7 @@
         <table class="table table-bordered" id="example">
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Image</th>
@@ -34,6 +35,7 @@
             <tbody>
                 {{#each categories}}
                     <tr>
+                        <td>{{add @index 1}}</td>
                         <td>{{this.name}}</td>
                         <td>{{this.description}}</td>
                         <td><img src="/uploads/categories/{{this.image}}" alt="{{this.name}}" style="width: 100px;"></td>

@@ -145,17 +145,41 @@ document.addEventListener('DOMContentLoaded', function () {
             codOption.disabled = false;
         }
     }
+    const walletBalance = {{walletBalance}}; // Assuming this value is passed from the server
+    const totalPriceElement = document.querySelector('.summary-total .price');
+    const totalAmount = parseFloat(totalPriceElement.textContent.replace('₹', '').replace(',', ''));
 
+  function toggleWallet() {
+        const walletOption = document.getElementById('wallet');
+        if (walletBalance < totalAmount) {
+            walletOption.disabled = true;
+            if (walletOption.checked) {
+                // If Wallet was selected and is now disabled, select another payment method
+                document.getElementById('razorpay').checked = true;
+                Swal.fire({
+                    title: 'Insufficient Balance',
+                    text: 'Your wallet balance is insufficient to cover the total amount.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        } else {
+            walletOption.disabled = false;
+        }
+    }
     // Initial check
     toggleCOD();
+     toggleWallet();
 
     // Re-check COD availability on coupon apply or remove
     document.getElementById('removeCoupon')?.addEventListener('click', function () {
         setTimeout(toggleCOD, 500); // Timeout to wait for DOM update
+         setTimeout(toggleWallet, 500);
     });
 
     document.getElementById('openCouponModal')?.addEventListener('click', function () {
         setTimeout(toggleCOD, 500); // Timeout to wait for DOM update
+         setTimeout(toggleWallet, 500);
     });
     // Function to handle applying a coupon
     function applyCoupon(couponCode) {

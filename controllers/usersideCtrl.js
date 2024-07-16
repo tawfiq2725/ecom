@@ -11,30 +11,19 @@ const getProducts = async (req, res) => {
         const productType = req.query.productType;
         const searchQuery = req.query.search;
 
-        // Initialize the filter
         const filter = { status: true };
 
-        // Combine search query and category filters using $and
-        if (searchQuery && category) {
-            filter.$and = [
-                {
-                    $or: [
-                        { name: { $regex: searchQuery, $options: 'i' } },
-                        { description: { $regex: searchQuery, $options: 'i' } }
-                    ]
-                },
-                { category }
-            ];
-        } else if (searchQuery) {
+        if (searchQuery) {
             filter.$or = [
                 { name: { $regex: searchQuery, $options: 'i' } },
                 { description: { $regex: searchQuery, $options: 'i' } }
             ];
-        } else if (category) {
+        }
+
+        if (category) {
             filter.category = category;
         }
 
-        // Sorting options
         let sortOption = {};
         if (sort === 'priceLow') {
             sortOption = { price: 1 };
@@ -42,7 +31,6 @@ const getProducts = async (req, res) => {
             sortOption = { price: -1 };
         }
 
-        // Apply product type filter
         const today = new Date();
         if (productType === 'new') {
             const tenDaysAgo = new Date(today);
@@ -54,7 +42,6 @@ const getProducts = async (req, res) => {
             filter.createdAt = { $lt: tenDaysAgo };
         }
 
-        // Fetch categories, total products count, and products
         const [categories, totalProducts, products] = await Promise.all([
             Category.find(),
             Product.countDocuments(filter),
@@ -65,10 +52,8 @@ const getProducts = async (req, res) => {
                 .limit(limit)
         ]);
 
-        // Calculate total pages
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Calculate effective offer and price for each product
         const productsWithOffers = products.map(product => {
             const categoryOffer = product.category.offerRate || 0;
             const productOffer = product.discount || 0;
@@ -81,7 +66,6 @@ const getProducts = async (req, res) => {
             };
         });
 
-        // Render the products page with the filtered and sorted products
         res.render('user/products', {
             title: "Products",
             products: productsWithOffers,
@@ -92,13 +76,14 @@ const getProducts = async (req, res) => {
             category,
             sort,
             productType,
-            searchQuery,
+            searchQuery
         });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server Error");
     }
 };
+
 
 
 
