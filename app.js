@@ -13,7 +13,7 @@ const cors = require('cors')
 // Configurations
 require('dotenv').config();
 require('./config/dbconnection');
-const PORT = process.env.APP_PORT || 3000;
+const PORT = process.env.APP_PORT || 3001;
 
 // Routes Path
 const authRoutes = require('./routes/authRoutes');
