@@ -86,7 +86,7 @@ const initiatePayment = async (req, res) => {
         res.json(order);
     } catch (error) {
         console.error('Error initiating payment:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Server error Occur' });
     }
 };
 
