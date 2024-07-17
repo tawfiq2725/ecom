@@ -204,7 +204,7 @@ const downloadSalesReport = async (req, res) => {
     } else if (format === 'pdf') {
         const htmlContent = generateHTMLContent(orders, reportDetails, fromDate, toDate);
 
-        const browser = await puppeteer.launch({ 
+        const browser = await puppeteer.launch({
             executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'  // Update this path as needed
         });
         const page = await browser.newPage();

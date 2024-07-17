@@ -9,7 +9,7 @@ const AddressSchema = new Schema({
     },
     place: {
         type: String,
-        enum: ['home', 'work'], 
+        enum: ['home', 'work'],
         required: true
     },
     houseNumber: {
@@ -33,6 +33,6 @@ const AddressSchema = new Schema({
         required: true
     }
 },
-{ timestamps: true });
+    { timestamps: true });
 
 module.exports = mongoose.model('Address', AddressSchema);

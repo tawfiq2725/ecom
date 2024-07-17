@@ -44,14 +44,14 @@ const addProduct = async (req, res) => {
             stock: variant.stock,
         }));
 
-        const newProduct = new Product({ 
-            name, 
-            description, 
-            price, 
-            category, 
-            mainImage, 
-            subImages, 
-            highlights: highlightsArray, 
+        const newProduct = new Product({
+            name,
+            description,
+            price,
+            category,
+            mainImage,
+            subImages,
+            highlights: highlightsArray,
             variants: variantsArray
         });
 
@@ -85,7 +85,7 @@ const updateProduct = async (req, res) => {
         const { name, description, price, category, existingMainImage, existingSubImages, highlights, variants } = req.body;
 
         // console.log("Received Data:", req.body);
-        
+
         const mainImage = req.files.mainImage ? req.files.mainImage[0].filename : existingMainImage;
         const subImages = req.files.subImages ? req.files.subImages.map(file => file.filename) : existingSubImages.split(',');
 
@@ -161,7 +161,7 @@ const updateStock = async (req, res) => {
         const product = await Product.findById(req.params.id);
         product.variants = variants;
         await product.save();
-        
+
         req.flash('success_msg', 'Stock updated successfully');
         res.redirect('/admin/products');
     } catch (error) {

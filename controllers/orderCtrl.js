@@ -299,7 +299,7 @@ const confirmRazorpayPayment = async (req, res) => {
             await product.save();
         }
 
-        console.log('Cart clearing start'); // Debug log
+        // Clear the cart
         cart.items = [];
         cart.totalPrice = 0;
         await cart.save();
@@ -331,6 +331,7 @@ const confirmRazorpayPayment = async (req, res) => {
     }
 };
 
+
 // Adding logs to verifyRazorpayPayment
 const verifyRazorpayPayment = async (req, res) => {
     try {
@@ -352,7 +353,7 @@ const verifyRazorpayPayment = async (req, res) => {
             console.log('Order not found'); // Debug log
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
-        
+
         // Call confirmRazorpayPayment function to finalize the order
         req.body = {
             razorpayPaymentId: razorpay_payment_id,

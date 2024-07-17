@@ -40,7 +40,7 @@ const addAddress = async (req, res) => {
     if (!req.session.user) {
       return res.redirect('/login');
     }
-    console.log('Request Body:', req.body); 
+    console.log('Request Body:', req.body);
     const address = new Address({
       userId: req.session.user._id,
       place: req.body.place,

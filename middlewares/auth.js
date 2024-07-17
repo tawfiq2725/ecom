@@ -1,6 +1,6 @@
 const User = require('../models/userSchema');
 const Admin = require('../models/adminSchema');
-const Product = require('../models/productSchema'); 
+const Product = require('../models/productSchema');
 const mongoose = require('mongoose');
 const checkUserStatus = async (req, res, next) => {
     if (req.session && (req.session.user || req.session.admin)) {
@@ -18,7 +18,7 @@ const checkUserStatus = async (req, res, next) => {
                 } else {
                     next();
                 }
-            } 
+            }
             else if (req.session.admin) {
                 const admin = await Admin.findById(req.session.admin._id);
                 if (admin && admin.isAdmin) {
@@ -33,7 +33,7 @@ const checkUserStatus = async (req, res, next) => {
                         return res.redirect('/admin/login');
                     });
                 }
-            } 
+            }
             else {
                 next();
             }
@@ -41,7 +41,7 @@ const checkUserStatus = async (req, res, next) => {
             console.log(error.message);
             return res.status(500).send("An error occurred while checking user status.");
         }
-    } 
+    }
     else {
         next();
     }

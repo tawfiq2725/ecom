@@ -68,7 +68,7 @@ const userSchema = new Schema({
     timestamps: true,
 });
 
-userSchema.virtual('fullName').get(function() {
+userSchema.virtual('fullName').get(function () {
     return `${this.firstname} ${this.lastname}`;
 });
 

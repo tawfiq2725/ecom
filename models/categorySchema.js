@@ -18,18 +18,18 @@ const categorySchema = new mongoose.Schema({
         enum: ['active', 'inactive'],
         default: 'active',
     },
-    offerIsActive:{
-        type:Boolean,
-        default:false
+    offerIsActive: {
+        type: Boolean,
+        default: false
     },
-    offerRate:{
-        type:Number,
-        min:0,
-        default:0
+    offerRate: {
+        type: Number,
+        min: 0,
+        default: 0
     }
 }
-,
-{timestamps:true}
+    ,
+    { timestamps: true }
 );
 
 module.exports = mongoose.model('Category', categorySchema);

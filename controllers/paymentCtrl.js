@@ -5,8 +5,8 @@ const Transaction = require('../models/transactionSchema');
 require('dotenv').config()
 // Initialize Razorpay instance with your credentials
 const razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID ,
-    key_secret:process.env.RAZORPAY_KEY_SECRET 
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
 // Fetch user's wallet and transaction history
@@ -138,8 +138,8 @@ const verifyPayment = async (req, res) => {
         }
     } catch (error) {
         console.error('Error verifying payment:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 }
 
 

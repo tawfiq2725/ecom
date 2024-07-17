@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const GenerateOtp = () => {
     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
     console.log("Generated OTP:", otp);
-    return otp;  
+    return otp;
 }
 
 const sendMail = async (email, otp) => {

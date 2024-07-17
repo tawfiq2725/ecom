@@ -81,7 +81,7 @@ const newUserRegistration = async (req, res) => {
         const generateReferralCode = () => {
             return Math.random().toString(36).substring(2, 8); // Generates a random 8-character code
         };
-       
+
         const newUser = new User({
             firstname,
             lastname,
@@ -315,7 +315,7 @@ const handleForgotPassword = async (req, res) => {
             return res.render("user/forgot-password", { error_msg: "Failed to send OTP email." });
         }
 
-        res.render("user/reset-password", { success_msg: 'An e-mail has been sent to ' + user.email + ' with further instructions.' , title:"Reset Password"});
+        res.render("user/reset-password", { success_msg: 'An e-mail has been sent to ' + user.email + ' with further instructions.', title: "Reset Password" });
 
     } catch (error) {
         console.log(error.message);
@@ -372,7 +372,7 @@ const handleResetPasswordPageAndRequest = async (req, res) => {
 
 
 // User profile
-const gotoProfile = async(req, res) => {
+const gotoProfile = async (req, res) => {
     if (req.session.user) {
         const user = await User.findById(req.session.user._id);
         res.render('user/profile-details', {
@@ -406,7 +406,7 @@ const updateProfile = async (req, res) => {
 
         await user.save();
 
-        req.session.user = user; 
+        req.session.user = user;
         res.redirect('/profile');
     } catch (error) {
         console.error(error);
