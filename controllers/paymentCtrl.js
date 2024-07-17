@@ -85,11 +85,10 @@ const initiatePayment = async (req, res) => {
         const order = await razorpayInstance.orders.create(options);
         res.json(order);
     } catch (error) {
-        console.error('Error initiating payment:', error);
-        res.status(500).json({ error: 'Server error Occur' });
+        console.error('Error initiating payment:', error); // Log the error details
+        res.status(500).json({ error: 'Server error occurred. Please try again later.' });
     }
 };
-
 
 // Verify the Razorpay payment signature and update the wallet
 const verifyPayment = async (req, res) => {
