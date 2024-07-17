@@ -8,6 +8,7 @@ const flash = require('connect-flash');
 const passport = require('./config/passport-config');
 const Handlebars = require('handlebars'); // Ensure Handlebars is required
 const { checkUserStatus } = require('./middlewares/auth'); // Ensure middleware is correctly imported
+const cors = require('cors')
 
 // Configurations
 require('dotenv').config();
@@ -25,6 +26,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // app.use(morgan('dev'));
+app.use(cors())
 app.use(nocache());
 
 // Sessions
