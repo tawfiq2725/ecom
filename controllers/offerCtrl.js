@@ -10,7 +10,7 @@ const gotoCategoryOffer = async (req, res) => {
         res.render('admin/categoryOffer', {
             title: "Category Offer",
             categories,
-            layout: 'adminLayout'
+            layout: 'adminlayout'
         })
     } catch (error) {
         res.status(500).json({
@@ -73,7 +73,7 @@ const gotoProductOffer = async (req, res) => {
         res.render('admin/productOffers', {
             title: "Product Offer Management",
             products,
-            layout: 'adminLayout'
+            layout: 'adminlayout'
         })
     } catch (error) {
         res.status(500).json({
