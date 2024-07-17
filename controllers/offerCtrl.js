@@ -54,7 +54,7 @@ const activateOffer = async (req, res) => {
         const category = await Category.findById(categoryId);
         category.offerIsActive = isActive;
         await category.save();
-        res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully`,layout:'adminlayout' },);
+        res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully`,layout:'adminlayout'});
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -118,7 +118,7 @@ const ProductactivateOffer = async (req, res) => {
         const product = await Product.findById(productId);
         product.offerIsActive = isActive;
         await product.save();
-        res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully`,layout:'adminlayout' });
+        res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully`,layout:'adminlayout'});
     } catch (error) {
         res.status(500).json({
             success: false,
