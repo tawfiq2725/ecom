@@ -24,7 +24,12 @@ router.post('/auth/register', userController.newUserRegistration);
 router.post('/auth/verify-otp', userController.verifyOtp);
 router.post('/auth/login', userController.loginUser);
 router.get('/auth/logout', userController.logoutUser);
-
+router.get('/privacy-policy',(req,res)=>{
+    res.render('user/privacy-policy')
+})
+router.get('/terms-condition',(req,res)=>{
+    res.render('user/terms-condition')
+})
 // Google OAuth Routes
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
