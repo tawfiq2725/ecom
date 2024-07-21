@@ -24,7 +24,7 @@ const app = express();
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(morgan('dev'));
+app.use(morgan('dev'));
 app.use(cors())
 app.use(nocache());
 
@@ -60,9 +60,7 @@ Handlebars.registerHelper('eq', function (a, b) {
     return a === b;
 });
 
-Handlebars.registerHelper('eq', function (a, b) {
-    return a.toString() === b.toString();
-});
+
 
 Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
     switch (operator) {
