@@ -1,32 +1,43 @@
 <div class="content-body">
     <div class="container-fluid">
         <h2>Edit Product</h2>
-       <form action="/admin/products/edit/{{product._id}}" method="POST" enctype="multipart/form-data">
+        <form id="editProductForm" action="/admin/products/edit/{{product._id}}" method="POST" enctype="multipart/form-data">
+            <div id="product-error-message" class="alert alert-danger" style="display:none;"></div>
+            
             <div class="form-group">
                 <label for="name">Product Name</label>
                 <input type="text" name="name" class="form-control" value="{{product.name}}" required>
+                <small id="nameError" class="form-text text-danger" style="display:none;"></small>
             </div>
+            
             <div class="form-group">
                 <label for="description">Description</label>
                 <textarea name="description" class="form-control" required>{{product.description}}</textarea>
+                <small id="descriptionError" class="form-text text-danger" style="display:none;"></small>
             </div>
+            
             <div class="form-group">
                 <label for="price">Price</label>
                 <input type="number" name="price" class="form-control" value="{{product.price}}" required>
+                <small id="priceError" class="form-text text-danger" style="display:none;"></small>
             </div>
-<div class="form-group">
-    <label for="category">Category</label>
-    <select name="category" class="form-control" required>
-       <option value="">{{product.category.name}}</option>
-        {{#each categories}}
-            <option value="{{this._id}}" {{#if (eq this._id ../product.category)}}selected{{/if}}>{{this.name}}</option>
-        {{/each}}
-    </select>
-</div>
+            
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select name="category" class="form-control" required>
+                    <option value="">{{product.category.name}}</option>
+                    {{#each categories}}
+                        <option value="{{this._id}}" {{#if (eq this._id ../product.category._id)}}selected{{/if}}>{{this.name}}</option>
+                    {{/each}}
+                </select>
+                <small id="categoryError" class="form-text text-danger" style="display:none;"></small>
+            </div>
+            
             <div class="form-group">
                 <label for="highlights">Highlights (comma-separated)</label>
                 <input type="text" name="highlights" class="form-control" value="{{product.highlights}}">
             </div>
+            
             <div class="form-group">
                 <label for="existingMainImage">Existing Main Image</label>
                 <div>
@@ -34,11 +45,14 @@
                 </div>
                 <input type="hidden" name="existingMainImage" value="{{product.mainImage}}">
             </div>
+            
             <div class="form-group">
                 <label for="mainImage">Upload New Main Image</label>
                 <input type="file" name="mainImage" id="mainImage" class="form-control">
                 <img id="main-cropped-image" src="#" alt="Cropped Image" style="display:none;">
+                <small id="mainImageError" class="form-text text-danger" style="display:none;"></small>
             </div>
+            
             <div class="form-group">
                 <label for="existingSubImages">Existing Additional Images</label>
                 <div>
@@ -48,17 +62,19 @@
                 </div>
                 <input type="hidden" name="existingSubImages" value="{{product.subImages}}">
             </div>
+            
             <div class="form-group">
                 <label for="subImages">Upload New Additional Images</label>
                 <input type="file" name="subImages" id="subImages" class="form-control" multiple>
-                <div id="subImagePreviews"></div>
+                <div id="subImagePreviews" class="mt-2"></div>
+                <button type="button" class="btn btn-danger" id="clearSubImages" style="display:none;">Clear Sub Images</button>
             </div>
             
             <!-- Variant Section -->
             <div id="variant-container">
                 {{#each product.variants}}
                 <div class="form-group variant-box">
-                    <h5>Variant {{@index}}</h5>
+                    <h5>Variant {{add @index 1}}</h5>
                     <label for="variant-size-{{@index}}">Size</label>
                     <input type="text" name="variants[{{@index}}][size]" class="form-control" value="{{this.size}}" required>
                     <label for="variant-stock-{{@index}}">Stock</label>
@@ -66,9 +82,10 @@
                 </div>
                 {{/each}}
             </div>
+            
             <button type="button" class="btn btn-secondary" id="add-variant">Add Variant</button>
             <div id="variant-limit-message" class="text-danger" style="display:none;">Maximum 6 variants allowed</div>
-
+            
             <button type="submit" class="btn btn-primary">Update Product</button>
         </form>
     </div>
@@ -132,6 +149,76 @@
     document.addEventListener('DOMContentLoaded', function() {
         let variantCount = document.querySelectorAll('.variant-box').length;
 
+        document.getElementById('editProductForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let isValid = true;
+
+            const name = document.querySelector('input[name="name"]').value.trim();
+            const description = document.querySelector('textarea[name="description"]').value.trim();
+            const price = document.querySelector('input[name="price"]').value.trim();
+            const category = document.querySelector('select[name="category"]').value;
+            const mainImage = document.querySelector('input[name="mainImage"]').files[0];
+
+            const nameError = document.getElementById('nameError');
+            const descriptionError = document.getElementById('descriptionError');
+            const priceError = document.getElementById('priceError');
+            const categoryError = document.getElementById('categoryError');
+            const mainImageError = document.getElementById('mainImageError');
+
+            nameError.style.display = 'none';
+            descriptionError.style.display = 'none';
+            priceError.style.display = 'none';
+            categoryError.style.display = 'none';
+            mainImageError.style.display = 'none';
+
+            const alphaNumericRegex = /^[A-Za-z\s]+$/;
+
+            if (!name) {
+                isValid = false;
+                nameError.textContent = 'Name is required';
+                nameError.style.display = 'block';
+            } else if (!alphaNumericRegex.test(name)) {
+                isValid = false;
+                nameError.textContent = 'Name must contain only alphanumeric characters and spaces';
+                nameError.style.display = 'block';
+            }
+
+            if (!description) {
+                isValid = false;
+                descriptionError.textContent = 'Description is required';
+                descriptionError.style.display = 'block';
+            } else if (!alphaNumericRegex.test(description)) {
+                isValid = false;
+                descriptionError.textContent = 'Description must contain only alphabetic characters only';
+                descriptionError.style.display = 'block';
+            }
+
+            if (!price || isNaN(price) || price <= 0) {
+                isValid = false;
+                priceError.textContent = 'Price is required and must be a positive number';
+                priceError.style.display = 'block';
+            }
+
+            if (!category) {
+                isValid = false;
+                categoryError.textContent = 'Category is required';
+                categoryError.style.display = 'block';
+            }
+
+            if (!mainImage && !document.querySelector('input[name="existingMainImage"]').value) {
+                isValid = false;
+                mainImageError.textContent = 'Main Image is required';
+                mainImageError.style.display = 'block';
+            }
+
+            if (isValid) {
+                this.submit();
+            } else {
+                document.getElementById('product-error-message').textContent = 'Please fix the errors above and try again.';
+                document.getElementById('product-error-message').style.display = 'block';
+            }
+        });
+
         document.getElementById('add-variant').addEventListener('click', function() {
             if (variantCount < 6) {
                 const variantContainer = document.getElementById('variant-container');
@@ -149,6 +236,33 @@
             } else {
                 document.getElementById('variant-limit-message').style.display = 'block';
             }
+        });
+
+        document.getElementById('subImages').addEventListener('change', function(event) {
+            const subImagePreviews = document.getElementById('subImagePreviews');
+            const files = event.target.files;
+            subImagePreviews.innerHTML = '';
+
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('img-thumbnail', 'm-2');
+                    img.style.width = '150px';
+                    img.style.height = '150px';
+                    subImagePreviews.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            document.getElementById('clearSubImages').style.display = 'inline';
+        });
+
+        document.getElementById('clearSubImages').addEventListener('click', function() {
+            document.getElementById('subImagePreviews').innerHTML = '';
+            document.getElementById('subImages').value = '';
+            this.style.display = 'none';
         });
     });
 </script>

@@ -71,8 +71,8 @@
             "pageLength": 10
         });
 
-        // Handle Block/Unblock action
-        $('.toggle-status').on('click', function() {
+        // Handle Block/Unblock action using event delegation
+        $(document).on('click', '.toggle-status', function() {
             var userId = $(this).data('id');
             var action = $(this).data('status');
             var button = $(this);
@@ -96,7 +96,6 @@
                         headers: {
                             'Content-Type': 'application/json'
                         }
-                        
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -110,11 +109,9 @@
                             if (action === 'block') {
                                 button.removeClass('btn-danger').addClass('btn-success').text('Unblock').data('status', 'unblock');
                                 button.closest('tr').find('td:nth-child(4)').text('Blocked');
-                                 
                             } else {
                                 button.removeClass('btn-success').addClass('btn-danger').text('Block').data('status', 'block');
                                 button.closest('tr').find('td:nth-child(4)').text('Active');
-                                
                             }
                         } else {
                             Swal.fire(
@@ -129,3 +126,4 @@
         });
     });
 </script>
+
