@@ -27,6 +27,13 @@ const addCategory = async (req, res) => {
         const { name, description } = req.body;
         const image = req.file.filename;
 
+        // Check if category name already exists
+        const existingCategory = await Category.findOne({ name });
+        if (existingCategory) {
+            req.flash('error_msg', 'Category name already exists');
+            return res.redirect('/admin/categories'); // Redirect to the add category page
+        }
+
         const newCategory = new Category({ name, description, image });
         await newCategory.save();
 
@@ -38,6 +45,7 @@ const addCategory = async (req, res) => {
         res.redirect('/admin/categories');
     }
 };
+
 
 // Edit category page
 const getEditCategoryPage = async (req, res) => {

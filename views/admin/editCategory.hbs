@@ -1,20 +1,24 @@
 <div class="content-body">
     <div class="container-fluid">
         <h2>Edit Category</h2>
-        <form action="/admin/categories/edit/{{category._id}}" method="POST" enctype="multipart/form-data">
+        <div id="error-message" class="alert alert-danger" style="display:none;"></div>
+        <form id="editCategoryForm" action="/admin/categories/edit/{{category._id}}" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" name="name" class="form-control" value="{{category.name}}" required>
+                <input type="text" name="name" id="name" class="form-control" value="{{category.name}}" required>
+                <small id="nameError" class="form-text text-danger" style="display:none;"></small>
             </div>
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea name="description" class="form-control">{{category.description}}</textarea>
+                <textarea name="description" id="description" class="form-control">{{category.description}}</textarea>
+                <small id="descriptionError" class="form-text text-danger" style="display:none;"></small>
             </div>
             <div class="form-group">
                 <label for="image">Image</label>
                 <input type="file" name="image" id="categoryImage" class="form-control">
                 <input type="hidden" name="existingImage" value="{{category.image}}">
                 <img id="category-cropped-image" src="/uploads/categories/{{category.image}}" alt="Current Image" style="width: 100px;">
+                <small id="imageError" class="form-text text-danger" style="display:none;"></small>
             </div>
             <button type="submit" class="btn btn-primary">Update Category</button>
         </form>
@@ -43,3 +47,59 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('editCategoryForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let isValid = true;
+
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const image = document.getElementById('categoryImage').files[0];
+
+        const nameError = document.getElementById('nameError');
+        const descriptionError = document.getElementById('descriptionError');
+        const imageError = document.getElementById('imageError');
+
+        nameError.style.display = 'none';
+        descriptionError.style.display = 'none';
+        imageError.style.display = 'none';
+
+        const alphaRegex = /^[A-Za-z\s]+$/;
+
+        if (!name) {
+            isValid = false;
+            nameError.textContent = 'Name is required';
+            nameError.style.display = 'block';
+        } else if (!alphaRegex.test(name)) {
+            isValid = false;
+            nameError.textContent = 'Name must contain only alphabets';
+            nameError.style.display = 'block';
+        }
+
+        if (!description) {
+            isValid = false;
+            descriptionError.textContent = 'Description is required';
+            descriptionError.style.display = 'block';
+        } else if (!alphaRegex.test(description)) {
+            isValid = false;
+            descriptionError.textContent = 'Description must contain only alphabets';
+            descriptionError.style.display = 'block';
+        }
+
+        if (!image) {
+            imageError.style.display = 'none';
+        } else if (image && !image.name.match(/\.(jpg|jpeg|png)$/)) {
+            isValid = false;
+            imageError.textContent = 'Image must be a JPG, JPEG, or PNG file';
+            imageError.style.display = 'block';
+        }
+
+        if (isValid) {
+            this.submit();
+        } else {
+            document.getElementById('error-message').textContent = 'Please fix the errors above and try again.';
+            document.getElementById('error-message').style.display = 'block';
+        }
+    });
+</script>

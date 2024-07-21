@@ -79,25 +79,25 @@ const getEditProductPage = async (req, res) => {
     }
 };
 
+
 // Update Product
 const updateProduct = async (req, res) => {
     try {
         const { name, description, price, category, existingMainImage, existingSubImages, highlights, variants } = req.body;
 
-        // console.log("Received Data:", req.body);
-
+        // Handle main image and sub images
         const mainImage = req.files.mainImage ? req.files.mainImage[0].filename : existingMainImage;
         const subImages = req.files.subImages ? req.files.subImages.map(file => file.filename) : existingSubImages.split(',');
 
+        // Convert highlights and variants to arrays
         const highlightsArray = highlights.split(',').map(item => item.trim());
 
-        // Parse the variants
         const variantsArray = Object.values(variants).map(variant => ({
             size: variant.size,
             stock: variant.stock,
         }));
 
-        // Ensure to include all required fields in the update
+        // Create update data object
         const updateData = {
             name,
             description,
@@ -106,11 +106,10 @@ const updateProduct = async (req, res) => {
             mainImage,
             subImages,
             highlights: highlightsArray,
-            variants: variantsArray // Make sure this is correctly formatted
+            variants: variantsArray
         };
 
-        // console.log("Update Data:", updateData);
-
+        // Update product in database
         await Product.findByIdAndUpdate(req.params.id, updateData);
 
         req.flash('success_msg', 'Product updated successfully');
@@ -121,6 +120,7 @@ const updateProduct = async (req, res) => {
         res.redirect('/admin/products');
     }
 };
+
 // Delete Product
 const deleteProduct = async (req, res) => {
     try {

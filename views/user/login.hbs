@@ -43,49 +43,6 @@
 </section>
 
 <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        // Prevent form submission
-        e.preventDefault();
-
-        // Clear previous error messages
-        document.querySelectorAll('.error-message').forEach(function(el) {
-            el.textContent = '';
-        });
-        document.querySelectorAll('.form-control').forEach(function(el) {
-            el.style.borderColor = '';
-        });
-
-        // Get form fields
-        var email = document.querySelector('input[name="email"]');
-        var password = document.querySelector('input[name="password"]');
-
-        var isValid = true;
-
-        // Email validation
-        var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (!emailPattern.test(email.value.trim())) {
-            email.nextElementSibling.textContent = 'Please enter a valid email address.';
-            email.style.borderColor = 'red';
-            isValid = false;
-        } else {
-            email.style.borderColor = 'green';
-        }
-
-        // Password validation (minimum 8 characters, at least one letter and one number)
-        var passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        if (!passwordPattern.test(password.value.trim())) {
-            password.nextElementSibling.textContent = 'Password must 8 char';
-            password.style.borderColor = 'red';
-            isValid = false;
-        } else {
-            password.style.borderColor = 'green';
-        }
-
-        if (isValid) {
-            // If the form is valid, submit it
-            this.submit();
-        }
-    });
 
     // Toggle password visibility
     document.getElementById('togglePassword').addEventListener('click', function() {

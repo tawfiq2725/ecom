@@ -14,14 +14,15 @@
                 <label for="price">Price</label>
                 <input type="number" name="price" class="form-control" value="{{product.price}}" required>
             </div>
-            <div class="form-group">
-                <label for="category">Category</label>
-                <select name="category" class="form-control" required>
-                    {{#each categories}}
-                        <option value="{{this._id}}" {{#if (eq this._id ../product.category._id)}}selected{{/if}}>{{this.name}}</option>
-                    {{/each}}
-                </select>
-            </div>
+<div class="form-group">
+    <label for="category">Category</label>
+    <select name="category" class="form-control" required>
+       <option value="">{{product.category.name}}</option>
+        {{#each categories}}
+            <option value="{{this._id}}" {{#if (eq this._id ../product.category)}}selected{{/if}}>{{this.name}}</option>
+        {{/each}}
+    </select>
+</div>
             <div class="form-group">
                 <label for="highlights">Highlights (comma-separated)</label>
                 <input type="text" name="highlights" class="form-control" value="{{product.highlights}}">

@@ -1,150 +1,96 @@
 const Order = require('../models/orderSchema');
 const Product = require('../models/productSchema');
-const Category = require('../models/categorySchema');
+const {getDateRange} = require('../helpers/chart');
 const bestSelling = require('../helpers/topSelling');
 const Admin = require('../models/adminSchema');
 const User = require('../models/userSchema');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
-const getSaleChartData = async (filter) => {
-    let matchStage = {};
-    if (filter === 'monthly') {
-        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) } };
-    } else if (filter === 'weekly') {
-        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } };
-    }
 
-    const orders = await Order.aggregate([
-        { $match: matchStage },
-        {
-            $group: {
-                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                totalSales: { $sum: "$totalAmount" }
-            }
-        },
-        { $sort: { _id: 1 } }
-    ]);
+const ChartCtrl =  async (req, res) => {
+    const { filterType,dateRange, filterDate } = req.query;
 
-    const labels = orders.map(order => order._id);
-    const data = orders.map(order => order.totalSales);
+    console.log(`Received request for filterType=${filterType},dateRange=${dateRange}, filterDate=${filterDate}`);
 
-    return {
-        labels,
-        datasets: [{
-            label: 'Sales',
-            data,
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-        }]
-    };
-};
-
-const getOrderTypeChartData = async (filter) => {
-    let matchStage = {};
-    if (filter === 'monthly') {
-        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) } };
-    } else if (filter === 'weekly') {
-        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } };
-    }
-
-    const orders = await Order.aggregate([
-        { $match: matchStage },
-        {
-            $group: {
-                _id: "$paymentMethod",
-                count: { $sum: 1 }
-            }
+    try {
+        let data;
+        if (filterType === 'products') {
+            data = await getProductOrderAnalysis(dateRange, filterDate);
+        } else {
+            data = await getCategoryOrderAnalysis(dateRange, filterDate);
         }
-    ]);
 
-    const labels = orders.map(order => order._id);
-    const data = orders.map(order => order.count);
-
-    return {
-        labels,
-        datasets: [{
-            label: 'Order Types',
-            data,
-            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-            borderColor: 'rgba(153, 102, 255, 1)',
-            borderWidth: 1
-        }]
-    };
-};
-
-const getCategoryChartData = async (filter) => {
-    let matchStage = {};
-    if (filter === 'monthly') {
-        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) } };
-    } else if (filter === 'weekly') {
-        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } };
+        console.log('Sending data:', data);
+        res.json(data);
+    } catch (error) {
+        console.error('Error processing request:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
+}
 
-    const categories = await Product.aggregate([
-        { $lookup: { from: 'orders', localField: '_id', foreignField: 'items.product', as: 'orders' } },
-        { $unwind: "$orders" },
-        { $match: matchStage },
-        {
-            $group: {
-                _id: "$category",
-                count: { $sum: 1 }
-            }
-        },
-        { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'categoryDetails' } },
-        { $unwind: "$categoryDetails" }
-    ]);
-
-    const labels = categories.map(category => category.categoryDetails.name);
-    const data = categories.map(category => category.count);
-
-    return {
-        labels,
-        datasets: [{
-            label: 'Categories',
-            data,
-            backgroundColor: 'rgba(255, 159, 64, 0.2)',
-            borderColor: 'rgba(255, 159, 64, 1)',
-            borderWidth: 1
-        }]
-    };
-};
-
-const getOrderQuantityChartData = async (filter) => {
-    let matchStage = {};
-    if (filter === 'monthly') {
-        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) } };
-    } else if (filter === 'weekly') {
-        matchStage = { createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } };
-    }
+// Updated function for product order analysis
+async function getProductOrderAnalysis(dateRange, filterDate) {
+    const { startDate, endDate } = getDateRange(dateRange, filterDate);
 
     const orders = await Order.aggregate([
-        { $match: matchStage },
-        { $unwind: "$items" },
-        {
-            $group: {
-                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                totalQuantity: { $sum: "$items.quantity" }
-            }
-        },
-        { $sort: { _id: 1 } }
+        { $match: { createdAt: { $gte: startDate, $lt: endDate } } },
+        { $unwind: '$items' },
+        { $lookup: {
+            from: 'products',
+            localField: 'items.product',
+            foreignField: '_id',
+            as: 'productDetails'
+        }},
+        { $unwind: '$productDetails' },
+        { $group: {
+            _id: '$productDetails.name',
+            totalQuantity: { $sum: '$items.quantity' }
+        }},
+        { $sort: { totalQuantity: -1 } },
+        { $limit: 10 }
     ]);
 
     const labels = orders.map(order => order._id);
     const data = orders.map(order => order.totalQuantity);
 
-    return {
-        labels,
-        datasets: [{
-            label: 'Order Quantity',
-            data,
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-        }]
-    };
-};
+    return { labels, orders: data };
+}
+
+// Updated function for category order analysis
+async function getCategoryOrderAnalysis(dateRange, filterDate) {
+    const { startDate, endDate } = getDateRange(dateRange, filterDate);
+
+    const orders = await Order.aggregate([
+        { $match: { createdAt: { $gte: startDate, $lt: endDate } } },
+        { $unwind: '$items' },
+        { $lookup: {
+            from: 'products',
+            localField: 'items.product',
+            foreignField: '_id',
+            as: 'productDetails'
+        }},
+        { $unwind: '$productDetails' },
+        { $lookup: {
+            from: 'categories',
+            localField: 'productDetails.category',
+            foreignField: '_id',
+            as: 'categoryDetails'
+        }},
+        { $unwind: '$categoryDetails' },
+        { $group: {
+            _id: '$categoryDetails.name',
+            totalQuantity: { $sum: '$items.quantity' }
+        }},
+        { $sort: { totalQuantity: -1 } },
+        { $limit: 10 }
+    ]);
+
+    const labels = orders.map(order => order._id);
+    const data = orders.map(order => order.totalQuantity);
+
+    return { labels, orders: data };
+}
 
 
 
@@ -155,26 +101,6 @@ const getHomePage = async (req, res) => {
             console.log("Redirecting to login");
             return res.redirect('/admin/login');
         }
-
-        const filter = req.query.filter || 'yearly';
-
-        // Fetch chart data based on the filter
-        const saleChartInfo = await getSaleChartData(filter);
-        const orderTypeChartInfo = await getOrderTypeChartData(filter);
-        const categoryChartInfo = await getCategoryChartData(filter);
-        const orderQuantityChartInfo = await getOrderQuantityChartData(filter);
-
-        // If it's an AJAX request, respond with JSON
-        if (req.xhr) {
-            console.log("Sending JSON response for AJAX request");
-            return res.json({
-                saleChartInfo,
-                orderTypeChartInfo,
-                categoryChartInfo,
-                orderQuantityChartInfo
-            });
-        }
-
         // Fetch other data needed for the dashboard rendering
         const totalUsers = await User.countDocuments();
         const totalProducts = await Product.countDocuments();
@@ -192,10 +118,6 @@ const getHomePage = async (req, res) => {
             admin: req.session.admin,
             topCategories: await bestSelling.getTopCategories(),
             bestsellingProducts: await bestSelling.getBestSellingProducts(),
-            saleChartInfo,
-            orderTypeChartInfo,
-            categoryChartInfo,
-            orderQuantityChartInfo,
             totalUsers,
             totalProducts,
             totalOrders,
@@ -388,5 +310,6 @@ module.exports = {
     logoutUser,
     getAllUsers,
     blockUser,
-    unblockUser
+    unblockUser,
+    ChartCtrl
 }

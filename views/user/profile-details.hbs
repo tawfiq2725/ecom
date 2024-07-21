@@ -6,10 +6,10 @@
           <li><a class="active" href="/profile">Profile Details</a></li>
           <li><a href="/address">Address</a></li>
           <li><a href="/wallet">Wallet</a></li>
-          <li><a href="/wishlist">Whislist</a></li>
+          <li><a href="/wishlist">Wishlist</a></li>
           <li><a href="/orders">Orders</a></li>
-           <li><a href="/returns">Returns</a></li>
-                    <li><a href="/referrals">Referrals</a></li> 
+          <li><a href="/returns">Returns</a></li>
+          <li><a href="/referrals">Referrals</a></li>
         </ul>
         <div class="dashboard-wrapper dashboard-user-profile">
           <div class="media">
@@ -70,4 +70,55 @@ document.getElementById('edit-profile-button').addEventListener('click', functio
     document.getElementById('update-profile-button').style.display = 'block';
 });
 
+document.getElementById('profile-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent form submission
+
+    let firstname = document.getElementById('firstname-input').value.trim();
+    let lastname = document.getElementById('lastname-input').value.trim();
+    let email = document.getElementById('email-input').value.trim();
+    let mobile = document.getElementById('mobile-input').value.trim();
+
+    if (firstname === '' || lastname === '' || email === '' || mobile === '') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'All fields are required!',
+        });
+        return;
+    }
+
+    let namePattern = /^[A-Za-z]+$/;
+    if (!namePattern.test(firstname) || !namePattern.test(lastname)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'First name and last name must contain only letters!',
+        });
+        return;
+    }
+
+    let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please enter a valid email address!',
+        });
+        return;
+    }
+
+    let mobilePattern = /^(?!0000000000)\d{10}$/;
+    if (!mobilePattern.test(mobile)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please enter a valid 10-digit phone number!',
+        });
+        return;
+    }
+
+    // If validation passes, submit the form
+    this.submit();
+});
 </script>
+

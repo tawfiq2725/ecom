@@ -34,76 +34,100 @@
         </div>
     </div>
 </section>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let timer = 120; // 2 minutes countdown
-        const timerElement = document.getElementById('timer');
-        const resendButton = document.getElementById('resend-btn');
+   document.addEventListener('DOMContentLoaded', function () {
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const resendButton = document.getElementById('resend-btn');
+    const timerElement = document.getElementById('timer');
+    let timer = 120; // 2 minutes countdown
 
-        const updateTimer = () => {
-            if (timer <= 0) {
-                clearInterval(countdown);
-                resendButton.disabled = false;
-                timerElement.textContent = 'You can now resend the OTP.';
-            } else {
-                timer--;
-                const minutes = Math.floor(timer / 60);
-                const seconds = timer % 60;
-                timerElement.textContent = `Resend OTP in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            }
-        };
-
-        const countdown = setInterval(updateTimer, 1000);
-        updateTimer(); // Initial call to set the timer text immediately
-
-        resendButton.addEventListener('click', function () {
-            fetch('/auth/resend', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email: "{{email}}" })  // Ensure the email is correctly passed
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    resendButton.disabled = true;
-                    timer = 120;  // Reset timer for 2 minutes
-                    clearInterval(countdown);
-                    setInterval(updateTimer, 1000);
-                } else {
-                    alert('Failed to resend OTP. Please try again.');
-                }
-            });
-        });
-
-        // OTP input fields logic
-        const otpInputs = document.querySelectorAll('.otp-input');
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('input', function() {
-                if (this.value.length === 1) {
-                    if (index < otpInputs.length - 1) {
-                        otpInputs[index + 1].focus();
-                    } else {
-                        otpInputs[index].blur();
-                    }
-                }
-                updateHiddenOTP();
-            });
-
-            input.addEventListener('keydown', function(event) {
-                if (event.key === 'Backspace' && this.value.length === 0 && index > 0) {
-                    otpInputs[index - 1].focus();
-                }
-            });
-        });
-
-        function updateHiddenOTP() {
-            const otpHiddenInput = document.getElementById('otpHidden');
-            otpHiddenInput.value = Array.from(otpInputs).map(input => input.value).join('');
+    const updateTimer = () => {
+        if (timer <= 0) {
+            clearInterval(countdown);
+            resendButton.disabled = false;
+            timerElement.textContent = 'You can now resend the OTP.';
+        } else {
+            timer--;
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+            timerElement.textContent = `Resend OTP in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
+    };
+
+    let countdown = setInterval(updateTimer, 1000);
+    updateTimer();
+
+    resendButton.addEventListener('click', function () {
+        fetch('/auth/resend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: "{{email}}" })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                resendButton.disabled = true;
+                timer = 120;
+                clearInterval(countdown);
+                countdown = setInterval(updateTimer, 1000);
+            } else {
+                Swal.fire('Failed', 'Failed to resend OTP. Please try again.', 'error');
+            }
+        });
     });
+
+    otpInputs.forEach((input, index) => {
+        input.addEventListener('input', function() {
+            if (this.value.length === 1 && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            } else if (index === otpInputs.length - 1) {
+                otpInputs[index].blur();
+            }
+            updateHiddenOTP();
+        });
+
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+    });
+
+    function updateHiddenOTP() {
+        const otpHiddenInput = document.getElementById('otpHidden');
+        otpHiddenInput.value = Array.from(otpInputs).map(input => input.value).join('');
+    }
+
+    document.getElementById('otpForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const otpHiddenInput = document.getElementById('otpHidden').value;
+
+        fetch('/auth/verify-otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ otp: otpHiddenInput })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success_msg) {
+                Swal.fire('Success', data.success_msg, 'success').then(() => {
+                    window.location.href = '/login'; // Redirect to login page
+                });
+            } else {
+                Swal.fire('Error', data.error_msg || 'An error occurred. Please try again.', 'error');
+            }
+        })
+        .catch(error => {
+            Swal.fire('Error', 'An error occurred. Please try again.', 'error');
+        });
+    });
+});
+
 </script>
 
 <style>

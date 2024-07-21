@@ -12,7 +12,6 @@ const passport = require('../config/passport-config');
 const multer = require('multer');
 const upload = multer();
 const { checkProductExists } = require('../middlewares/auth'); // Correct import
-
 // User Routes
 router.get('/pageNotFound', userController.pageNotFound);
 router.get('/', userController.getHomePage);
