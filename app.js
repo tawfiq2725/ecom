@@ -45,7 +45,6 @@ app.use(passport.session());
 
 // Flash
 app.use(flash());
-
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
@@ -54,14 +53,10 @@ app.use((req, res, next) => {
     res.locals.admin = req.session.admin || null;
     next();
 });
-
 // Register Handlebars helpers
 Handlebars.registerHelper('eq', function (a, b) {
     return a === b;
 });
-
-
-
 Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
     switch (operator) {
         case '==':
@@ -88,19 +83,15 @@ Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
             return options.inverse(this);
     }
 });
-
 Handlebars.registerHelper('or', function (v1, v2) {
     return v1 || v2;
 });
-
 Handlebars.registerHelper('add', function (a, b) {
     return a + b;
 });
-
 Handlebars.registerHelper('subtract', function (a, b) {
     return a - b;
 });
-
 Handlebars.registerHelper('range', function(start, end) {
     const range = [];
     for (let i = start; i <= end; i++) {
@@ -108,25 +99,20 @@ Handlebars.registerHelper('range', function(start, end) {
     }
     return range;
 });
-
 Handlebars.registerHelper('gt', function(a, b) {
     return a > b;
 });
-
 Handlebars.registerHelper('lt', function(a, b) {
     return a < b;
 });
-
 // Register the 'multiply' helper
 Handlebars.registerHelper('multiply', function (a, b) {
     return a * b;
 });
-
 // Define the 'toJson' helper to stringify JSON
 Handlebars.registerHelper('json', function (context) {
     return JSON.stringify(context);
 });
-
 Handlebars.registerHelper('getMaxStock', function (variants) {
     let maxStock = 0;
     variants.forEach(variant => {
@@ -136,7 +122,6 @@ Handlebars.registerHelper('getMaxStock', function (variants) {
     });
     return maxStock;
 });
-
 Handlebars.registerHelper('formatDate', function (date) {
     return new Date(date).toLocaleDateString('en-GB', {
         day: 'numeric', 
