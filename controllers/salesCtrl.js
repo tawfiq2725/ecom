@@ -1,8 +1,8 @@
 const Order = require('../models/orderSchema');
 const moment = require('moment');
 const ExcelJS = require('exceljs');
-const puppeteer = require('puppeteer-core');
-const fs = require('fs');
+const PDFDocument = require('pdfkit');
+const stream = require('stream');
 
 const getSalesReportPage = async (req, res) => {
     if (!req.session.admin) {
@@ -59,23 +59,6 @@ const calculateReportDetails = (orders) => {
 };
 
 const generateHTMLContent = (orders, reportDetails, fromDate, toDate) => {
-    const styles = `
-        <style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            th, td {
-                border: 1px solid #dddddd;
-                text-align: left;
-                padding: 8px;
-            }
-            th {
-                background-color: #f2f2f2;
-            }
-        </style>
-    `;
-
     const formattedFromDate = fromDate ? moment(fromDate).format('YYYY-MM-DD') : 'N/A';
     const formattedToDate = toDate ? moment(toDate).format('YYYY-MM-DD') : 'N/A';
 
@@ -125,9 +108,8 @@ const generateHTMLContent = (orders, reportDetails, fromDate, toDate) => {
 
     const table = `<table>${tableHeaders}${tableRows}</table>`;
 
-    return `<html><head>${styles}</head><body>${header}${table}</body></html>`;
+    return `<html><head></head><body>${header}${table}</body></html>`;
 };
-
 
 const downloadSalesReport = async (req, res) => {
     const { type, fromDate, toDate, format } = req.body;
@@ -204,25 +186,47 @@ const downloadSalesReport = async (req, res) => {
     } else if (format === 'pdf') {
         const htmlContent = generateHTMLContent(orders, reportDetails, fromDate, toDate);
 
-        const browser = await puppeteer.launch({
-            executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'  // Update this path as needed
+        const doc = new PDFDocument();
+        let buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => {
+            let pdfData = Buffer.concat(buffers);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=SalesReport.pdf');
+            res.send(pdfData);
         });
-        const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-        const pdfBuffer = await page.pdf({ format: 'A3', printBackground: true });
+        doc.fontSize(20).text('HOSSOM SHIRTS', { align: 'center' });
+        doc.fontSize(12).text(`From Date: ${formattedFromDate}`);
+        doc.fontSize(12).text(`To Date: ${formattedToDate}`);
+        doc.fontSize(18).text('Sales Report');
+        doc.fontSize(12).text(`Total Orders: ${reportDetails.totalOrders}`);
+        doc.fontSize(12).text(`Total Amount: ₹${reportDetails.totalAmount}`);
+        doc.fontSize(12).text(`Total Discount: ₹${reportDetails.totalDiscount}`);
+        
+        doc.moveDown();
+        
+        orders.forEach(order => {
+            doc.fontSize(10).text(`Order ID: ${order._id}`);
+            doc.fontSize(10).text(`Order Date: ${moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss')}`);
+            doc.fontSize(10).text(`User: ${order.user.firstname} ${order.user.lastname}`);
+            doc.fontSize(10).text(`Products: ${order.items.map(item => `${item.product.name} - ${item.quantity} x ${item.size} - ₹${item.price}`).join(', ')}`);
+            doc.fontSize(10).text(`Shipping Address: ${order.address.houseNumber}, ${order.address.street}, ${order.address.city}, ${order.address.zipcode}, ${order.address.country}`);
+            doc.fontSize(10).text(`Payment Method: ${order.paymentMethod}`);
+            doc.fontSize(10).text(`Status: ${order.orderStatus}`);
+            doc.fontSize(10).text(`Total Amount: ₹${order.totalAmount}`);
+            doc.fontSize(10).text(`Coupon: ${order.coupon ? order.coupon.code : ''}`);
+            doc.fontSize(10).text(`Coupon Discount: ₹${order.coupon ? order.coupon.discountAmount : 0}`);
+            doc.fontSize(10).text(`Payable: ₹${order.totalAmount - (order.coupon ? order.coupon.discountAmount : 0)}`);
+            doc.fontSize(10).text(`Category Discount: ₹${order.discountAmount}`);
+            doc.moveDown();
+        });
 
-        await browser.close();
-
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=SalesReport.pdf');
-        res.send(pdfBuffer);
+        doc.end();
     } else {
         res.status(400).send('Invalid format');
     }
 };
-
-
 
 module.exports = {
     getSalesReportPage,

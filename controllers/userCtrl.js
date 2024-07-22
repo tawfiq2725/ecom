@@ -425,7 +425,34 @@ const getCart = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+const checkCart = async (req, res) => {
+    try {
+        const { productId, variantSize } = req.body;
+        const userId = req.session.user._id;
 
+        if (!productId || !variantSize) {
+            return res.status(400).json({ success: false, message: "Missing required fields" });
+        }
+
+        let cart = await Cart.findOne({ user: userId });
+        if (!cart) {
+            return res.json({ success: true, inCart: false });
+        }
+
+        const existingCartItem = cart.items.find(
+            item => item.product.toString() === productId && item.size === variantSize
+        );
+
+        if (existingCartItem) {
+            res.json({ success: true, inCart: true });
+        } else {
+            res.json({ success: true, inCart: false });
+        }
+    } catch (error) {
+        console.error('Error checking cart:', error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
 const addToCart = async (req, res) => {
     try {
         const { productId, variantSize, quantity } = req.body;
@@ -614,6 +641,7 @@ module.exports = {
     logoutUser,
     gotoProfile,
     updateProfile,
+    checkCart,
     addToCart,
     getCart,
     removeFromCart,

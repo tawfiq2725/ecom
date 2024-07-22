@@ -1,5 +1,4 @@
 const User = require('../models/userSchema');
-const Admin = require('../models/adminSchema');
 const Product = require('../models/productSchema');
 const mongoose = require('mongoose');
 const checkUserStatus = async (req, res, next) => {
@@ -20,7 +19,7 @@ const checkUserStatus = async (req, res, next) => {
                 }
             }
             else if (req.session.admin) {
-                const admin = await Admin.findById(req.session.admin._id);
+                const admin = await User.findById(req.session.admin._id);
                 if (admin && admin.isAdmin) {
                     // If admin is logged in, allow access
                     next();

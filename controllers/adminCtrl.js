@@ -2,7 +2,6 @@ const Order = require('../models/orderSchema');
 const Product = require('../models/productSchema');
 const {getDateRange} = require('../helpers/chart');
 const bestSelling = require('../helpers/topSelling');
-const Admin = require('../models/adminSchema');
 const User = require('../models/userSchema');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
@@ -187,14 +186,14 @@ const newUserRegistration = async (req, res) => {
         }
 
         // Check if the user already exists
-        const findAdmin = await Admin.findOne({ email });
+        const findAdmin = await User.findOne({ email });
         if (findAdmin) {
             return res.render("admin/signup", { error_msg: "Admin with this email already exists.", firstname, lastname, email, mobile, layout: 'adminlayout' });
         }
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         // Create and save the new user
-        const newAdmin = new Admin({
+        const newAdmin = new User({
             firstname: firstname,
             lastname: lastname,
             mobile: mobile,
@@ -217,7 +216,7 @@ const loginUser = async (req, res) => {
         const { email, password } = req.body;
 
         // Find user by email
-        const admin = await Admin.findOne({ email });
+        const admin = await User.findOne({ email });
         if (!admin) {
             return res.render("admin/login", { message: "Invalid email or password.", layout: 'adminlayout' });
         }

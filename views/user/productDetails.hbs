@@ -171,10 +171,6 @@
         </ul>
     </div>
 
-    <!-- Availability message -->
-    <p class="{{#if product.displayStatus}}text-success{{else}}text-danger{{/if}}">
-        This product is {{product.displayStatus}}.
-    </p>
 
     <button type="submit" class="btn btn-main mt-20" id="add-to-cart">Add To Cart</button>
 </form>
@@ -328,7 +324,6 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 <script>
@@ -381,31 +376,50 @@
                 });
             } else {
                 try {
-                    const response = await fetch('/add-to-cart', {
+                    // Check if product is already in the cart
+                    const cartResponse = await fetch('/check-cart', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ productId, variantSize, quantity }),
+                        body: JSON.stringify({ productId, variantSize }),
                     });
 
-                    const result = await response.json();
-                    if (result.success) {
+                    const cartResult = await cartResponse.json();
+                    if (cartResult.inCart) {
                         Swal.fire({
-                            title: 'Success!',
-                            text: result.message,
-                            icon: 'success',
-                            confirmButtonText: 'Continue Shopping',
-                        }).then(() => {
-                            // Optional: Code to update cart UI or redirect user
+                            icon: 'info',
+                            title: 'Already in Cart',
+                            text: 'This product is already in your cart. You can update the quantity in the cart.',
                         });
                     } else {
-                        Swal.fire({
-                            title: 'Oops!',
-                            text: result.message,
-                            icon: 'error',
-                            confirmButtonText: 'Try Again',
+                        // Add product to cart
+                        const response = await fetch('/add-to-cart', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ productId, variantSize, quantity }),
                         });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: result.message,
+                                icon: 'success',
+                                confirmButtonText: 'Continue Shopping',
+                            }).then(() => {
+                                // Optional: Code to update cart UI or redirect user
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Oops!',
+                                text: result.message,
+                                icon: 'error',
+                                confirmButtonText: 'Try Again',
+                            });
+                        }
                     }
                 } catch (error) {
                     console.error('Error adding product to cart:', error);

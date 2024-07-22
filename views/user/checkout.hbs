@@ -328,8 +328,17 @@ document.addEventListener('DOMContentLoaded', function () {
        document.querySelector('form.checkout-form').addEventListener('submit', function (event) {
         event.preventDefault();
 
-        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
         const selectedAddressRadio = document.querySelector('input[name="addressId"]:checked');
+        if (!selectedAddressRadio) {
+            Swal.fire({
+                title: 'Address Required',
+                text: 'Please select a billing address before placing the order.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
         const selectedAddressLabel = selectedAddressRadio.nextElementSibling.textContent.split(',');
 
         const addressDetails = {

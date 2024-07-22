@@ -19,26 +19,26 @@
                         <h4 class="card-title">Add Coupon</h4>
                     </div>
                     <div class="card-body">
-                        <form action="/admin/coupon/add" method="POST">
+                        <form id="addCouponForm" action="/admin/coupon/add" method="POST">
                             <div class="form-group">
                                 <label>Coupon Code</label>
-                                <input type="text" name="code" class="form-control" required>
+                                <input type="text" id="code" name="code" class="form-control" >
                             </div>
                             <div class="form-group">
                                 <label>Minimum Purchase Amount</label>
-                                <input type="number" name="minPurchaseAmount" class="form-control" required>
+                                <input type="number" id="minPurchaseAmount" name="minPurchaseAmount" class="form-control" >
                             </div>
                             <div class="form-group">
                                 <label>Discount Rate (%)</label>
-                                <input type="number" name="discountRate" class="form-control" required>
+                                <input type="number" id="discountRate" name="discountRate" class="form-control" >
                             </div>
                             <div class="form-group">
                                 <label>Maximum Discount</label>
-                                <input type="number" name="maxDiscount" class="form-control" required>
+                                <input type="number" id="maxDiscount" name="maxDiscount" class="form-control" >
                             </div>
                             <div class="form-group">
                                 <label>Expiry Date</label>
-                                <input type="date" name="expiryDate" class="form-control" required>
+                                <input type="date" id="expiryDate" name="expiryDate" class="form-control" >
                             </div>
                             <button type="submit" class="btn btn-primary">Add Coupon</button>
                         </form>
@@ -48,3 +48,63 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('addCouponForm').addEventListener('submit', function(event) {
+        let isValid = true;
+
+        // Clear previous error messages
+        document.querySelectorAll('.error-message').forEach(function(element) {
+            element.remove();
+        });
+
+        // Validate Coupon Code
+        const code = document.getElementById('code').value;
+        if (code.trim() === '') {
+            isValid = false;
+            showError('code', 'Coupon Code is required.');
+        }
+
+        // Validate Minimum Purchase Amount
+        const minPurchaseAmount = document.getElementById('minPurchaseAmount').value;
+        if (minPurchaseAmount <= 0) {
+            isValid = false;
+            showError('minPurchaseAmount', 'Minimum Purchase Amount must be greater than 0.');
+        }
+
+        // Validate Discount Rate
+        const discountRate = document.getElementById('discountRate').value;
+        if (discountRate <= 0 || discountRate > 100) {
+            isValid = false;
+            showError('discountRate', 'Discount Rate must be between 1 and 100.');
+        }
+
+        // Validate Maximum Discount
+        const maxDiscount = document.getElementById('maxDiscount').value;
+        if (maxDiscount <= 0) {
+            isValid = false;
+            showError('maxDiscount', 'Maximum Discount must be greater than 0.');
+        }
+
+        // Validate Expiry Date
+        const expiryDate = document.getElementById('expiryDate').value;
+        if (new Date(expiryDate) <= new Date()) {
+            isValid = false;
+            showError('expiryDate', 'Expiry Date must be a future date.');
+        }
+
+        // Prevent form submission if validation fails
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+
+    function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        const errorMessage = document.createElement('div');
+        errorMessage.classList.add('error-message');
+        errorMessage.style.color = 'red';
+        errorMessage.textContent = message;
+        element.parentNode.appendChild(errorMessage);
+    }
+</script>

@@ -247,7 +247,7 @@ const createRazorpayOrder = async (req, res) => {
         });
 
         await order.save();
-
+        console.log(order.razorpayOrderId +"The id generated")
 
 
         res.json({
@@ -284,7 +284,7 @@ const confirmRazorpayPayment = async (req, res) => {
         order.orderStatus = 'Pending';
         await order.save();
 
-        const cart = await Cart.findOne({ user: order.user }).populate('items.product');
+        const cart = await Cart.findOne({ user: userId }).populate('items.product');
         if (!cart) {
             console.log('Cart not found'); // Debug log
             return res.status(404).json({ success: false, message: 'Cart not found' });
@@ -348,7 +348,9 @@ const verifyRazorpayPayment = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid signature' });
         }
 
+        console.log('verifyRazorpayPayment called with:', razorpay_order_id); // Debug log
         const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
+        console.log('Order found:', order); // Debug log to confirm order find
         if (!order) {
             console.log('Order not found'); // Debug log
             return res.status(404).json({ success: false, message: 'Order not found' });
@@ -365,6 +367,7 @@ const verifyRazorpayPayment = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
 
 
 const orderConfirm = async (req, res) => {

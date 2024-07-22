@@ -3,6 +3,7 @@ const Category = require('../models/categorySchema');
 const Return = require('../models/returnSchema')
 const Order = require('../models/orderSchema')
 const Wallet = require('../models/walletSchema')
+const Transaction = require('../models/transactionSchema')
 // Get All Products
 const getProducts = async (req, res) => {
     try {
@@ -274,13 +275,18 @@ const updateReturnStatus = async (req, res) => {
                 });
             }
 
-            // Update the wallet balance and log the transaction
-            wallet.balance += returnAmount;
-            wallet.transactions.push({
-                type: 'Credit',
+            // Create a transaction document
+            const transaction = new Transaction({
+                userId: user._id,
+                type: 'credit',
                 amount: returnAmount,
                 description: `Return approved for order ${returnRequest.order._id}`
             });
+            await transaction.save();
+
+            // Update the wallet balance and log the transaction
+            wallet.balance += returnAmount;
+            wallet.transactions.push(transaction._id);
             await wallet.save();
 
             console.log(`Updated wallet balance: ${wallet.balance}`);
