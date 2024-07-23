@@ -13,7 +13,6 @@ const userSchema = new Schema({
     mobile: {
         type: String,
         required: false,
-        unique: true,
     },
     email: {
         type: String,
