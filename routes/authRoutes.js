@@ -69,7 +69,7 @@ router.post('/cart/update/:productId', userController.updateCartQuantity);
 router.get('/api/product/:productId/variant/:size', userController.getProductVariant);
 
 // Product Page
-router.get('/products',checkProductExists, usersideCtrl.getProducts);
+router.get('/products', usersideCtrl.getProducts);
 router.get('/products/:id', checkProductExists, usersideCtrl.getProductDetails); // Apply middleware here
 
 // Order Management
