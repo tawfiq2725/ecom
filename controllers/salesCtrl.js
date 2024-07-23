@@ -142,6 +142,9 @@ const downloadSalesReport = async (req, res) => {
 
     const reportDetails = calculateReportDetails(orders);
 
+    const formattedFromDate = fromDate ? moment(fromDate).format('YYYY-MM-DD') : 'N/A';
+    const formattedToDate = toDate ? moment(toDate).format('YYYY-MM-DD') : 'N/A';
+
     if (format === 'excel') {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
@@ -227,6 +230,7 @@ const downloadSalesReport = async (req, res) => {
         res.status(400).send('Invalid format');
     }
 };
+
 
 module.exports = {
     getSalesReportPage,

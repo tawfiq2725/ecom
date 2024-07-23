@@ -55,7 +55,7 @@ const getProducts = async (req, res) => {
         const totalPages = Math.ceil(totalProducts / limit);
 
         const productsWithOffers = products.map(product => {
-            const categoryOffer = product.category.offerRate || 0;
+            const categoryOffer = product.category.offerIsActive ? product.category.offerRate : 0;
             const productOffer = product.discount || 0;
             const effectiveOffer = Math.max(categoryOffer, productOffer);
             const effectivePrice = product.price - (product.price * (effectiveOffer / 100));
@@ -92,7 +92,7 @@ const getProductDetails = async (req, res) => {
         const productId = req.params.id;
         const product = await Product.findById(productId).populate('category');
 
-        const categoryOffer = product.category.offerRate || 0;
+        const categoryOffer = product.category.offerIsActive ? product.category.offerRate : 0;
         const productOffer = product.discount || 0;
         const effectiveOffer = Math.max(categoryOffer, productOffer);
         const effectivePrice = product.price - (product.price * (effectiveOffer / 100));
@@ -114,7 +114,7 @@ const getProductDetails = async (req, res) => {
         }
 
         const relatedProductsWithOffers = relatedProducts.map(relatedProduct => {
-            const categoryOffer = relatedProduct.category.offerRate || 0;
+            const categoryOffer = relatedProduct.category.offerIsActive ? relatedProduct.category.offerRate : 0;
             const productOffer = relatedProduct.discount || 0;
             const effectiveOffer = Math.max(categoryOffer, productOffer);
             const effectivePrice = relatedProduct.price - (relatedProduct.price * (effectiveOffer / 100));
@@ -140,6 +140,7 @@ const getProductDetails = async (req, res) => {
         res.status(500).send("Server Error");
     }
 };
+
 
 
 

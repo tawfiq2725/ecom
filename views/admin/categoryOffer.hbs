@@ -108,8 +108,9 @@
         });
 
         $('.activate-offer').on('click', function () {
-            var categoryId = $(this).data('id');
-            var isActive = $(this).data('active');
+            var button = $(this);
+            var categoryId = button.data('id');
+            var isActive = button.data('active');
             var action = isActive ? 'deactivate' : 'activate';
 
             Swal.fire({
@@ -125,13 +126,15 @@
                     $.ajax({
                         url: '/admin/category/offers/activate',
                         method: 'POST',
-                        data: { categoryId: categoryId, isActive: !isActive },
+                        data: { categoryId: categoryId },
                         success: function (response) {
                             Swal.fire({
                                 title: `${action.charAt(0).toUpperCase() + action.slice(1)}d!`,
                                 text: response.message,
                                 icon: 'success'
                             }).then(() => {
+                                button.data('active', !isActive);
+                                button.text(isActive ? 'Activate' : 'Deactivate');
                                 window.location.reload();
                             });
                         }
@@ -141,3 +144,4 @@
         });
     });
 </script>
+

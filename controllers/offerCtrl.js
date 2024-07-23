@@ -48,46 +48,54 @@ const addOrEditOffer = async (req, res) => {
 const activateOffer = async (req, res) => {
     try {
         if (!req.session.admin) {
-            res.redirect('/admin/login')
+            return res.redirect('/admin/login');
         }
-        const { categoryId, isActive } = req.body;
+        
+        const { categoryId } = req.body;
         const category = await Category.findById(categoryId);
-        category.offerIsActive = isActive;
-        await category.save();
-        res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully`,layout:'adminlayout'});
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Something went wrong"
-        })
-        console.log("Error Occurred: " + error)
-    }
-}
 
+        if (!category) {
+            return res.status(404).json({ success: false, message: "Category not found" });
+        }
+
+        // Toggle offerIsActive status
+        const newStatus = !category.offerIsActive;
+        category.offerIsActive = newStatus;
+        await category.save();
+
+        return res.json({ success: true, message: `Offer ${newStatus ? 'activated' : 'deactivated'} successfully` });
+    } catch (error) {
+        console.error("Error Occurred:", error);
+        return res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+};
+
+
+// Inside your controller file
 const gotoProductOffer = async (req, res) => {
     try {
         if (!req.session.admin) {
-            res.redirect('/admin/login')
+            return res.redirect('/admin/login');
         }
-        const products = await Product.find()
+        const products = await Product.find();
         res.render('admin/productOffers', {
             title: "Product Offer Management",
             products,
             layout: 'adminlayout'
-        })
+        });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Something went wrong"
-        })
-        console.log("Error Occurred: " + error)
+        });
+        console.log("Error Occurred: " + error);
     }
-}
+};
 
 const ProductaddOrEditOffer = async (req, res) => {
     try {
         if (!req.session.admin) {
-            res.redirect('/admin/login')
+            return res.redirect('/admin/login');
         }
         const { offerRate, productId } = req.body;
         if (offerRate >= 95) {
@@ -104,29 +112,36 @@ const ProductaddOrEditOffer = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Something went wrong"
-        })
-        console.log("Error Occurred: " + error)
+        });
+        console.log("Error Occurred: " + error);
     }
-}
+};
 
 const ProductactivateOffer = async (req, res) => {
     try {
         if (!req.session.admin) {
-            res.redirect('/admin/login')
+            return res.redirect('/admin/login');
         }
+
         const { productId, isActive } = req.body;
         const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        // Set the offerIsActive status
         product.offerIsActive = isActive;
         await product.save();
-        res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully`,layout:'adminlayout'});
+
+        return res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully` });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Something went wrong"
-        });
-        console.log("Error Occurred: " + error);
+        console.error("Error Occurred:", error);
+        return res.status(500).json({ success: false, message: "Something went wrong" });
     }
-}
+};
+
+
 
 module.exports = {
     gotoCategoryOffer,
