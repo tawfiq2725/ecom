@@ -38,14 +38,14 @@
                 <tr>
                     <td>{{this.name}}</td>
                     <td><img src="/uploads/products/{{this.mainImage}}" alt="{{this.name}}" style="width: 100px;"></td>
-                    <td>{{#if this.offerIsActive}}Listed{{else}}Not Listed{{/if}}</td>
+                    <td>{{#if this.offerStatus}}Listed{{else}}Not Listed{{/if}}</td>
                     <td>{{this.price}}</td>
                     <td>{{this.discount}}%</td>
                     <td>₹{{this.offerPrice}}</td>
                     <td>
                         <button class="btn btn-warning activate-offer" data-id="{{this._id}}"
-                            data-active="{{this.offerIsActive}}">
-                            {{#if this.offerIsActive}}Deactivate{{else}}Activate{{/if}}
+                            data-active="{{this.offerStatus}}">
+                            {{#if this.offerStatus}}Deactivate{{else}}Activate{{/if}}
                         </button>
                     </td>
                     <td>
