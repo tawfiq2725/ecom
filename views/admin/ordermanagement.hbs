@@ -36,26 +36,25 @@
                                     {{#each orders}}
                                     <tr>
                                         <td>{{this._id}}</td>
-                                        <td>{{this.user.firstname}} {{this.user.lastname}}</td> <!-- Combine first and last names -->
+                                        <td>{{this.user.firstname}} {{this.user.lastname}}</td>
                                         <td>{{this.address.houseNumber}},{{this.address.street}}, {{this.address.city}}, {{this.address.zipcode}}, {{this.address.country}}</td>
                                         <td>{{formatDate this.createdAt}}</td>
                                         <td>{{this.paymentMethod}}</td>
                                         <td>₹{{this.totalAmount}}</td>
                                         <td>{{this.orderStatus}}</td>
                                         <td>
-    <select class="form-control change-status" data-id="{{this._id}}" data-current-status="{{this.orderStatus}}">
-        <option value="Pending" {{#if (eq this.orderStatus "Pending")}}selected{{else}}disabled{{/if}}>Pending</option>
-        <option value="Processing" {{#if (eq this.orderStatus "Processing")}}selected{{else if (eq this.orderStatus "Pending")}}{{else}}disabled{{/if}}>Processing</option>
-        <option value="Shipped" {{#if (eq this.orderStatus "Shipped")}}selected{{else if (eq this.orderStatus "Processing")}}{{else}}disabled{{/if}}>Shipped</option>
-        <option value="Delivered" {{#if (eq this.orderStatus "Delivered")}}selected{{else if (eq this.orderStatus "Shipped")}}{{else}}disabled{{/if}}>Delivered</option>
-        <option value="Cancelled" {{#if (eq this.orderStatus "Cancelled")}}selected{{else}}disabled{{/if}}>Cancelled</option>
-    </select>
-</td>
+                                            <select class="form-control change-status" data-id="{{this._id}}" data-current-status="{{this.orderStatus}}">
+                                                <option value="Pending" {{#if (eq this.orderStatus "Pending")}}selected{{else}}disabled{{/if}}>Pending</option>
+                                                <option value="Processing" {{#if (eq this.orderStatus "Processing")}}selected{{else if (eq this.orderStatus "Pending")}}{{else}}disabled{{/if}}>Processing</option>
+                                                <option value="Shipped" {{#if (eq this.orderStatus "Shipped")}}selected{{else if (eq this.orderStatus "Processing")}}{{else}}disabled{{/if}}>Shipped</option>
+                                                <option value="Delivered" {{#if (eq this.orderStatus "Delivered")}}selected{{else if (eq this.orderStatus "Shipped")}}{{else}}disabled{{/if}}>Delivered</option>
+                                                <option value="Cancelled" {{#if (eq this.orderStatus "Cancelled")}}selected{{else}}disabled{{/if}}>Cancelled</option>
+                                            </select>
+                                        </td>
                                     </tr>
                                     {{/each}}
                                 </tbody>
                             </table>
-                           
                         </div>
                     </div>
                 </div>
@@ -74,7 +73,8 @@
         "searching": true,
         "info": true,
         "lengthChange": false,
-        "pageLength": 15
+        "pageLength": 15,
+        "order": [[3, "desc"]]  // Order by the fourth column (Date) in descending order
     });
 
     // Use event delegation to handle change event

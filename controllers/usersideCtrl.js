@@ -87,10 +87,20 @@ const getProducts = async (req, res) => {
 
 
 
+
 const getProductDetails = async (req, res) => {
     try {
         const productId = req.params.id;
-        const product = await Product.findById(productId).populate('category');
+
+        // Fetch the main product and ensure it is listed
+        const product = await Product.findOne({ _id: productId, status: true }).populate('category');
+
+        if (!product) {
+            return res.status(404).render('user/productNotFound', {
+                title: "Product Not Found",
+                admin: req.session.admin
+            });
+        }
 
         const categoryOffer = product.category.offerIsActive ? product.category.offerRate : 0;
         const productOffer = product.discount || 0;
@@ -104,13 +114,18 @@ const getProductDetails = async (req, res) => {
             product.displayStatus = 'Available';
         }
 
+        // Fetch related products and ensure they are listed
         let relatedProducts = await Product.find({
             category: product.category._id,
-            _id: { $ne: product._id }
+            _id: { $ne: product._id },
+            status: true // Ensure related products are listed
         }).limit(4);
 
         if (relatedProducts.length === 0) {
-            relatedProducts = await Product.find({ _id: { $ne: product._id } }).limit(4);
+            relatedProducts = await Product.find({
+                _id: { $ne: product._id },
+                status: true // Ensure fallback related products are listed
+            }).limit(4);
         }
 
         const relatedProductsWithOffers = relatedProducts.map(relatedProduct => {
@@ -140,7 +155,6 @@ const getProductDetails = async (req, res) => {
         res.status(500).send("Server Error");
     }
 };
-
 
 
 

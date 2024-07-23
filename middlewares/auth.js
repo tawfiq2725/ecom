@@ -68,6 +68,12 @@ const checkProductExists = async (req, res, next) => {
                 admin: req.session.admin
             });
         }
+        if(!product.status){
+            return res.status(404).render('user/productNotFound', {
+                title: "Product Not Found",
+            });
+        }
+
 
         req.product = product;
         next();

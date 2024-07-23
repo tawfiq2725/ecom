@@ -12,6 +12,8 @@ const passport = require('../config/passport-config');
 const multer = require('multer');
 const upload = multer();
 const { checkProductExists } = require('../middlewares/auth'); // Correct import
+
+
 // User Routes
 router.get('/pageNotFound', userController.pageNotFound);
 router.get('/', userController.getHomePage);
@@ -67,7 +69,7 @@ router.post('/cart/update/:productId', userController.updateCartQuantity);
 router.get('/api/product/:productId/variant/:size', userController.getProductVariant);
 
 // Product Page
-router.get('/products', usersideCtrl.getProducts);
+router.get('/products',checkProductExists, usersideCtrl.getProducts);
 router.get('/products/:id', checkProductExists, usersideCtrl.getProductDetails); // Apply middleware here
 
 // Order Management
