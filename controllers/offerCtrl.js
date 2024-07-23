@@ -131,7 +131,7 @@ const ProductactivateOffer = async (req, res) => {
         }
 
         // Set the offerIsActive status
-        product.offerIsActive = isActive;
+        product.offerStatus = isActive;
         await product.save();
 
         return res.json({ success: true, message: `Offer ${isActive ? 'activated' : 'deactivated'} successfully` });
