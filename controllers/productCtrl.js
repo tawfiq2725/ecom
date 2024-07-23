@@ -260,6 +260,7 @@ const updateReturnStatus = async (req, res) => {
         if (status === 'Approved' && returnRequest.status !== 'Approved') {
             const user = returnRequest.user;
             const returnAmount = returnRequest.order.totalAmount;
+            const productId = returnRequest.order.productId; // Assuming productId is stored in the order
 
             console.log(`Attempting to add return amount: ${returnAmount} to user: ${user.fullName}`);
 
@@ -290,6 +291,16 @@ const updateReturnStatus = async (req, res) => {
             await wallet.save();
 
             console.log(`Updated wallet balance: ${wallet.balance}`);
+
+            // Update product stock
+            const product = await Product.findById(productId);
+            if (product) {
+                product.stock += returnRequest.order.quantity; // Assuming quantity is stored in the order
+                await product.save();
+                console.log(`Updated product stock: ${product.stock}`);
+            } else {
+                console.log(`Product not found for order ${returnRequest.order._id}`);
+            }
         }
 
         // Update the return request status
