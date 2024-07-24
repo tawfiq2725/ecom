@@ -31,7 +31,7 @@
                                     <td>#{{this._id}}</td>
                                     <td>{{formatDate this.createdAt}}</td>
                                     <td>{{this.items.length}}</td>
-                                    <td>${{this.totalAmount}}</td>
+                                    <td>₹{{this.totalAmount}}</td>
                                     <td><span class="label label-{{this.orderStatus}} btn btn-primary">{{this.orderStatus}}</span></td>
                                     <td>
                                         {{#if (or (eq this.paymentMethod 'Wallet') (eq this.paymentMethod 'Razorpay') (eq this.orderStatus 'Delivered'))}}

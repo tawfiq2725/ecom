@@ -31,7 +31,7 @@
                                     <td>{{order.items.length}}</td>
                                     <td>{{#if order.coupon.code}}<p>{{order.coupon.code}}</p>{{/if}}</td>
                                     <td><p>{{#if order.coupon.code}}{{order.coupon.discountAmount}}{{/if}}</p></td>
-                                    <td>${{order.totalAmount}}</td>
+                                    <td>₹{{order.totalAmount}}</td>
                                     <td><span class="label label-{{order.orderStatus}} btn btn-primary">{{order.orderStatus}}</span></td>
                                 </tr>
                             </tbody>
@@ -53,8 +53,8 @@
                                     <td>{{this.product.name}}</td>
                                     <td>{{this.quantity}}</td>
                                     <td>{{this.size}}</td>
-                                    <td>${{this.price}}</td>
-                                    <td>${{multiply this.quantity this.price}}</td>
+                                    <td>₹{{this.price}}</td>
+                                    <td>₹{{multiply this.quantity this.price}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
