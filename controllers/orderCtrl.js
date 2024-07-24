@@ -627,17 +627,6 @@ const cancelOrder = async (req, res) => {
             await transaction.save();
             wallet.transactions.push(transaction._id);
             await wallet.save();
-
-            // Update product stock
-            const product = await Product.findById(productId);
-            if (product) {
-                product.stock += returnRequest.order.quantity; // Assuming quantity is stored in the order
-                await product.save();
-                console.log(`Updated product stock: ${product.stock}`);
-            } else {
-                console.log(`Product not found for order ${returnRequest.order._id}`);
-            }
-
         } else if (order.paymentMethod === 'Razorpay') {
             if (!order.razorpayPaymentId) {
                 return res.status(400).json({ success: false, message: 'Payment ID is missing for Razorpay refund' });
@@ -676,17 +665,6 @@ const cancelOrder = async (req, res) => {
                     await transaction.save();
                     wallet.transactions.push(transaction._id);
                     await wallet.save();
-
-                    // Update product stock
-                    const product = await Product.findById(productId);
-                    if (product) {
-                        product.stock += returnRequest.order.quantity; // Assuming quantity is stored in the order
-                        await product.save();
-                        console.log(`Updated product stock: ${product.stock}`);
-                    } else {
-                        console.log(`Product not found for order ${returnRequest.order._id}`);
-                    }
-
                 } else {
                     console.error('Refund failed:', refund);
                     return res.status(500).json({ success: false, message: 'Refund failed' });
@@ -697,6 +675,18 @@ const cancelOrder = async (req, res) => {
                     return res.status(400).json({ success: false, message: 'The payment has already been fully refunded' });
                 }
                 return res.status(500).json({ success: false, message: 'Razorpay refund error' });
+            }
+        }
+
+        // Update product stock
+        for (const item of order.items) {  // Assuming order.items contains the product items with quantity
+            const product = await Product.findById(item.productId);
+            if (product) {
+                product.stock += item.quantity; // Adjust stock based on the quantity of each item in the order
+                await product.save();
+                console.log(`Updated product stock: ${product.stock}`);
+            } else {
+                console.log(`Product not found for order ${order._id}`);
             }
         }
 
