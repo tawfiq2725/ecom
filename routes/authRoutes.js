@@ -62,8 +62,8 @@ router.post('/wishlist/remove', whislistCtrl.removeFromWishlist);
 
 // Cart Routes
 router.get('/cart/data', userController.getCart);
-router.post('/check-cart', userController.checkCart);
-router.post('/add-to-cart', userController.addToCart);
+router.post('/check-cart',userController.checkCart);
+router.post('/add-to-cart',userController.addToCart);
 router.post('/cart/remove/:id', userController.removeFromCart);
 router.post('/cart/update/:productId', userController.updateCartQuantity);
 router.get('/api/product/:productId/variant/:size', userController.getProductVariant);

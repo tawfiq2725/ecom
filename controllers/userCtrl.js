@@ -472,6 +472,10 @@ const addToCart = async (req, res) => {
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
+        
+        if(!product.status){
+            return res.status(404).json({ success: false, message: "Product unlisted" });
+        }
 
         const variant = product.variants.find(v => v.size === variantSize);
         if (!variant) {

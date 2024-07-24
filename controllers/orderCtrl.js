@@ -247,7 +247,7 @@ const createRazorpayOrder = async (req, res) => {
         });
 
         await order.save();
-        console.log(order.razorpayOrderId +"The id generated")
+        console.log(order.razorpayOrderId + "The id generated")
 
 
         res.json({
@@ -439,15 +439,15 @@ const generateInvoice = async (order) => {
                     .text(index + 1, indexX, position)
                     .text(item.product.name, descriptionX, position)
                     .text(item.quantity, quantityX, position)
-                    .text(`$${item.price.toFixed(2)}`, priceX, position)
-                    .text(`$${itemAmount.toFixed(2)}`, amountX, position);
+                    .text(`₹${item.price.toFixed(2)}`, priceX, position)
+                    .text(`₹${itemAmount.toFixed(2)}`, amountX, position);
                 position += 20;
             });
 
             // Add the total amount
             position += 20;
             doc.fontSize(12).text('Total:', priceX, position, { align: 'left' });
-            doc.fontSize(12).text(`$${totalAmount.toFixed(2)}`, amountX, position, { align: 'right' });
+            doc.fontSize(12).text(`₹${totalAmount.toFixed(2)}`, amountX, position, { align: 'right' });
 
             // Move down before adding additional details
             position += 40;
@@ -627,6 +627,17 @@ const cancelOrder = async (req, res) => {
             await transaction.save();
             wallet.transactions.push(transaction._id);
             await wallet.save();
+
+            // Update product stock
+            const product = await Product.findById(productId);
+            if (product) {
+                product.stock += returnRequest.order.quantity; // Assuming quantity is stored in the order
+                await product.save();
+                console.log(`Updated product stock: ${product.stock}`);
+            } else {
+                console.log(`Product not found for order ${returnRequest.order._id}`);
+            }
+
         } else if (order.paymentMethod === 'Razorpay') {
             if (!order.razorpayPaymentId) {
                 return res.status(400).json({ success: false, message: 'Payment ID is missing for Razorpay refund' });
@@ -665,6 +676,17 @@ const cancelOrder = async (req, res) => {
                     await transaction.save();
                     wallet.transactions.push(transaction._id);
                     await wallet.save();
+
+                    // Update product stock
+                    const product = await Product.findById(productId);
+                    if (product) {
+                        product.stock += returnRequest.order.quantity; // Assuming quantity is stored in the order
+                        await product.save();
+                        console.log(`Updated product stock: ${product.stock}`);
+                    } else {
+                        console.log(`Product not found for order ${returnRequest.order._id}`);
+                    }
+
                 } else {
                     console.error('Refund failed:', refund);
                     return res.status(500).json({ success: false, message: 'Refund failed' });
